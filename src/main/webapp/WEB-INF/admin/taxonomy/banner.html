@@ -1,0 +1,96 @@
+<#include "../_inc/_layer_layout.html"/> 
+<#macro script>
+		var data = {
+			url: '',
+			alt: ''
+		};
+		
+		function doUpload(btn) {		    
+		    layer.open({
+		        type: 2,
+		        title: '选择图片',
+		        shadeClose: true,
+		        shade: 0.8,
+		        area: ['92%', '90%'],
+		        content: '${CPATH}/admin/attachment/choose_layer?mime=image',
+		        end: function() {
+		            if ('' != data.url && null != data.url) {
+		                $(btn).parents("ul").find("img").attr("src", data.url);
+		                $(btn).parents("ul").find("input[type='hidden']").attr("value", data.url);
+                        $(btn).text("编辑");
+		            }
+		        }
+		    });
+		}
+		
+		function delUpload(btn) {
+            var ul = $(btn).parents("ul");
+            var upload = ul.parent().attr("id");
+            var index = 0;
+            if(ul.siblings().length > 0){
+                $.each(ul.siblings(), function(){
+                    $(this).find("input").each(function(){
+                        var name = $(this).attr("name");
+                        var suffix = name.substring(name.lastIndexOf("_"));
+                        $(this).attr("name", "meta_" + upload + index + suffix);
+                    });
+                    index ++;
+                });
+                ul.remove();
+            }
+            else{
+                resetUpload($(btn).parents("ul"));
+            }
+        }
+		
+		function cloneUpload(upload) {
+            var id = upload.substring(1);
+            var index = $(upload).find("ul").length;
+		    var html = $(upload).find("ul:first").prop("outerHTML").replace(new RegExp(id + "0", "g"), id + index);
+		    $(html).appendTo(upload);
+		    resetUpload($(upload).find("ul:last"));
+		}
+		
+		function clearUpload(upload) {
+		    resetUpload($(upload).find("ul:first"));
+		    $(upload).find("ul:not(':first')").remove();
+		}
+		
+		function resetUpload(item) {
+		    item.find("img").attr("src", "${CPATH+'/static/jpress/admin/image/upload.jpg'}");
+		    item.find("input").val("");
+		}
+
+		function deleteAll(id) {
+			if(confirm("确定清空吗？")){
+				$.post("${CPATH}/admin/taxonomy/doClearBanners?ucode=${ucode}&id="+id, function(result){
+					if(result.errorCode > 0){
+						alert(result.message);
+					}else{
+						location.reload();
+					}
+				});
+			}
+		}
+		
+		function doSubmit() {
+		    $("#bannerForm").ajaxSubmit({
+		        type: "post",
+		        dataType: "json",
+		        success: function(data) {
+		            if (data.errorCode > 0) {
+		                alert(data.message);
+		            } else {
+						location.reload();
+		            }
+		        },
+		        error: function() {
+		            alert("信息提交错误");
+		        }
+		    });
+		}
+
+</#macro>
+<@layout >
+<#include include/>
+</@layout>

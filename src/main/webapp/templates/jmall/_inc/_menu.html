@@ -1,0 +1,17 @@
+<nav id="menu">
+    <header class="major">
+        <h2>商品导航</h2>
+    </header>
+    <ul>
+        <li><a href="${CPATH}/">首页</a></li>
+        <@jp.menus>
+            <#list menus as menu>
+                <li <#if menu.active!>class="menu-active"</#if> >
+                    <a href="${menu.url!}" >
+                        ${menu.title!}
+                    </a>
+                </li>
+            </#list>
+        </@jp.menus>
+    </ul>
+</nav>

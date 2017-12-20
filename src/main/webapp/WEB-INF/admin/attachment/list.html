@@ -1,0 +1,177 @@
+<#include "../_inc/_layout.html"/>
+<#include "../_inc/_layer.html"/>
+<#macro script>
+
+function changeStatus(id,status){
+	$.post("${CPATH}/admin/attachment/changeStatus?ucode=${ucode}", {id:id,status:status}, function(result){
+		if(result.errorCode > 0){
+			alert(result.message);
+		}else{
+			location.reload();
+		}
+	});
+}
+
+function fileDownLoad(path){
+	var url="${CPATH}/admin/attachment/doDownload?ucode=${ucode}&path="+path+"";
+	window.location.href=url;
+}
+ 
+function del(id){
+	if(confirm("确定删除吗?")){
+		$.get("${CPATH}/admin/attachment/delete?ucode=${ucode}&id="+id, function(result){
+			if(result.errorCode > 0){
+				alert(result.message);
+			}else{
+				location.reload();
+			}
+		});
+	}
+}
+
+</#macro> 
+<@layout active_id=p child_active_id=c>
+<section class="content-header">
+	<h1>
+		附件信息
+	</h1>
+</section>
+
+<!-- Main content -->
+<section class="content">
+
+	<div class="row content-row">
+	
+			<form action="${CPATH}/admin/attachment/list?&p=${p!}&c=${c!}&k=${k!}&m=${m!}" method="POST">
+				<div class="jp-left">
+					<select style="width: 150px" class="form-control input-sm" name="mime" >
+						<option value="">所有附件类型</option>
+						<#if mime??&&mime=='application'>
+						<option value="application" selected="selected">文件</option>
+						<#else>
+						<option value="application">文件</option>
+						</#if>
+						
+						<#if mime??&&mime=='image'>
+						<option value="image" selected="selected">图像</option>
+						<#else>
+						<option value="image">图像</option>
+						</#if>
+						
+						<#if mime??&&mime=='audio'>
+						<option value="audio" selected="selected" >音频</option>
+						<#else>
+						<option value="audio"  >音频</option>
+						</#if>
+						
+						<#if mime??&&mime=='video'>
+						<option value="video" selected="selected">视频</option>
+						<#else>
+						<option value="video" >视频</option>
+						</#if> 
+						
+					</select>
+				</div>
+	
+				<div class="jp-left">
+					<select style="width: 150px" class="form-control input-sm" name="dm" >
+						<option value="">全部日期</option>
+						<#if archives ??>
+						<#list archives as archive>
+							<#if dm??&&dm==archive.date!>
+							<option value="${archive.date!}" selected="selected" >${archive.date!}</option>
+							<#else>
+							<option value="${archive.date!}"  >${archive.date!}</option>
+							</#if> 
+						</#list>
+						</#if>
+					</select>
+				</div>
+				
+				<div class="jp-left">
+					<select style="width: 150px" class="form-control input-sm" name="status" >
+						<option value="">全部状态</option>
+						<option value="normal" <#if 'normal' == status!>selected</#if> >正常</option>
+						<option value="draft" <#if 'draft' == status!>selected</#if> >待审核</option>
+						<option value="delete" <#if 'delete' == status!>selected</#if> >审核不通过</option>
+					</select>
+				</div>
+				
+				<div class="jp-left">
+					<button class="btn  btn-sm btn-default" type="submit">筛选</button>
+				</div>
+			</form>
+			
+			<form action="${CPATH}/admin/attachment/list?&p=${p!}&c=${c!}&dm=${dm!}&mime=${mime!}" method="POST">
+				<div class="jp-right ">
+					<input class="form-control jp-inp-width280" name="k" value="${k!}" type="text" placeholder="输入标题关键字按回车键搜索">
+				</div>
+			</form>
+	</div>
+	
+	<div class="box">
+		<!-- /.box-header -->
+		<div class="box-body">
+			<form action="" method="POST" id="form">
+				<input type="hidden" name="ucode" value="${ucode}">
+				<table id="ordersTable" class="table table-striped">
+					<thead>
+						<tr>
+							<th style="width: 20px"><input name="dataItem" onclick="checkAll(this)" type="checkbox" value="0"></th>
+							<th>标题</th>
+							<th>上传时间</th>				
+						</tr>
+					</thead>
+					<tbody>
+						<#if page??> <#list page.getList() as bean>
+						<tr class="jp-onmouse">
+							<td><input name="dataItem" type="checkbox" value="${bean.id}"></td>					
+							<td>${(bean.title)!}
+								<#if "draft" == bean.status!>
+									<font color="red">(待审核)</font>
+									<#elseif "delete" == bean.status!>
+									<font color="red">(审核不通过)</font>
+								</#if>
+								<div class="jp-flash-comment">
+									<p class="row-actions jp-cancel-pad">
+										<span class="approve"><a class="vim-a" onclick="openLayer('70%','90%', '附件详情', '${CPATH}/admin/attachment/detail_layer?id=${bean.id}')">查看</a></span>
+										<span class="approve">&nbsp;|&nbsp;<a class="vim-a" onclick="fileDownLoad('${bean.path}')">下载</a></span>
+										<span class="spam">&nbsp;|&nbsp;<a class="vim-s vim-destructive" href="javascript:;" onclick="del(${bean.id})">彻底删除</a></span>
+										<#if "draft" == bean.status!>
+											<span class="spam">&nbsp;|&nbsp;<a class="vim-s vim-destructive" href="javascript:;" onclick="changeStatus(${bean.id},'normal')">允许发布</a></span>
+											<span class="spam">&nbsp;|&nbsp;<a class="vim-s vim-destructive" href="javascript:;" onclick="changeStatus(${bean.id},'delete')">审核不通过</a></span>
+										<#else>
+											<span class="spam">&nbsp;|&nbsp;<a class="vim-s vim-destructive" href="javascript:;" onclick="changeStatus(${bean.id},'draft')">待审核</a></span>
+										</#if>										
+									</p>
+								</div>
+							</td>
+							<td>${(bean.created)!}</td>
+						</tr>
+						</#list> </#if>
+					</tbody>
+					<tfoot>
+						<tr>
+							<th style="width: 20px"><input name="dataItem" onclick="checkAll(this)" type="checkbox" value="0"></th>
+							<th>标题</th>
+							<th>上传时间</th>	
+						</tr>
+					</tfoot>
+				</table>
+				</form>
+		</div>
+		<!-- /.box-body -->
+	</div>
+	
+	<div class="cf">
+		<div class="pull-right ">
+			<#if page??> 
+			<#include "../_inc/_paginate.html" /> 
+			<@paginate currentPage=page.pageNumber totalPage=page.totalPage actionUrl="?p="+(p!)+"&c="+(c!)+"&dm="+(dm!)+"&mime="+(mime!)+"&k="+(k!)+"&m="+(m!)+"&status="+(status!)+"&page="/> 
+			</#if>
+		</div>
+	</div>
+	<!-- /.row -->
+</section>
+<!-- /.content -->
+</@layout>

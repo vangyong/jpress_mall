@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+	<infos>
+		<title>jmall</title>
+		<id>jmall</id>
+		<description>
+			jmall是由个人开发者-靓仔梁提供的商城模板，大家在使用过程中发现问题可以与我联系，QQ：593835501，后续会持续升级。
+		</description>
+		<author>靓仔梁</author>
+		<authorWebsite>http://www.jpress.io</authorWebsite>
+		<version>v1.0</version>
+		<versionCode>1</versionCode>
+		<updateUrl>http://www.jpress.io</updateUrl>
+	</infos>
+
+	<module title="商品" name="mall" list="所有商品" add="撰写商品" comment="评论">
+		<taxonomy title="分类" name="category" formType="select" />
+		<taxonomy title="专题" name="feature" formType="select" />
+		<taxonomy title="标签" name="tag" formType="input" />
+		
+		<metadata dataType="input" name="_meta1" text="元数据1"  placeholder="元数据测试1"/>
+		<metadata dataType="input" name="_meta2" text="元数据2"  placeholder="元数据测试2"/>
+	</module>
+
+	<!--<module title="页面" name="page" list="所有页面" add="新建页面" comment="评论">
+	</module>-->
+
+	<!--<thumbnail name="t1" size="780 x 240" />
+	<thumbnail name="t2" size="240 x 140" />
+	<thumbnail name="t3" size="600 x 300" />
+	<thumbnail name="t4" size="300 x 300" />-->
+
+</config>

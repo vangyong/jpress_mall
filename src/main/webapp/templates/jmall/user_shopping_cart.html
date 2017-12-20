@@ -1,0 +1,147 @@
+<#include "_inc/_layout.html"/>
+<#macro script>
+	$(".quantity").TouchSpin({min: 1}).focus(function(){$(this).blur();}).on("change", function() {
+		layer.load(2);
+		$.get('${CPATH}/user/doChangeShoppingCartQuantity',{id:this.id,quantity:this.value},function(data){
+			layer.closeAll('loading');
+			if(data.errorCode == 0){
+				return;
+			}else if(data.errorCode == 2){
+				var goto=window.location.href;
+				var url="${CPATH}"+data.data+"?goto="+goto;
+				window.location.href=url;
+			}else{
+				layer.msg(data.message);
+			}
+		});
+	});
+
+	function clearShoppingCart(){
+		layer.confirm('确定清空购物车吗', {
+			btn: ['确定','取消']
+		}, function(){
+			$.post('${CPATH}/user/doClearShoppingCart',{ucode:'${ucode!}'},function(data){
+				if(data.errorCode == 0){
+					location.reload();
+				}else if(data.errorCode == 2){
+					var goto=window.location.href;
+					var url="${CPATH}"+data.data+"?goto="+goto;
+					window.location.href=url;
+				}else{
+					layer.msg(data.message);
+				}
+			});
+		});
+	}
+
+	function deleteShoppingCart(){
+		var shoppingCarts=$(".shoppingCartChecked:checked");
+		if(shoppingCarts.length > 0){
+			layer.confirm('确定删除选中的商品吗', {
+				btn: ['确定','取消']
+			}, function(){
+				var shoppingCartIds=new Array();
+				$.each(shoppingCarts,function(n,shoppingCart) {
+					shoppingCartIds.push(shoppingCart.value);
+				});
+				$.post('${CPATH}/user/doDeleteShoppingCart?ucode=${ucode!}&ids='+shoppingCartIds,function(data){
+					if(data.errorCode == 0){
+						location.reload();
+					}else if(data.errorCode == 2){
+						var goto=window.location.href;
+						var url="${CPATH}"+data.data+"?goto="+goto;
+						window.location.href=url;
+					}else{
+						layer.msg(data.message);
+					}
+				});
+			});
+		}else{
+			layer.msg('请选中商品');
+		}
+	}
+
+	function userShoppingCartSettlement(){
+		var shoppingCarts=$(".shoppingCartChecked:checked");
+		if(shoppingCarts.length > 0){
+			var shoppingCartIds=new Array();
+			$.each(shoppingCarts,function(n,shoppingCart) {
+				shoppingCartIds.push(shoppingCart.value);
+			});
+			var goto=window.location.href;
+			var url="${CPATH}/user/userShoppingCartSettlement?ids="+shoppingCartIds+"&goto="+goto+"";
+			window.location.href=url;
+		}else{
+			layer.msg('请选中商品');
+		}
+	}
+
+</#macro>
+<@layout>
+<section>
+	<header class="major">
+        <h4>购物车</h4>
+    </header>
+	<@jp.shoppingCartPage pageSize="100">
+		<div class="table-wrapper">
+			<form action="#" method="post">
+				<input type="hidden" name="goto" value="${goto!}">
+				<#if shoppingCarts?size gt 0>
+					<table>
+						<tbody>
+							<#list shoppingCarts as shoppingCart>
+								<tr>
+									<td style="width: 10%;">
+										<input class="shoppingCartChecked" type="checkbox" id="shoppingCart${shoppingCart.id!}" value="${shoppingCart.id!}">
+										<label for="shoppingCart${shoppingCart.id!}"></label>
+									</td>
+									<td style="width: 40%;">
+										<img class="image fit" src="${shoppingCart.thumbnail!}" alt="" />
+									</td>
+									<td style="width: 50%;" onclick="window.location.href='${shoppingCart.getContentUrl()!'#'}';">								
+											<p>${shoppingCart.title!}</p>
+											<p>${shoppingCart.value!}</p>
+											<p class="price">￥${shoppingCart.price!}</p>
+											<p><input class="quantity" id="${shoppingCart.id!}" style="width: 40%;" readonly="readonly" type="number" value="${shoppingCart.quantity!}"></p>
+									</td>
+								</tr>
+							</#list>
+						</tbody>
+						<!--<tfoot>
+							<tr>
+								<td colspan="3">
+									<ul class="pagination">
+										<@pagination>
+											<#list pages as page>
+												<li class="${(page.style)!}">
+													<a class="page" href="${(page.url)!}">${(page.text)!}</a>
+												</li>
+											</#list>
+										</@pagination>
+									</ul>
+								</td>
+							</tr>
+						</tfoot>-->
+					</table>
+				<#else>
+					<p>购物车空空的...</p>
+				</#if>
+			</form>
+		</div>
+		<#if shoppingCarts?size gt 0>
+			<div class="box alt bottom">
+				<div class="row uniform">
+					<div class="12u$">
+						<ul class="actions fit">
+							<li><a href="javascript:void(0)" class="button fit" onclick="clearShoppingCart()">清空</a></li>
+							<li ><a href="javascript:void(0)" class="button fit" onclick="deleteShoppingCart()">删除</a></li>
+							<li><a href="javascript:void(0)" class="button special fit" onclick="userShoppingCartSettlement()">去结算</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</#if>
+	</@jp.shoppingCartPage>
+	<#include "_inc/_user_bottom_bar.html"/>
+</section>
+</@layout>

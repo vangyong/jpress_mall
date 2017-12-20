@@ -1,0 +1,35 @@
+<#include "../_inc/_layout.html"/> 
+<#include "../_inc/_layer.html"/>
+<#macro script>
+	function delivered(id){
+        if(!id){
+            layer.msg("id为空");
+            return;
+        }
+        layer.open({
+            type: 1,
+            skin: 'layui-layer-rim',
+            area: ['50%', 'auto'],
+            content: '<textarea class="form-control " rows="4" id="express" placeholder="请输入快递信息"></textarea>',
+            btn: ['确定','取消'],
+            yes: function(index){
+                var express=$("#express").val();
+                if(!express){
+                    layer.msg('快递信息不能为空');
+                    return;
+                }
+                $.post('${CPATH}/admin/transaction/delivered',{id:id,express:express}, function(result){
+                    layer.close(index);
+                    if(result.errorCode > 0){
+                        layer.msg(result.message);
+                    }else{
+                        location.reload();
+                    }
+                });
+            }
+        });
+    }
+</#macro> 
+<@layout active_id=p child_active_id=c>
+<#include include/>
+</@layout>

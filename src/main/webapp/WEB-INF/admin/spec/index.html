@@ -1,0 +1,32 @@
+<#include "../_inc/_layout.html"/> 
+<#include "../_inc/_layer.html"/>
+<#macro script>
+	
+	<#-- 新增 -->
+	function add(){
+		var url="${CPATH}/admin/spec/add?m=${m!}&p=${p!}&c=${c!}";
+		openLayer('50%', '50%', '添加商品规格', url)
+	}
+	
+	<#-- 编辑 -->
+	function edit(url){
+		openLayer('50%', '50%', '编辑商品规格', url)
+	}
+	
+	<#-- 删除 -->
+	function del(url){
+	    if(confirm("确定删除吗?")){
+	    	$.post(url, function(result){
+				if(result.errorCode > 0){
+					layer.msg(result.message);
+				}else{
+					location.reload();
+				}
+	    	});
+	    }
+	}
+	
+</#macro> 
+<@layout active_id=p child_active_id=c>
+<#include include/>
+</@layout>

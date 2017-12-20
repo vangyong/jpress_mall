@@ -1,0 +1,142 @@
+<#include "../_inc/_layer_layout.html"/>
+<#macro script>
+
+</#macro>
+<#macro css>
+
+</#macro>
+<@layout>
+<section class="content" style="z-index: 9999">
+	<form id="spec_form" action="${CPATH}/admin/spec/save" method="POST">
+		<input type="hidden" class="form-control" name="spec.id" value="${(spec.id)!}">
+		<input type="hidden" name="ucode" value="${ucode}">
+		<div class="row">
+            <div class="form-horizontal">
+            	<div class="col-md-11">
+	                <div class="form-group">
+	                    <label class="col-sm-2 control-label">规格名称：</label>
+	                    <div class="col-sm-8">
+	                        <input type="text" class="form-control" name="spec.title" value="${(spec.title)!}">
+	                    </div>
+	                </div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label">排序：</label>
+						<div class="col-sm-8">
+							<input type="text" class="form-control" name="spec.order_number" value="${(spec.order_number)!'0'}" onkeyup="this.value=this.value.replace(/[^0-9]/g, '').replace(/^0(\d)/g, '$1')||0">
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label">规格值：</label>
+						<div class="col-sm-8">
+							<div class="box box-solid">
+								<div class="box-header">
+									<h3 class="box-title"></h3>
+									<div class="box-tools">
+										<button type="button" class="btn btn-sm" onclick="cloneSpecValue('spec_value_div')">新增</button>
+										<button type="button" class="btn btn-box-tool" data-widget="collapse">
+											<i class="fa fa-minus"></i>
+										</button>
+									</div>
+								</div>
+								<div id="spec_value_div" class="box-body no-padding">
+									<ul class="nav" style="text-align:center;">
+										<#if spec.id??>
+											<#if specValueList??>
+												<#list specValueList as bean>
+													<li class="jp-borde-top">
+														<div class="form-inline">
+															<input type="hidden" name="spec_value_id" value="${(bean.id)!}">
+															规格值：<input type="text" class="form-control" name="spec_value_value" value="${(bean.value)!}" style="margin:1px auto;width:30%;">
+															排序：<input type="text" class="form-control" name="spec_value_order_number" value="${(bean.order_number)!}" style="margin:1px auto;width:30%;" onkeyup="this.value=this.value.replace(/[^0-9]/g, '').replace(/^0(\d)/g, '$1')||0">
+															<button type="button" class="btn btn-sm" onclick="deleteSpecValue(${(bean.id)!})">删除</button>
+														</div>
+													</li>
+												</#list>
+											<#else>
+												<li class="jp-borde-top">
+													<div class="form-inline">
+														规格值：<input type="text" class="form-control" name="spec_value_value" style="margin:1px auto;width:30%;">
+														排序：<input type="text" class="form-control" name="spec_value_order_number" style="margin:1px auto;width:30%;" onkeyup="this.value=this.value.replace(/[^0-9]/g, '').replace(/^0(\d)/g, '$1')||0">
+														<button type="button" class="btn btn-sm" onclick="delSpecValue(this)">删除</button>
+													</div>
+												</li>
+											</#if>
+										<#else>
+											<li class="jp-borde-top">
+												<div class="form-inline">
+													规格值：<input type="text" class="form-control" name="spec_value_value" style="margin:1px auto;width:30%;">
+													排序：<input type="text" class="form-control" name="spec_value_order_number" style="margin:1px auto;width:30%;" onkeyup="this.value=this.value.replace(/[^0-9]/g, '').replace(/^0(\d)/g, '$1')||0">
+													<button type="button" class="btn btn-sm" onclick="delSpecValue(this)">删除</button>
+												</div>
+											</li>
+										</#if>
+									</ul>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="col-sm-2 control-label">备注：</label>
+						<div class="col-sm-8">
+							<input type="text" class="form-control" name="spec.remark" value="${(spec.remark)!}" >
+						</div>
+					</div>
+	                <div class="form-group">
+	                    <div style="text-align:center;">
+	                        <button type="button" onclick="save()" class="btn btn-primary btn-sm">提交</button>
+	                    </div>
+	                </div>
+            	</div>
+            </div>
+        </div>
+	</form>
+	<script type="text/javascript">
+		function save(){
+			$("#spec_form").ajaxSubmit({
+				type: "post",
+				dataType: "json",
+				success: function(data) {
+					if (data.errorCode == 0) {
+						top.window.location.reload();
+					} else {
+						layer.msg(data.message);
+					}
+				},
+				error: function() {
+					layer.msg("信息提交错误");
+				}
+			});
+		}
+
+        function cloneSpecValue(id){
+		    var div=$('#'+id);
+            var html=div.find('li').eq(0).clone();
+            $(html).appendTo(div.find('ul'));
+            div.find("li:last").find("input").val("");
+        }
+
+        function delSpecValue(btn){
+            if(confirm("确定删除吗？")){
+                var li = $(btn).parents("li");
+                var length=$('#spec_value_div li').length;
+                if(length >= 2){
+                    li.remove();
+                }
+			}
+		}
+        
+        function deleteSpecValue(id){
+        	if(confirm("确定删除吗？")){
+        		$.post("${CPATH}/admin/spec/deleteSpecValue?specValue.id="+id, function(result){
+    				if(result.errorCode > 0){
+    					alert(data.message);
+    				}else{
+    					location.reload();
+    				}
+    	    	});
+        	}
+        }
+
+	</script>
+</section>
+</@layout>

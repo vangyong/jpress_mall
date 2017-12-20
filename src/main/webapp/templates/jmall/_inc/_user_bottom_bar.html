@@ -1,0 +1,17 @@
+<div class="bottombar">
+	<ul class="icons">
+		<li style="width: 30%;" onclick="window.location.href='${CPATH}/';">
+			<span class="icon fa-home"></span>
+		</li>
+		<li style="width: 30%;" onclick="window.location.href='${CPATH}/user/shoppingCart';">
+			<span class="icon fa-shopping-cart">
+				<#if USER??>
+					<span class="mainRed">（${USER.getShoppingCartCount()!}）</span>
+				</#if>
+			</span>
+		</li>
+		<li style="width: 30%;" onclick="window.location.href='${CPATH}/user/center';">
+			<span class="icon fa-user"></span>
+		</li>
+	</ul>
+</div>

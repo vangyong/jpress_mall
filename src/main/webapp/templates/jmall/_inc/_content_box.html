@@ -1,0 +1,16 @@
+<section>
+    <header class="major">
+        <h2>推荐商品</h2>
+    </header>
+    <div class="mini-posts">
+        <@jp.contents  module="mall" count="3" orderBy="view_count" hasThumbnail="true">
+            <#list contents as content>
+                <article>
+                    <a href="${(content.url)!'#'}" class="image"><img src="${(content.thumbnail)!}" alt="" /></a>
+                    <p>${(content.title)!}</p>
+                    <p class="price">￥${(content.price)!0}</p>
+                </article>
+            </#list>
+        </@jp.contents>
+    </div>
+</section>

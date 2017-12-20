@@ -1,0 +1,185 @@
+<#include "_inc/_layout.html"/>
+<#macro script>
+	function clearUserAddress(){
+		layer.confirm('确定清空收货地址吗', {
+			btn: ['确定','取消']
+		}, function(){
+			$.post('${CPATH}/user/doClearUserAddress',{ucode:'${ucode!}'},function(data){
+				if(data.errorCode == 0){
+					location.reload();
+				}else if(data.errorCode == 2){
+					var goto=window.location.href;
+					var url="${CPATH}"+data.data+"?goto="+goto;
+					window.location.href=url;
+				}else{
+					layer.msg(data.message);
+				}
+			});
+		});
+	}
+
+	function deleteUserAddress(){
+		var userAddresss=$(".userAddressChecked:checked");
+		if(userAddresss.length > 0){
+			layer.confirm('确定删除选中的收货地址吗', {
+				btn: ['确定','取消']
+			}, function(){
+				var userAddressIds=new Array();
+				$.each(userAddresss,function(n,userAddress) {
+					userAddressIds.push(userAddress.value);
+				});
+				$.post('${CPATH}/user/doDeleteUserAddress?ucode=${ucode!}&ids='+userAddressIds,function(data){
+					if(data.errorCode == 0){
+						location.reload();
+					}else if(data.errorCode == 2){
+						var goto=window.location.href;
+						var url="${CPATH}"+data.data+"?goto="+goto;
+						window.location.href=url;
+					}else{
+						layer.msg(data.message);
+					}
+				});
+			});
+		}else{
+			layer.msg('请选择收货地址');
+		}
+	}
+
+	function addUserAddress(userAddress){
+	    var id='',address='',name='',mobile='';
+		if(userAddress){
+			id=userAddress.id;
+			address=userAddress.address;
+			name=userAddress.name;
+			mobile=userAddress.mobile;
+		}
+		layer.open({
+			type: 1,
+			skin: 'layui-layer-rim',
+			area: ['90%', 'auto'],
+			content: '<form id="userAddressForm" action="${CPATH}/user/doSaveUserAddress" method="post"><input type="hidden" name="ucode" value="${ucode}"><input type="hidden" name="userAddress.id" value="'+id+'"><p><input type="text" name="userAddress.address" value="'+address+'" placeholder="请输入收货地址" /></p><p><input type="text" name="userAddress.name" value="'+name+'" placeholder="请输入收货人姓名" /></p><p><input type="text" name="userAddress.mobile" value="'+mobile+'" placeholder="请输入收货人手机号码" /></p></form>',
+			btn: ['确定','取消'],
+			yes: function(index){
+				$("#userAddressForm").ajaxSubmit({
+					type : "post",
+					dataType : "json",
+					success : function(data) {
+						if(data.errorCode == 0){
+							layer.close(index);
+							location.reload();
+						}else if(data.errorCode == 2){
+							layer.close(index);
+							var goto=window.location.href;
+							var url="${CPATH}"+data.data+"?goto="+goto;
+							window.location.href=url;
+						}else{
+							layer.msg(data.message);
+						}
+					},
+					error : function() {
+						layer.msg("信息提交错误");
+					}
+				});
+			}
+		});
+	}
+
+	function editUserAddress(){
+		var userAddress=$(".userAddressChecked:checked");
+		if(userAddress.length == 0){
+			layer.msg('请选择收货地址');
+		}else if(userAddress.length == 1){
+			$.get('${CPATH}/user/doGetUserAddress',{id:userAddress.val()},function(data){
+				if(data.errorCode == 0){
+					addUserAddress(data.data);
+				}else if(data.errorCode == 2){
+					var goto=window.location.href;
+					var url="${CPATH}"+data.data+"?goto="+goto;
+					window.location.href=url;
+				}else{
+					layer.msg(data.message);
+				}
+			});
+		}else{
+			layer.msg("只能选择一个收货地址");
+		}
+	}
+
+</#macro>
+<@layout>
+<section>
+	<header class="major">
+        <h4>收货地址</h4>
+    </header>
+	<@jp.userAddressPage pageSize="100">
+		<div class="table-wrapper">
+			<form action="#" method="post">
+				<input type="hidden" name="goto" value="${goto!}">
+				<#if userAddresss?size gt 0>
+					<table>
+						<tbody>
+							<#list userAddresss as userAddress>
+								<tr>
+									<td>
+										<input class="userAddressChecked" type="checkbox" id="userAddress${userAddress.id!}" value="${userAddress.id!}">
+										<label for="userAddress${userAddress.id!}"></label>
+									</td>
+									<td>
+										<P>${userAddress.address!}</P>
+										<P>${userAddress.name!}</P>
+										<P>${userAddress.mobile!}</P>
+									</td>
+								</tr>
+							</#list>
+						</tbody>
+						<!--<tfoot>
+							<tr>
+								<td colspan="3">
+									<ul class="pagination">
+										<@pagination>
+											<#list pages as page>
+												<li class="${(page.style)!}">
+													<a class="page" href="${(page.url)!}">${(page.text)!}</a>
+												</li>
+											</#list>
+										</@pagination>
+									</ul>
+								</td>
+							</tr>
+						</tfoot>-->
+					</table>
+				<#else>
+					<p>收货地址空空的...</p>
+				</#if>
+			</form>
+		</div>
+		<#if userAddresss?size gt 0>
+			<div class="box alt bottom">
+				<div class="row uniform">
+					<div class="12u$">
+						<ul class="actions fit">
+							<li><a href="javascript:void(0)" class="button fit" onclick="clearUserAddress()">清空</a></li>
+							<li ><a href="javascript:void(0)" class="button fit" onclick="deleteUserAddress()">删除</a></li>
+							<li><a href="javascript:void(0)" onclick="addUserAddress('')" class="button special fit">新增</a></li>
+							<li><a href="javascript:void(0)" onclick="editUserAddress()" class="button special fit">修改</a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		<#else>
+			<div class="box alt bottom">
+				<div class="row uniform">
+					<div class="12u$">
+						<ul class="actions fit">
+							<li></li>
+							<li><a href="javascript:void(0)" onclick="addUserAddress('')" class="button special fit">新增</a></li>
+							<li></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</#if>
+	</@jp.userAddressPage>
+	<#include "_inc/_user_bottom_bar.html"/>
+</section>
+</@layout>

@@ -1,0 +1,55 @@
+<script>
+	var data = {
+		url : '',
+		alt : ''
+	};
+
+	function initTinymce() {
+        tinymce.init({
+					selector : '#textarea',
+					height : 365,
+					language : 'zh_CN',
+					menubar : false,
+					automatic_uploads : true,
+					paste_data_images : true,
+					convert_urls : false,
+					relative_urls : false,
+					imagetools_toolbar : "rotateleft rotateright | flipv fliph | editimage imageoptions",
+					imagetools_proxy : '${CPATH}/admin/tinymce/image/proxy',
+					images_upload_url : '${CPATH}/admin/tinymce/image/upload',
+					wordcount_countregex : /[\u4e00-\u9fa5_a-zA-Z0-9]/g,
+					file_picker_callback : function(callback, value, meta) {
+						layer.open({
+							type : 2,
+							title : '选择附件',
+							shadeClose : true,
+							offset: 0,
+							shade : 0.8,
+							area : [ '80%', '80%' ],
+							content : '${CPATH}/admin/attachment/choose_layer',
+							end : function() {
+								if ('' != data.url && null != data.url) {
+									callback(data.url, {
+										alt : data.alt
+									});
+								}
+							}
+						});
+					},
+					font_formats : "宋体=SimSun;新宋体=NSimSun;微软雅黑=Microsoft YaHei;华文黑体=STHeiti;楷体=KaiTi;Arial=arial,helvetica,sans-serif;Courier New=courier new,courier,monospace;AkrutiKndPadmini=Akpdmi-n",
+					fontsize_formats : "12px 14px 16px 18px 20px 24px 32px",
+					plugins : [
+							"advlist autolink autosave link image media imagetools lists charmap print preview hr anchor pagebreak spellchecker",
+							"searchreplace wordcount visualblocks visualchars code codesample fullscreen insertdatetime media nonbreaking",
+							"table contextmenu directionality emoticons template textcolor paste fullpage textcolor colorpicker textpattern" ],
+					toolbar1 : '  bold italic underline strikethrough removeformat | blockquote hr table image media codesample | anchor link   unlink | alignleft aligncenter alignright alignjustify | bullist numlist     ',
+					toolbar2 : '  fontselect | fontsizeselect | formatselect | outdent indent | forecolor backcolor  |  undo redo | code  fullscreen',
+				});
+	}
+
+    var simplemde ;
+    function initMarkdownEditor(){
+        simplemde = new SimpleMDE({ element: $("#textarea")[0] });
+    }
+
+</script>

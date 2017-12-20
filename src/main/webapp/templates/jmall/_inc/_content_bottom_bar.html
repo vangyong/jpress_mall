@@ -1,0 +1,17 @@
+<div class="bottombar">
+	<ul class="icons">
+		<li style="width: 30%;" onclick="window.location.href='${CPATH}/user/shoppingCart';">
+			<span class="icon fa-shopping-cart">
+				<#if USER??>
+					<span class="mainRed">（${USER.getShoppingCartCount()!}）</span>
+				</#if>
+			</span>
+		</li>
+		<li style="width: 30%;" onclick="addShoppingCart()">
+			<span class="icon fa-hand-o-up">加入购物车</span>
+		</li>
+		<li style="width: 30%;" onclick="userSettlement()">
+			<span class="icon fa-cny">立即购买</span>
+		</li>
+	</ul>
+</div>

@@ -1,0 +1,42 @@
+<#include "_inc/_layout.html"/>
+<@layout>
+<section>
+    <header class="major">
+        <h4>用户登录</h4>
+    </header>
+    <div class="box alt">
+        <form action="${CPATH}/user/doLogin" method="post">
+        	<input type="hidden" name="goto" value="${goto!}">
+            <div class="row uniform">
+                <div class="12u$">
+                    <input type="text" name="username" value="${username!}" placeholder="用户名" />
+                </div>
+                <div class="12u$">
+                    <input type="password" name="password" value="${password!}" placeholder="密码" />
+                </div>
+                <div class="12u$">
+	                <ul class="actions vertical">
+	                	<li>
+	                		<input type="text" name="_login_captcha" placeholder="验证码"/>
+	                	</li>
+	                	<li>
+	                		<img src="${CPATH}/captcha" onclick="this.src='${CPATH}/captcha?d='+Math.random();" >
+	                		<span>还没有账号？<a class="icon fa-hand-o-right" href="${CPATH}/user/register?goto=${goto!}"> 这里 </a>注册</span>
+	                	</li>
+	                </ul>                	           	
+                </div>
+                <div class="12u$">
+                    <ul class="actions fit">
+                        <li></li>
+                        <li><input type="submit" value="登录" class="button special fit" /></li>
+                        <li></li>
+                    </ul>
+                </div>
+                <div class="12u$">
+                	<span style="color: red">${error_msg!}</span>
+                </div>
+            </div>
+        </form>
+    </div>
+</section>
+</@layout>

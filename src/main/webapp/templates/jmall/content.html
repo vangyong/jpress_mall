@@ -1,0 +1,178 @@
+<#include "_inc/_layout.html"/>
+<#macro script>
+	$(document).ready(function(){
+		$('.multiple-items').slick({
+			dots: true,
+			infinite: true,
+			slidesToShow: 1,
+			slidesToScroll: 1,
+			prevArrow:'',
+			nextArrow:'',
+		});
+	});
+	
+	function showContentSpecItem(specValueId,price,stock){
+		var html="￥"+price+"&nbsp;&nbsp;&nbsp;库存："+stock;
+		$(".price").html(html);
+		$("#specValueId").val(specValueId);
+		$("#quantity").trigger("touchspin.updatesettings", {min: 1,max: stock});
+	}
+
+	$("#quantity").TouchSpin({min: 1}).focus(function(){$(this).blur();});
+
+	function addShoppingCart(){
+		$("#form").attr("action","${CPATH}/user/doAddShoppingCart");
+		$("#form").ajaxSubmit({
+			type : "post",
+			dataType : "json",
+			success : function(data) {
+				if(data.errorCode == 0){
+					location.reload();
+				}else if(data.errorCode == 2){
+					var goto=window.location.href;
+					var url="${CPATH}"+data.data+"?goto="+goto;
+					window.location.href=url;
+				}else{
+					layer.msg(data.message);
+				}
+			},
+			error : function() {
+				layer.msg("系统异常");
+			}
+		});
+	}
+
+	function userSettlement(){
+		$("#form").attr("action","${CPATH}/user/checkUserSettlement");
+		$("#form").ajaxSubmit({
+			type : "post",
+			dataType : "json",
+			success : function(data) {
+				if(data.errorCode == 0){
+					var goto=window.location.href;
+					$("#form").attr("action","${CPATH}/user/userSettlement?goto="+goto+"").submit();
+				}else if(data.errorCode == 2){
+					var goto=window.location.href;
+					var url="${CPATH}"+data.data+"?goto="+goto;
+					window.location.href=url;
+				}else{
+					layer.msg(data.message);
+				}
+			},
+			error : function() {
+				layer.msg("系统异常");
+			}
+		});
+	}
+
+</#macro>
+<@layout>
+<section>
+	<#if content??>
+		<#if "normal"==content.status!>
+			<form id="form" action="#" method="POST">
+				<input type="hidden" readonly="readonly" name="content.id" value="${content.id!}">
+				<div class="box alt">
+					<#if banners?size gt 0>
+						<div class="slider multiple-items slick-screen">
+							<#list banners as banner>
+								<div class="image fit">
+									<img src="${(banner)!}" alt="" />
+								</div>
+							</#list>
+						</div>
+					<#else>
+						<span class="image fit"><img src="${content.thumbnailByName('t1')!}" alt="" /></span>
+					</#if>
+					<p>${(content.title)!}</p>
+					<p class="price">￥${(content.price)!0}</p>
+				</div>
+
+				<hr />
+
+				<#if spec??>
+					<div class="box">
+						<h5>选择${spec.title!}</h5>
+						<div class="row">
+							<input type="hidden" readonly="readonly" id="specValueId" name="specValue.id" >
+							<#if specValueList??>
+								<#list specValueList as specValue>
+									<div>
+										<input type="radio" id="demo-priority-specValue${specValue.id!}" name="specValueRadio" onclick="showContentSpecItem(${specValue.id!},${specValue.getContentSpecItem(content.id!).price!},${specValue.getContentSpecItem(content.id!).stock!})">
+										<label for="demo-priority-specValue${specValue.id!}">${specValue.value!}</label>
+									</div>
+								</#list>
+							</#if>
+						</div>
+						<h5>选择数量</h5>
+						<div class="row">
+							<div >
+								<input id="quantity" name="quantity" style="width: 30%;" readonly="readonly" type="number" value="1">
+							</div>
+						</div>
+					</div>
+				</#if>
+
+				<hr />
+
+				<div class="box alt bottom">
+					<h4 id="content">商品介绍</h4>
+					<div class="row">${content.text!}</div>
+				</div>
+
+				<#include "_inc/_content_bottom_bar.html"/>
+			</form>
+		<#else>
+			商品已经下架...
+		</#if>
+	<#else>
+		哎哟，没有找到商品，请稍后再试...
+	</#if>
+	<#if jp.commentPage??>
+		<@jp.commentPage pageSize="10">
+			<div class="table-wrapper">
+				<h4>商品评价</h4>
+				<#if comments?size gt 0>
+					<table class="alt">
+						<tbody>
+						<#list comments as comment>
+							<tr>
+								<td>
+									${comment.author!}
+								</td>
+								<td>
+									${comment.text!}
+								</td>
+							</tr>
+						</#list>
+						</tbody>
+						<tfoot>
+						<tr>
+							<td colspan="2">
+								<ul class="pagination">
+									<@pagination>
+									<#list pages as page>
+										<li class="${(page.style)!}">
+											<a class="page" href="${(page.url)!}">${(page.text)!}</a>
+										</li>
+									</#list>
+								</@pagination>
+								</ul>
+							</td>
+						</tr>
+						</tfoot>
+					</table>
+				<#else>
+					<div class="box alt bottom">
+						<div class="row uniform">
+							<div class="12u$">
+								<P>商品评价空空的...</P>
+							</div>
+						</div>
+					</div>
+				</#if>
+			</div>
+		</@jp.commentPage>
+	</#if>
+</section>
+</@layout>

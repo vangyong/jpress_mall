@@ -1,0 +1,58 @@
+<#include "_inc/_layout.html"/>
+<#macro script>
+    function modifyPassword(){
+        layer.prompt({title: '请输入新密码'}, function(val, index){
+            $.post('${CPATH}/user/doModifyPassword',{ucode:'${ucode!}',newPassword:val},function(data){
+                if(data.errorCode == 0){
+                    window.location.href='${CPATH}/user/logout?ucode=${ucode!}';
+                }else if(data.errorCode == 2){
+                    var goto=window.location.href;
+                    var url="${CPATH}"+data.data+"?goto="+goto;
+                    window.location.href=url;
+                }else{
+                    layer.msg(data.message);
+                }
+            });
+            layer.close(index);
+        });
+    }
+</#macro>
+<@layout>
+<section>
+    <header class="major">
+        <h4>用户中心</h4>
+    </header>
+    <div class="box alt bottom">
+        <div class="row uniform">
+            <div class="12u$">
+                <ul class="actions">
+                    <li><img class="litter-avatar" src="${CPATH}${USER.avatar!TPATH+'/images/avatar.jpg'}"/></li>
+                    <li>${USER.username!}</li>
+                    <li ><a href="javascript:void(0)" onclick="modifyPassword()" class="icon fa-warning">修改密码</a></li>
+                    <li><a href="${CPATH}/user/userAddress" class="icon fa-plane">地址管理</a></li>
+                </ul>
+            </div>
+            <div class="12u$">
+                <div class="box" style="text-align: center;">
+                    <ul class="actions fit">
+                        <li ><a style="color: #3d4449;" href="${CPATH}/user/userUnpayed?goto=${CPATH}/user/userUnpayed" class="icon fa-jpy">待支付<span class="mainRed">（${unpayed!}）</span></a></li>
+                        <li><a style="color: #3d4449;" href="${CPATH}/user/userUnreceived?goto=${CPATH}/user/userUnreceived" class="icon fa-truck">待收货<span class="mainRed">（${unreceived!}）</span></a></li>
+                    </ul>
+                    <ul class="actions fit">
+                        <li><a style="color: #3d4449;" href="${CPATH}/user/userUncomment?goto=${CPATH}/user/userUncomment" class="icon fa-pencil-square-o">待评论<span class="mainRed">（${uncomment!}）</span></a></li>
+                        <li><a style="color: #3d4449;" href="${CPATH}/user/userTransaction?goto=${CPATH}/user/userTransaction" class="icon fa-th-list">我的订单</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="12u$">
+                <ul class="actions fit">
+                    <li></li>
+                    <li><a href="${CPATH}/user/logout?ucode=${ucode!}" class="button special fit">退出</a></li>
+                    <li></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <#include "_inc/_user_bottom_bar.html"/>
+</section>
+</@layout>

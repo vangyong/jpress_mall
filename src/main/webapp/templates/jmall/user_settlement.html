@@ -1,0 +1,220 @@
+<#include "_inc/_layout.html"/>
+<#macro script>
+	function doShoppingCartSettlement(){
+		var remark=$("#remark").val();
+		var shoppingCarts=$("input[name='shoppingCart.id']");
+		var userAddressId=$("#userAddress option:selected").val();
+		var shoppingCartIds=new Array();
+		if(shoppingCarts.length > 0){
+			$.each(shoppingCarts,function(n,shoppingCart) {
+				shoppingCartIds.push(shoppingCart.value);
+			});
+		}else{
+			layer.msg('结算的商品为空');
+			return;
+		}
+		if(!userAddressId){
+			layer.msg('请选择收货地址');
+			return;
+		}
+		<!--支付宝支付-->
+		$.ajax({
+			type: "POST",
+			traditional: true,
+			url: "${CPATH}/transaction/shoppingCartAlipay",
+			data: {
+				ucode:'${ucode!}',
+				remark:remark,
+				userAddressId:userAddressId,
+				shoppingCartIds:shoppingCartIds
+			},
+			success: function(data){
+				if(data.errorCode == 0){
+					$("#alipayDiv").append(data.data);
+				}else if(data.errorCode == 2){
+					var goto=window.location.href;
+					var url="${CPATH}"+data.data+"?goto="+goto;
+					window.location.href=url;
+				}else if(data.errorCode == 3){
+					layer.msg(data.message+" 几秒后自动跳转", function(){
+						window.location.href="${CPATH}/user/center";
+					});
+				}else{
+					layer.msg(data.message);
+				}
+			},error: function(){
+				layer.msg('系统异常 几秒后自动跳转', function(){
+					window.location.href="${CPATH}/user/center";
+				});
+			}
+		});
+	}
+
+	function doSettlement(){
+		var contentId=$("#contentId").val();
+		var specValueId=$("#specValueId").val();
+		var quantity=$("#quantity").val();
+		var remark=$("#remark").val();
+		var userAddressId=$("#userAddress option:selected").val();
+		if(!userAddressId){
+			layer.msg('请选择收货地址');
+			return;
+		}
+		<!--支付宝支付-->
+		$.ajax({
+			type: "POST",
+			traditional: true,
+			url: "${CPATH}/transaction/contentAlipay",
+			data: {
+				ucode:'${ucode!}',
+				remark:remark,
+				userAddressId:userAddressId,
+				contentId:contentId,
+				specValueId:specValueId,
+				quantity:quantity
+			},
+			success: function(data){
+				if(data.errorCode == 0){
+					$("#alipayDiv").append(data.data);
+				}else if(data.errorCode == 2){
+					var goto=window.location.href;
+					var url="${CPATH}"+data.data+"?goto="+goto;
+					window.location.href=url;
+				}else if(data.errorCode == 3){
+					layer.msg(data.message+" 几秒后自动跳转", function(){
+						window.location.href="${CPATH}/user/center";
+					});
+				}else{
+					layer.msg(data.message);
+				}
+			},error: function(){
+				layer.msg('系统异常 几秒后自动跳转', function(){
+					window.location.href="${CPATH}/user/center";
+				});
+			}
+		});
+	}
+
+</#macro>
+<@layout>
+<section>
+	<div>
+		<input type="hidden" name="goto" value="${goto!}">
+		<header class="major">
+			<h4>填写订单</h4>
+		</header>
+		<@jp.userAddressPage pageSize="100">
+			<div class="row uniform">
+				<div class="12u$">
+					<div class="select-wrapper">
+						<select id="userAddress" name="userAddress" >
+							<option value="">-请选择收货地址-</option>
+							<#list userAddresss as userAddress>
+								<option value="${userAddress.id!}">${userAddress.address!}&nbsp;${userAddress.name!}&nbsp;${userAddress.mobile!}</p></option>
+							</#list>
+						</select>
+					</div>
+				</div>
+			</div>
+		</@jp.userAddressPage>
+		<#if jp.shoppingCartPage??>
+			<@jp.shoppingCartPage pageSize="100">
+				<div class="table-wrapper">
+					<table>
+						<tbody>
+							<#list shoppingCarts as shoppingCart>
+								<input type="hidden" name="shoppingCart.id" value="${shoppingCart.id!}">
+								<tr>
+									<td style="width: 40%;">
+										<img class="image fit" src="${shoppingCart.thumbnail!}" alt="" />
+									</td>
+									<td>
+										<p>${shoppingCart.title!}</p>
+										<p>${shoppingCart.value!}</p>
+										<p class="price">￥${shoppingCart.price!} × ${shoppingCart.quantity!}</p>
+									</td>
+								</tr>
+							</#list>
+						</tbody>
+						<!--<tfoot>
+							<tr>
+								<td colspan="3">
+									<ul class="pagination">
+										<@pagination>
+											<#list pages as page>
+												<li class="${(page.style)!}">
+													<a class="page" href="${(page.url)!}">${(page.text)!}</a>
+												</li>
+											</#list>
+										</@pagination>
+									</ul>
+								</td>
+							</tr>
+						</tfoot>-->
+					</table>
+				</div>
+				<diV class="box alt">
+					<div class="row uniform">
+						<div class="12u$">
+							<p class="price">数量：${object.get('quantity')!}</p>
+							<p class="price">实付款：￥${object.get('price')!}</p>
+						</div>
+					</div>
+				</diV>
+			</@jp.shoppingCartPage>
+		</#if>
+		<#if content??>
+			<div class="table-wrapper">
+				<table>
+					<tbody>
+						<input type="hidden" id="contentId" name="contentId" value="${content.id!}">
+						<input type="hidden" id="specValueId" name="specValueId" value="${content.spec_value_id!}">
+						<input type="hidden" id="quantity" name="quantity" value="${quantity!}">
+						<tr>
+							<td style="width: 40%;">
+								<img class="image fit" src="${content.thumbnail!}" alt="" />
+							</td>
+							<td>
+								<p>${content.title!}</p>
+								<p>${content.value!}</p>
+								<p class="price">￥${content.price!} × ${quantity!}</p>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<diV class="box alt">
+				<div class="row uniform">
+					<div class="12u$">
+						<p class="price">数量：${quantity!}</p>
+						<p class="price">实付款：￥${(content.price!)*(quantity!)}</p>
+					</div>
+				</div>
+			</diV>
+		</#if>
+		<diV class="box alt">
+			<div class="row uniform">
+				<div class="12u$">
+					<textarea id="remark" name="remark" placeholder="给商家留言...（选填）" rows="3"></textarea>
+				</div>
+			</div>
+		</diV>
+		<div class="box alt">
+			<div class="row uniform">
+				<div class="12u$">
+					<ul class="actions fit">
+						<li><a href="${goto!}" class="button fit" >取消</a></li>
+						<#if jp.shoppingCartPage??>
+							<li><a href="javascript:void(0)" class="button special fit" onclick="doShoppingCartSettlement()">提交订单</a></li>
+						</#if>
+						<#if content??>
+							<li><a href="javascript:void(0)" class="button special fit" onclick="doSettlement()">提交订单</a></li>
+						</#if>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="alipayDiv"></div>
+</section>
+</@layout>

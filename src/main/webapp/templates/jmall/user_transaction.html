@@ -1,0 +1,125 @@
+<#include "_inc/_layout.html"/>
+<#macro script>
+    function reAlipay(id){
+        $.ajax({
+            type: "POST",
+            traditional: true,
+            url: "${CPATH}/transaction/reAlipay",
+            data: {
+                ucode:'${ucode!}',
+                id:id
+            },
+            success: function(data){
+                if(data.errorCode == 0){
+                    $("#alipayDiv").append(data.data);
+                }else if(data.errorCode == 2){
+                    var goto=window.location.href;
+                    var url="${CPATH}"+data.data+"?goto="+goto;
+                    window.location.href=url;
+                }else if(data.errorCode == 3){
+                    layer.msg(data.message+" 几秒后自动刷新", function(){
+                        location.reload();
+                    });
+                }else{
+                    layer.msg(data.message);
+                }
+            },error: function(){
+                layer.msg('系统异常 几秒后自动跳转', function(){
+                    window.location.href="${CPATH}/user/center";
+                });
+            }
+        });
+    }
+
+    function del(id){
+        layer.confirm('确定删除该订单吗', {
+                btn: ['确定','取消']
+            },
+            function(){
+                $.post("${CPATH}/transaction/delete", {ucode:'${ucode!}',id:id}, function(data){
+                    if(data.errorCode > 0){
+                        layer.msg(data.message);
+                    }else{
+                        location.reload();
+                    }
+                });
+        });
+    }
+
+    function received(id){
+        layer.confirm('该订单的商品已经收到了吗', {
+            btn: ['确定','取消']
+            },
+            function(){
+                $.post("${CPATH}/transaction/received", {ucode:'${ucode!}',id:id}, function(data){
+                    if(data.errorCode > 0){
+                        layer.msg(data.message);
+                    }else{
+                        window.location.href="${CPATH}/user/center";
+                    }
+                });
+        });
+    }
+
+</#macro>
+<@layout>
+<section>
+    <header class="major">
+        <h4>${title!}</h4>
+    </header>
+    <input type="hidden" name="goto" value="${goto!}">
+    <@jp.transactionPage pageSize="10">
+        <#if transactions?size gt 0>
+            <#list transactions as transaction>
+                <div class="box">
+                    <div class="row uniform">
+                        <div class="12u$" onclick="window.location.href='${CPATH}/user/userTransactionItem?id=${transaction.id!}&goto=${goto!}';">
+                            <#if transaction.getContentThumbnailList()??>
+                                <#list transaction.getContentThumbnailList() as thumbnail>
+                                    <img style="width: 32%;" class="image" src="${thumbnail!}" alt="" />
+                                </#list>
+                            </#if>
+                        </div>
+                        <div class="12u$">
+                            <span style="float: right;">共${transaction.quantity!}件商品 实付款：￥${transaction.price!}</span>
+                        </div>
+                        <div class="12u$">
+                            <span style="float: right;">
+                                <#if "1"==transaction.status!>
+                                    <a href="javascript:void(0)" class="button" onclick="del('${transaction.id!}')">删除</a>
+                                    &nbsp;<a href="javascript:void(0)" class="button special" onclick="reAlipay('${transaction.id!}')">立即支付</a>
+                                <#elseif "3"==transaction.status!>
+                                    <a href="javascript:void(0)" class="button" onclick="received('${transaction.id!}')">确认收货</a>
+                                <#elseif "4"==transaction.status!>
+                                    <a href="${CPATH}/user/userTransactionItem?id=${transaction.id!}&goto=${goto!}" class="button">立即评价</a>
+                                <#elseif "5"==transaction.status!>
+                                    已完成
+                                </#if>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </#list>
+            <div class="box alt bottom">
+                <div class="row uniform">
+                    <div class="12u$">
+                        <ul class="pagination">
+                            <@pagination>
+                                <#list pages as page>
+                                    <li class="${(page.style)!}">
+                                        <a class="page" href="${(page.url)!}">${(page.text)!}</a>
+                                    </li>
+                                </#list>
+                            </@pagination>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        <#else>
+            <p>${title!}空空的...</p>
+        </#if>
+    </@jp.transactionPage>
+    <div id="alipayDiv"></div>
+    <#include "_inc/_user_bottom_bar.html"/>
+</section>
+</@layout>

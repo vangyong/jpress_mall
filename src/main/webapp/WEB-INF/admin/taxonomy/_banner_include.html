@@ -1,0 +1,85 @@
+<section class="content" style="padding-top: 0">
+	<div class="row">
+		<div class="col-md-12">
+			<form action="${CPATH}/admin/taxonomy/doSaveBanners?m=${m!}&t=${t!}" method="POST" id="bannerForm">
+				<input type="hidden" name="taxonomy.id" value="${(taxonomy.id)!}"> 
+				<input type="hidden" name="ucode" value="${ucode}">
+
+				<div class="row">
+		            <div class="form-horizontal">
+			            <div class="col-md-11">
+							<div class="form-group">
+			                    <label class="col-sm-2 control-label">banner图</label>
+			                    <div class="col-sm-10">
+			                        <div class="box box-solid">
+			                            <div class="box-header">
+			                                <h3 class="box-title"></h3>
+			                                <div class="box-tools">
+			                                    <button type="button" class="btn btn-sm" onclick="cloneUpload('#taxonomy_banner');">新增</button>
+			                                    <button type="button" class="btn btn-sm" onclick="clearUpload('#taxonomy_banner');">重置</button>
+												<button type="button" class="btn btn-sm" onclick="deleteAll('${(taxonomy.id)!}');">清空</button>
+			                                    <button type="button" class="btn btn-box-tool" data-widget="collapse">
+			                                        <i class="fa fa-minus"></i>
+			                                    </button>
+			                                </div>
+			                            </div>
+			                            <div id="taxonomy_banner" class="box-body no-padding">
+			                                <#if metadataSize gt 0>
+			                                	<#list 0..metadataSize as i>	                                		
+				                                	<#if taxonomy.metadata('taxonomy_banner','taxonomy_banner' + i + '_img') ??>
+					                                	<ul class="nav" style="text-align:center;">
+								                            <li class="jp-borde-top">
+									                            <div class="jp-content-thumbnail-box">
+									                            	<img style="margin:5px auto;" src="${(taxonomy.metadata('taxonomy_banner','taxonomy_banner' + i + '_img'))!!}" class="jp-content-thumbnail"/>
+									                            	<input type="hidden" name="${'meta_taxonomy_banner' + i + '_img'}" value="${(taxonomy.metadata('taxonomy_banner','taxonomy_banner' + i + '_img'))!!}">
+									                            	<input type="text" class="form-control" style="margin:10px auto;width:98%;" name="${'meta_taxonomy_banner' + i + '_remark'}" value="${(taxonomy.metadata('taxonomy_banner','taxonomy_banner' + i + '_remark'))!!}" placeholder="请输入图片描述（这里是图片alt的内容），每新增一张图片均需添加描述">
+			                                            			<input type="text" class="form-control" style="margin:10px auto;width:98%;" name="${'meta_taxonomy_banner' + i + '_url'}" value="${(taxonomy.metadata('taxonomy_banner','taxonomy_banner' + i + '_url'))!!}" placeholder="请输入图片url">
+									                        	</div>
+								                            	<div class="clr"></div>
+								                            </li>
+								                            <li class="jp-release-set">
+								                            	<button type="button" class="btn  btn-sm" onclick="doUpload(this)">上传</button>
+								                            	<button type="button" class="btn  btn-sm" onclick="delUpload(this)">删除</button>
+								                            	<div class="clr"></div>
+								                            </li>
+							                            </ul>
+				                                	<#else>
+			                                            <#break/>
+				                                	</#if>                                           
+			                                	</#list>	
+			                                <#else>
+			                                    <ul class="nav" style="text-align:center;">
+			                                        <li class="jp-borde-top">
+			                                            <div class="jp-content-thumbnail-box">
+			                                                <img style="margin:5px auto;" src="${CPATH+'/static/jpress/admin/image/upload.jpg'}" class="jp-content-thumbnail"/>
+			                                                <input type="hidden" name="meta_taxonomy_banner0_img">
+			                                                <input type="text" class="form-control" style="margin:10px auto;width:98%;" name="meta_taxonomy_banner0_remark" placeholder="请输入图片描述（这里是图片alt的内容），每新增一张图片均需添加描述">
+			                                            	<input type="text" class="form-control" style="margin:10px auto;width:98%;" name="meta_taxonomy_banner0_url" placeholder="请输入图片url">
+			                                            </div>
+			                                            <div class="clr"></div>
+			                                        </li>		                                        
+			                                        <li class="jp-release-set">
+			                                            <button type="button" class="btn  btn-sm" onclick="doUpload(this)">上传</button>
+			                                            <button type="button" class="btn  btn-sm" onclick="delUpload(this)">删除</button>
+			                                            <div class="clr"></div>
+			                                        </li>
+			                                    </ul>
+			                                </#if>
+			                            </div>
+			                        </div>
+			                    </div>
+			                </div>
+			                <div class="form-group">
+			                    <div style="text-align:center;">
+			                        <button type="button" onclick="doSubmit()" class="btn btn-primary">保 存</button>
+			                    </div>
+			                </div>
+						</div>
+					</div>
+				</div>
+
+			</form>
+			<!-- /.box -->
+		</div>
+	</div>
+</section>

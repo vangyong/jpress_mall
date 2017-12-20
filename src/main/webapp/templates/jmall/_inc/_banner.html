@@ -1,0 +1,13 @@
+<section>
+    <div class="box alt">
+        <#if index_banners_img??>
+            <div class="slider autoplay slick-screen" style="color: black;">
+                <#list index_banners_img as img>
+                    <#if img??>
+                        <span class="image fit"><a href="${(index_banners_url[img_index])!'#'}"><img src="${(img)!}" alt="${(index_banners_remark[img_index])!'#'}" /></a></span>
+                    </#if>
+                </#list>
+            </div>
+        </#if>
+    </div>
+</section>

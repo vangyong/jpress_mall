@@ -1,0 +1,213 @@
+<#include "../_inc/_layout.html"/>
+<#include "../_inc/_tinymce.html"/>
+<#include "../_inc/_layer.html"/>
+<#macro script>
+ $(document).ready(function(){
+	$.fn.editable.defaults.mode = 'inline';
+	$('#slug_text').editable();
+
+	var url = window.location.protocol  +"//"+ window.location.host+"${CPATH}${urlPreffix}" ;
+	$("#url_preffix").text(url);
+	$('#slug_text').editable('setValue'," ${(content.slug)!'标题'}");
+
+	$('#titleurl').on('save', function(e, params) {
+		$('#content_slug').attr('value',params.newValue);
+	});
+
+	$('.specClass').change(function(){
+		var id=this.value;
+		var checked=$(this).parent().siblings().find('input:checked');
+		if(checked.length > 0){
+			$(this).attr('checked', false);
+			alert("暂时只支持选择一个规格！");
+			return;
+		}
+		if($(this).prop('checked')){
+			var text=$.trim($(this).parent().text());
+			<!--$(this).parent().siblings().find('input').attr('disabled', true);-->
+			$.get('${CPATH}/admin/spec/getSpecValue?spec.id='+id,function(data){
+				if(data.errorCode == 0){
+					var specValueList=data.data;
+					var html="";
+					$.each(specValueList,function(n,specValue) {
+						html+="<span style='margin: 5px;'>";
+						html+="<input class='specValueClass' name='specValueIds' type='checkbox' value='"+specValue.id+"'>"+specValue.value+"";
+						html+="</span>";
+					});
+					$("#specValueTable").find('tbody').append("<tr id='specValueTr"+id+"' ><td>"+text+"：</td><td>"+html+"</td></tr>");
+				}
+			});
+		}else{
+			<!--$(this).parent().siblings().find('input').attr('disabled', false);-->
+			$("#specValueTr"+id+"").remove();
+			$("#itemTable").find('tbody tr').remove();
+		}
+	});
+
+	<!--$('.specClass-checked').trigger('click');-->
+
+	$('body').on('change', '.specValueClass', function(){
+		var id=this.value;
+		if($(this).prop('checked')){
+			var text=$.trim($(this).parent().text());
+			var html="<td>"+text+"</td><td><input name='price"+id+"' type='input'></td><td><input name='stock"+id+"' type='input'></td>";
+			$("#itemTable").find('tbody').append("<tr id='itemTr"+id+"' >"+html+"</tr>");
+		}else{
+			$("#itemTr"+id+"").remove();
+		}
+	});
+
+ });
+
+ var _editor = "${_editor!}";
+	if("tinymce" == _editor){
+		initTinymce();
+	}else{
+		initMarkdownEditor();
+ }
+
+ $("#title").keyup(function(){
+	if($('#content_slug').val() == ""){
+		$("#slug_text").text(this.value);
+		$('#slug_text').editable('setValue',this.value);
+	}
+ });
+
+ function save(){
+	$('#content_slug').attr('value',$("#slug_text").text());
+
+	if("tinymce" == _editor){
+		tinymce.activeEditor.uploadImages(function(success) {
+			tinymce.triggerSave();
+			doSubmit();
+		});
+	}else{
+		$("#textarea").text(simplemde.markdown(simplemde.value()));
+		doSubmit();
+	}
+	return false;
+ }
+
+ function doChangeEditor(){
+	if("tinymce" == _editor){
+		doAjax('${CPATH}/admin/content/changeEditor/markdown');
+	}else{
+		doAjax('${CPATH}/admin/content/changeEditor/tinymce');
+	}
+ }
+ 
+ function saveAsDraft(){
+ 	$("#content_status").attr("value","draft");
+ 	save();
+ }
+ 
+ function doSubmit(){
+ 	$("#form").ajaxSubmit({
+			type : "post", 
+			dataType : "json", 
+			success : function(data) { 
+				if(data.errorCode == 0){
+					$("#content_id").attr("value",data.data);
+					toastr.success('保存成功！','操作成功');
+					window.location.href='${CPATH}/admin/content/edit?id='+data.data+'&c=${c!}&p=${p!}&m=${m!}';
+				}else{
+					toastr.error(data.message,'操作失败');
+				}
+			},
+			error : function() {
+				alert("信息提交错误");
+			}
+	});
+ }
+
+ function doSelectThumbnailCallback(imageUrl){
+	$("#thumbnail").attr("src", imageUrl);
+	$("#content_thumbnail").attr("value", imageUrl);
+ }
+
+ function doRemoveThumbnail(){
+	$("#thumbnail").attr("src","${CPATH}/static/jpress/admin/image/nothumbnail.jpg");
+	$("#content_thumbnail").val("");
+ }
+ 
+function doAjax(url){
+	  $.get(url, function(result){
+			if(result.errorCode > 0){
+				toastr.error(result.message,'操作失败');
+			}else{
+				location.reload();
+			}
+	  }); 
+}
+
+function trash(id){
+	if(id!=''){
+		$.get("${CPATH}/admin/content/trash?ucode=${ucode}&id="+id, function(result){
+			if(result.errorCode > 0){
+				alert(result.message);
+			}else{
+				window.location.href='${CPATH}/admin/content?m=${m!}&p=${p!}&c=list&s=delete';
+			}
+		});
+	}
+}
+ 
+<#if module ??> 
+<#list module.taxonomyTypes! as taxonomyType > 
+ $('#_${taxonomyType.name}').tagEditor();
+</#list>
+</#if>
+
+
+$("#title").keyup(function(){
+	if($('#content_slug').val() == ""){
+	   $("#slug_text").text(this.value);
+       $('#slug_text').editable('setValue',this.value);
+	}
+});
+
+$(document).ready(function(){
+	
+	 $.fn.editable.defaults.mode = 'inline';
+	 $('#slug_text').editable();
+	 
+	 var url = window.location.protocol  +"//"+ window.location.host+"${CPATH}${urlPreffix}" ;
+     $("#url_preffix").text(url);
+     $('#slug_text').editable('setValue'," ${(content.slug)!'标题'}");
+     
+     $('#titleurl').on('save', function(e, params) {
+    	 $('#content_slug').attr('value',params.newValue);
+	 });
+});
+</#macro>
+<#macro script_import>
+<script src="${CPATH}/static/tinymce/tinymce.min.js"></script>
+<script src="${CPATH}/static/plugins/tag/jquery.caret.min.js"></script>
+<script src="${CPATH}/static/plugins/tag/jquery.tag-editor.min.js"></script>
+<script src="${CPATH}/static/plugins/editable/bootstrap-editable.min.js"></script>
+<script src="${CPATH}/static/simplemde/simplemde.min.js"></script>
+</#macro>
+<#macro css_import>
+<link rel="stylesheet" href="${CPATH}/static/plugins/tag/jquery.tag-editor.css">
+<link rel="stylesheet" href="${CPATH}/static/plugins/editable/bootstrap-editable.css">
+<link rel="stylesheet" href="${CPATH}/static/simplemde/simplemde.min.css">
+</#macro>
+<#macro css>
+.editable-input {
+	width: 100%;
+}
+.form-inline .form-control {
+    display: inline-block;
+    width: 100%;
+    vertical-align: middle;
+}
+.nav-tabs-custom {
+    margin-bottom: 0px; 
+    background: #fff;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0);
+    border-radius: 3px;
+}
+</#macro>
+<@layout active_id=p child_active_id=c>
+<#include include/>
+</@layout>

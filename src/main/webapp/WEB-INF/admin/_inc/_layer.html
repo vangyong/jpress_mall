@@ -1,0 +1,59 @@
+<script>
+	var data={
+	    url:'',
+	    alt:''
+	};
+	
+	function doSelectImageLayer(callback){
+	 	layer.open({
+				    type: 2,
+				    title: '选择图片',
+				    shadeClose: true,
+				    offset: 0,
+				    shade: 0.8,
+				    area: ['80%', '80%'],
+				    content: '${CPATH}/admin/attachment/choose_layer?mime=image',
+				    end:function(){
+				    	if(''!=data.url && null != data.url){
+				    		callback(data.url);
+				    	}
+				    }
+				}); 
+	 }
+	
+	function doSelectVideoLayer(callback){
+	 	layer.open({
+				    type: 2,
+				    title: '选择视频',
+				    shadeClose: true,
+				    offset: 0,
+				    shade: 0.8,
+				    area: ['80%', '80%'],
+				    content: '${CPATH}/admin/attachment/choose_layer?mime=video',
+				    end:function(){
+				    	if(''!=data.url && null != data.url){
+				    		callback(data.url);
+				    	}
+				    }
+				}); 
+	 }
+	
+	function openLayer(width, height, title, url){
+		var reload = false;
+	 	layer.open({
+				    type: 2,
+				    title: title,
+				    shadeClose: true,
+				    offset: 0,
+				    shade: 0.8,
+				    area: [width, height],
+				    content: url,
+				    end:function(){
+				    	if(reload){
+				    		location.reload();
+				    	}
+				    }
+				}); 
+	 }
+	
+</script>

@@ -1,0 +1,126 @@
+<section class="content-header">
+	<h1>
+		所有交易记录
+	</h1>
+</section>
+
+<!-- Main content -->
+<section class="content">
+
+	<div class="row content-row">
+		<form id="form" action="${CPATH}/admin/transaction?m=${m!}&p=${p!}&c=${c!}" method="POST" class="form-inline">
+			<div class="form-group">
+				<input id="post-search-input" style="width:350px;" class="form-control input-sm" type="search" value="${k!}" name="k" placeholder="输入本地订单号，微信/支付宝订单号进行搜索">
+			</div>
+			<div class="form-group">
+				<select class="form-control input-sm" name="pay_type" >
+					<option value="">请选择支付类型</option>
+					<option value="alipay" <#if 'alipay'==pay_type! >selected</#if> >支付宝支付</option>
+					<option value="wechatpay" <#if 'wechatpay'==pay_type! >selected</#if> >微信支付</option>
+				</select>
+			</div>
+			<div class="form-group">
+				<select class="form-control input-sm" name="status" >
+					<option value="">请选择订单状态</option>
+					<option value="0" <#if '0'==status! >selected</#if> >支付失败</option>
+					<option value="1" <#if '1'==status! >selected</#if> >待支付</option>
+					<option value="2" <#if '2'==status! >selected</#if> >已支付/待发货</option>
+					<option value="3" <#if '3'==status! >selected</#if> >已发货/待收货</option>
+					<option value="4" <#if '4'==status! >selected</#if> >已收货/待评价</option>
+					<option value="5" <#if '5'==status! >selected</#if> >完成</option>
+				</select>
+			</div>
+			<div class="form-group">
+				<input type="submit" class="btn btn-block btn-sm btn-default" style="width:100px;" value="搜索" />
+			</div>
+		</form>
+	</div>
+	
+	<div class="box">
+		<!-- /.box-header -->
+		<div class="box-body">
+			<form action="" method="POST">
+				<input type="hidden" name="ucode" value="${ucode}">
+				<table class="table table-striped" style="word-break:break-all">
+					<thead>
+						<tr>
+							<th style="width:20px;"><input name="dataItem" onclick="checkAll(this)" type="checkbox" value="0"></th>
+							<th>本地订单号</th>
+							<th>微信/支付宝订单号</th>
+							<th>总金额</th>
+							<th>支付类型</th>
+							<th>订单状态</th>
+							<th>创建时间</th>
+						</tr>
+					</thead>
+					<tbody>
+						<#if page??> <#list page.getList() as bean>
+						<tr class="jp-onmouse">
+							<td><input name="dataItem" type="checkbox" value="${bean.id!}"></td>
+							<td>
+								${(bean.order_no)!}
+								<div class="jp-flash-comment">
+									<p class="row-actions jp-cancel-pad">
+										<span class="approve"><a class="vim-a" onclick="openLayer('80%', '80%', '详情','${CPATH}/admin/transaction/view?id=${bean.id}&c=${c!}&p=${p!}&m=${m!}')">详情</a></span>
+										<#if "2"==bean.status!>
+											<span class="approve">|&nbsp;<a class="vim-a" onclick="delivered('${bean.id!}')">已发货</a></span>
+										</#if>
+									</p>
+								</div>
+							</td>
+							<td>${(bean.trade_no)!}</td>
+							<td>${(bean.totle_fee)!}</td>
+							<td>
+								<#if "alipay"==bean.pay_type!>
+									支付宝支付
+								<#elseif "wechatpay"==bean.pay_type!>
+									微信支付
+								</#if>
+							</td>
+							<td>
+								<#if "0"==bean.status!>
+									支付失败
+								<#elseif "1"==bean.status!>
+									待支付
+								<#elseif "2"==bean.status!>
+									已支付/待发货
+								<#elseif "3"==bean.status!>
+									已发货/待收货
+								<#elseif "4"==bean.status!>
+									已收货/待评价
+								<#elseif "5"==bean.status!>
+									完成
+								</#if>
+							</td>
+							<td>${(bean.created)!}</td>
+						</tr>
+						</#list> 
+						</#if>
+					</tbody>
+					<tfoot>
+						<tr>
+							<th style="width:20px;"><input name="dataItem" onclick="checkAll(this)" type="checkbox" value="0"></th>
+							<th>本地订单号</th>
+							<th>微信/支付宝订单号</th>
+							<th>总金额</th>
+							<th>支付类型</th>
+							<th>订单状态</th>
+							<th>创建时间</th>
+						</tr>
+					</tfoot>
+				</table>
+				</form>
+		</div>
+		
+	</div>	
+	
+	<div class="cf">
+		<div class="pull-right " >			
+			<#if page??> 
+			<#include "../_inc/_paginate.html" /> 
+			<@paginate currentPage=page.pageNumber totalPage=page.totalPage actionUrl="?p="+(p!)+"&c="+(c!)+"&m="+(m!)+"&t="+(t!)+"&s="+(s!)+"&k="+(k!)+"&status="+(status!)+"&pay_type="+(pay_type!)+"&page="/>
+			</#if>
+		</div>
+	</div>
+		
+</section>

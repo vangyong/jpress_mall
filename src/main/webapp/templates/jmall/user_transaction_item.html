@@ -1,0 +1,124 @@
+<#include "_inc/_layout.html"/>
+<#macro script>
+    function comment(transactionId,contentId){
+        layer.open({
+            type: 1,
+            skin: 'layui-layer-rim',
+            area: ['90%', 'auto'],
+            content: '<form id="commentForm" action="${CPATH}/comment/submit" method="post"><input type="hidden" name="ucode" value="${ucode}"><input type="hidden" name="transactionId" value="'+transactionId+'"><input type="hidden" name="cid" value="'+contentId+'"><textarea name="text" placeholder="说说这商品吧..." rows="3"></textarea></form>',
+            btn: ['确定','取消'],
+            yes: function(index){
+                $("#commentForm").ajaxSubmit({
+                    type : "post",
+                    dataType : "json",
+                    success : function(data) {
+                        if(data.errorCode == 0){
+                            layer.close(index);
+                            location.reload();
+                        }else if(data.errorCode == 2){
+                            layer.close(index);
+                            var goto=window.location.href;
+                            var url="${CPATH}"+data.data+"?goto="+goto;
+                            window.location.href=url;
+                        }else{
+                            layer.msg(data.message);
+                        }
+                    },
+                    error : function() {
+                        layer.msg("信息提交错误");
+                    }
+                });
+            }
+        });
+    }
+</#macro>
+<@layout>
+<section>
+    <#if transaction??>
+        <div class="box alt">
+            <div class="row uniform">
+                <div class="12u$">
+                    <h5>订单状态：</h5>
+                    <p>
+                        <#if "0"==transaction.status!>
+							支付失败
+                        <#elseif "1"==transaction.status!>
+							待支付
+                        <#elseif "2"==transaction.status!>
+							待发货
+                        <#elseif "3"==transaction.status!>
+							待收货
+                        <#elseif "4"==transaction.status!>
+							待评价
+                        <#elseif "5"==transaction.status!>
+							完成
+                        </#if>
+                    </p>
+                </div>
+                <div class="12u$">
+                    <hr />
+                    <h5>收货地址：</h5>
+                    <p>${transaction.userAddress!}</p>
+                </div>
+                <div class="12u$">
+                    <hr />
+                    <h5>其他：</h5>
+                    <p>付款金额：￥${transaction.totle_fee!}</p>
+                    <p>本地订单号：${transaction.order_no!}</p>
+                    <p>支付类型：
+                        <#if "alipay"==transaction.pay_type!>
+							支付宝支付
+                        <#elseif "wechatpay"==transaction.pay_type!>
+							 微信支付
+                        </#if>
+                    </p>
+                    <p>微信/支付宝订单号：${transaction.trade_no!}</p>
+                    <p>快递信息：${transaction.express!}</p>
+                    <p>给商家留言：${transaction.remark!}</p>
+                    <p>下单时间：${transaction.created!}</p>
+                </div>
+            </div>
+        </div>
+        <div class="table-wrapper">
+            <h5>商品信息：</h5>
+            <table>
+                <tbody>
+                    <#list transactionItemList as transactionItem>
+                        <tr onclick="window.location.href='${transactionItem.getContentUrl()!'#'}';">
+                            <td style="width: 40%;">
+                                <img class="image fit" src="${transactionItem.thumbnail!}" alt="" />
+                            </td>
+                            <td>
+                                <p>${transactionItem.title!}</p>
+                                <p>${transactionItem.value!}</p>
+                                <p class="price">￥${transactionItem.price!} × ${transactionItem.quantity!}</p>
+                            </td>
+                        </tr>
+                        <#if "4"==transaction.status!>
+                            <tr>
+                                <td colspan="2">
+                                    <a href="javascript:void(0)" class="button special small" style="float: right;" onclick="comment('${transaction.id!}','${transactionItem.content_id!}')" >立即评价</a>
+                                </td>
+                            </tr>
+                        </#if>
+                    </#list>
+                </tbody>
+            </table>
+        </div>
+    <#else>
+    	哎哟，没有找到数据，请稍后再试...
+    </#if>
+    <input type="hidden" name="goto" value="${goto!}">
+    <div class="box alt bottom">
+		<div class="row uniform">
+			<div class="12u$">
+				<ul class="actions fit">
+					<li></li>
+					<li ><a href="javascript:void(0)" class="button fit" onclick="window.location.href='${goto!'#'}?goto=${goto!'#'}';">返回</a></li>
+					<li></li>
+				</ul>
+			</div>
+		</div>
+	</div>
+</section>
+</@layout>

@@ -1,0 +1,108 @@
+<section class="content" style="padding-top: 0">
+	<div class="row">
+		<div class="col-md-12">
+			<#if transaction ??>
+				<div class="form-group jp-input-item">
+					<label class="input-title">本地订单号：</label>
+					${(transaction.order_no)!}
+				</div>
+				<div class="form-group jp-input-item">
+					<label class="input-title">微信/支付宝订单号：</label>
+					${(transaction.trade_no)!}
+				</div>
+				<div class="form-group jp-input-item">
+					<label class="input-title">用户：</label>
+					${(transaction.getUserName())!}
+				</div>
+				<div class="form-group jp-input-item">
+					<label class="input-title">收货地址：</label>
+					${(transaction.userAddress)!}
+				</div>
+				<div class="form-group jp-input-item">
+					<label class="input-title">用户备注：</label>
+					${(transaction.remark)!}
+				</div>
+				<div class="form-group jp-input-item">
+					<label class="input-title">快递信息：</label>
+					${(transaction.express)!}
+				</div>
+				<div class="form-group jp-input-item">
+					<label class="input-title">总金额（分）：</label>
+					${(transaction.totle_fee)!0}
+				</div>
+				<div class="form-group jp-input-item">
+					<label class="input-title">支付类型：</label>
+					<#if 'alipay'==transaction.pay_type! >
+						支付宝支付
+					<#elseif 'wechatpay'==transaction.pay_type! >
+						微信支付
+					</#if>
+				</div>
+				<div class="form-group jp-input-item">
+					<label class="input-title">交易状态：</label>
+					<#if '0'==transaction.status! >
+						支付失败
+					<#elseif '1'==transaction.status! >
+						待支付
+					<#elseif '2'==transaction.status! >
+						已支付/待发货
+					<#elseif '3'==transaction.status! >
+						已发货/待收货
+					<#elseif '4'==transaction.status! >
+						已收货/待评价
+					<#elseif '5'==transaction.status! >
+						完成
+					</#if>
+				</div>
+				<div class="form-group jp-input-item">
+					<label class="input-title">创建时间：</label>
+					${(transaction.created)!}
+				</div>		
+				<div class="form-group jp-input-item">
+					<label class="input-title">交易完成时间：</label>
+					${(transaction.payed)!}
+				</div>
+			</#if>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
+			<div class="box box-solid">
+				<div class="box-header with-border">
+					<h3 class="box-title">商品购买列表</h3>
+					<div class="box-body jp-common-pad">
+						<table class="table table-bordered">
+							<thead>
+								<tr>
+									<th>商品标题</th>
+									<th>规格值</th>
+									<th>价格</th>
+									<th>数量</th>
+								</tr>
+							</thead>
+							<tbody>
+								<#if transactionItemList??>
+									<#list transactionItemList as bean>
+										<tr class="jp-onmouse">
+											<td>
+												${bean.getContent().title!}
+												<div class="jp-flash-comment">
+													<p class="row-actions jp-cancel-pad">
+														<span class="approve"><a class="delete vim-d vim-destructive" href="${bean.getContent().url!}" target="_blank">查看</a></span>
+													</p>
+												</div>
+											</td>
+											<td>${bean.getSpecValueValue()!}</td>
+											<td>${bean.price!}</a></td>
+											<td>${bean.quantity!}</td>
+										</tr>
+									</#list>
+								</#if>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>

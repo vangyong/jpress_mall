@@ -1,0 +1,40 @@
+<#include "_inc/_layout.html"/>
+<@layout>
+<!-- Banner -->
+<#include "_inc/_banner.html"/>
+<section>
+    <div class="posts">
+        <@jp.indexPage module="mall" pageSize="9">
+            <#if page.getList()?size gt 0>
+                <#list page.getList() as content>
+                    <article>
+                        <a href="${(content.url)!'#'}" style="color: black;">
+                            <span class="image"><img src="${content.thumbnailByName('t1')!}" alt="" /></span>
+                            <p>${(content.title)!}</p>
+                            <p class="price">￥${(content.price)!0}</p>
+                        </a>
+                    </article>
+                </#list>
+            <#else>
+                <article>
+                    <P>商品努力上架中...</P>
+                </article>
+            </#if>
+        </@jp.indexPage>
+    </div>
+    <div class="box alt bottom">
+        <div class="row">
+            <ul class="pagination">
+                <@pagination>
+                    <#list pages as page>
+                        <li class="${(page.style)!}">
+                            <a class="page" href="${(page.url)!}">${(page.text)!}</a>
+                        </li>
+                    </#list>
+                </@pagination>
+            </ul>
+        </div>
+    </div>
+    <#include "_inc/_user_bottom_bar.html"/>
+</section>
+</@layout>

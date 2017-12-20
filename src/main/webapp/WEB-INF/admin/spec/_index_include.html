@@ -1,0 +1,83 @@
+<section class="content-header">
+	<h1>
+		商品规格配置
+	</h1>
+</section>
+
+<!-- Main content -->
+<section class="content">
+
+	<div class="row content-row">
+		<form id="form" action="${CPATH}/admin/spec?m=${m!}&p=${p!}&c=${c!}" method="POST" class="form-inline">
+			<div class="form-group">
+				<input id="post-search-input" style="width:350px;" class="form-control input-sm" type="search" value="${k!}" name="k" placeholder="输入规格名称进行搜索">
+			</div>
+			<div class="form-group">
+				<input type="submit" class="btn btn-block btn-sm btn-default" style="width:100px;" value="搜索" />
+			</div>
+			<div class="form-group">
+				<input type="buttom" class="btn btn-block btn-sm btn-default" style="width:100px;" onclick="add()" value="新增" />
+			</div>
+		</form>
+	</div>
+	
+	<div class="box">
+		<!-- /.box-header -->
+		<div class="box-body">
+			<form action="" method="POST">
+				<input type="hidden" name="ucode" value="${ucode}">
+				<table class="table table-striped" style="word-break:break-all">
+					<thead>
+						<tr>
+							<th style="width:20px;"><input name="dataItem" onclick="checkAll(this)" type="checkbox" value="0"></th>
+							<th>规格名称</th>
+							<th>规格值</th>
+							<th>排序</th>
+							<th>创建时间</th>
+						</tr>
+					</thead>
+					<tbody>
+						<#if page??> <#list page.getList() as bean>
+						<tr class="jp-onmouse">
+							<td><input name="dataItem" type="checkbox" value="${bean.id}"></td>
+							<td>
+								${(bean.title)!}
+								<div class="jp-flash-comment">
+									<p class="row-actions jp-cancel-pad">
+										<span class="approve"><a class="vim-a" onclick="edit('${CPATH}/admin/spec/edit?id=${bean.id}&c=edit&p=${p!}&m=${m!}')">编辑</a></span>
+										<span class="spam">&nbsp;|&nbsp;<a class="vim-s vim-destructive" onclick="del('${CPATH}/admin/spec/delete?id=${bean.id}&ucode=${ucode}')">删除</a></span>
+									</p>
+								</div>
+							</td>
+							<td>${(bean.getSpecValueValue())!}</td>
+							<td>${(bean.order_number)!}</td>
+							<td>${(bean.created)!}</td>
+						</tr>
+						</#list> 
+						</#if>
+					</tbody>
+					<tfoot>
+						<tr>
+							<th style="width:20px;"><input name="dataItem" onclick="checkAll(this)" type="checkbox" value="0"></th>
+							<th>规格名称</th>
+							<th>规格值</th>
+							<th>排序</th>
+							<th>创建时间</th>
+						</tr>
+					</tfoot>
+				</table>
+				</form>
+		</div>
+		
+	</div>	
+	
+	<div class="cf">
+		<div class="pull-right " >			
+			<#if page??> 
+			<#include "../_inc/_paginate.html" /> 
+			<@paginate currentPage=page.pageNumber totalPage=page.totalPage actionUrl="?p="+(p!)+"&c="+(c!)+"&m="+(m!)+"&t="+(t!)+"&s="+(s!)+"&k="+(k!)+"&page="/>
+			</#if>
+		</div>
+	</div>
+		
+</section>

@@ -1,0 +1,89 @@
+<#include "../_inc/_layout.html"/>
+<#include "_option_script.html"/>
+<@layout active_id=p child_active_id=c>
+<section class="content-header">
+	<h1>支付宝设置</h1>
+</section>
+
+<!-- Main content -->
+<section class="content">
+	<p class="content-msg"> 通过支付宝设置，让网站和支付宝互动互通。</p>
+
+	<form action="${CPATH}/admin/option/save" method="POST" id="form">
+		<input type="hidden" name="ucode" value="${ucode}"> 
+		<input type="hidden" name="autosave" value="alipay_appid,alipay_rsa_private_key,alipay_rsa_public_key,alipay_public_key,alipay_timeout_express">
+		<div class="row">
+			<div class="col-xs-12">
+				<h4 class="jp-set-title">常规选项</h4>
+				<ul class="list-unstyled">
+					<li class="jp-set-pad">
+						<div class="col-sm-3 ">
+							<div class="  jp-set-info ">支付宝AppID</div>
+						</div>
+						<div class="col-sm-9  jp-set-title-line">
+							<div class="col-sm-6 jp-table-distance-top ">
+								<input class="form-control input-md" type="text" name="alipay_appid" value="${OPTION('alipay_appid')!}">
+							</div>
+						</div>
+						<div class="clr"></div>
+					</li>
+					<li class="jp-set-pad">
+						<div class="col-sm-3 ">
+							<div class="  jp-set-info ">应用私钥</div>
+						</div>
+						<div class="col-sm-9  jp-set-title-line">
+							<div class="col-sm-6 jp-table-distance-top ">
+								<textarea class="form-control" rows="4" name="alipay_rsa_private_key">${OPTION('alipay_rsa_private_key')!}</textarea>
+							</div>
+						</div>
+						<div class="clr"></div>
+					</li>
+					<li class="jp-set-pad">
+						<div class="col-sm-3 ">
+							<div class="  jp-set-info ">应用公钥</div>
+						</div>
+						<div class="col-sm-9  jp-set-title-line">
+							<div class="col-sm-6 jp-table-distance-top ">
+								<textarea class="form-control" rows="4" name="alipay_rsa_public_key">${OPTION('alipay_rsa_public_key')!}</textarea>
+							</div>
+						</div>
+						<div class="clr"></div>
+					</li>
+					<li class="jp-set-pad">
+						<div class="col-sm-3 ">
+							<div class="  jp-set-info ">支付宝公钥</div>
+						</div>
+						<div class="col-sm-9  jp-set-title-line">
+							<div class="col-sm-6 jp-table-distance-top ">
+								<textarea class="form-control" rows="4" name="alipay_public_key">${OPTION('alipay_public_key')!}</textarea>
+							</div>
+						</div>
+						<div class="clr"></div>
+					</li>
+					<li class="jp-set-pad">
+						<div class="col-sm-3 ">
+							<div class="  jp-set-info ">超时时间</div>
+						</div>
+						<div class="col-sm-9  jp-set-title-line">
+							<div class="col-sm-6 jp-table-distance-top ">
+								<input class="form-control input-md" type="text" name="alipay_timeout_express" value="${OPTION('alipay_timeout_express')!}">
+							</div>
+						</div>
+						<div class="clr"></div>
+					</li>
+				</ul>
+			</div>
+			<!-- /.box -->
+		</div>
+
+		<div class="row">
+			<div class="col-xs-12">
+				<button type="button" onclick="doSubmit()" class="btn btn-primary">保存更改</button>
+			</div>
+		</div>
+		<!-- /.row -->
+	</form>
+</section>
+<!-- /.content -->
+
+</@layout>
