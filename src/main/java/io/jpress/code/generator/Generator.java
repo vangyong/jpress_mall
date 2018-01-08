@@ -22,9 +22,9 @@ public class Generator {
 		String modelPackage = "io.jpress";
 		
 		String dbHost = "127.0.0.1";
-		String dbName = "jpress";
+		String dbName = "jpress_mall";
 		String dbUser = "root";
-		String dbPassword = "";
+		String dbPassword = "root";
 		
 		new JGenerator(modelPackage, dbHost, dbName, dbUser, dbPassword).doGenerate();
 

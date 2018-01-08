@@ -38,8 +38,11 @@ import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
+import io.jpress.wechat.WechatUserInterceptor;
+
 @RouterMapping(url = Consts.ROUTER_USER)
-@Before(UserInterceptor.class)
+//@Before(UserInterceptor.class)
+@Before(WechatUserInterceptor.class)
 public class UserController extends BaseFrontController {
 
 	private void gotoUrl(){
@@ -52,7 +55,8 @@ public class UserController extends BaseFrontController {
 	}
 	
 	//登录
-	@Clear(UserInterceptor.class)
+	//@Clear(UserInterceptor.class)
+	@Clear(WechatUserInterceptor.class)
 	@ActionKey(Consts.ROUTER_USER_LOGIN) // 固定登录的url
 	public void login(){
 		gotoUrl();
@@ -139,6 +143,7 @@ public class UserController extends BaseFrontController {
 	}
 
 	//退出
+	//@Before(UCodeInterceptor.class)
 	@Before(UCodeInterceptor.class)
 	public void logout() {
 		CookieUtils.remove(this, Consts.COOKIE_LOGINED_USER);

@@ -99,5 +99,14 @@ public class Consts {
 
 	public final static String INDEX_BANNER="index_banner";
 	public final static BigInteger INDEX_BANNER_ID=BigInteger.valueOf(1);
+	
+	
+	public static final String TSET1 = "/test1";
+	
+	public static final String TSET2 = "/test2";
+	
+	public static final String TSET3 = "/test3";
+	
+	public static final String TSET4 = "/test4";
 
 }
