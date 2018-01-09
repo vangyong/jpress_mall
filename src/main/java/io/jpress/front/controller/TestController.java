@@ -11,6 +11,7 @@ import io.jpress.router.RouterMapping;
 import io.jpress.wechat.WechatUserInterceptor;
 
 @RouterMapping(url = "/test")
+@Before(WechatUserInterceptor.class)
 public class TestController extends BaseFrontController {
 
 	public void index() {
@@ -23,7 +24,6 @@ public class TestController extends BaseFrontController {
 	}
 
 	// 登录
-	@Before(WechatUserInterceptor.class)
 	@ActionKey(Consts.TSET1)
 	public void test1() {
 		render("test1.html");

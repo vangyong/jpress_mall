@@ -27,12 +27,8 @@ import io.jpress.utils.StringUtils;
 
 public class WechatUserInterceptor implements Interceptor {
 
-//	public static final String AUTHORIZE_URL = "https://open.weixin.qq.com/connect/oauth2/authorize" + "?appid={appid}"
-//			+ "&redirect_uri={redirecturi}" + "&response_type=code" + "&scope=snsapi_userinfo"
-//			+ "&state=235#wechat_redirect";
-	
-	public static final String AUTHORIZE_URL = "https://open.weixin.qq.com/connect/oauth2/authorize" + "?appid=wxd0b33231fc543b7b"
-			+ "&redirect_uri=http://m.yuweiguoye.com/jpress_mall" + "&response_type=code" + "&scope=snsapi_userinfo"
+	public static final String AUTHORIZE_URL = "https://open.weixin.qq.com/connect/oauth2/authorize" + "?appid={appid}"
+			+ "&redirect_uri={redirecturi}" + "&response_type=code" + "&scope=snsapi_userinfo"
 			+ "&state=235#wechat_redirect";
 
 	@Override
@@ -42,10 +38,10 @@ public class WechatUserInterceptor implements Interceptor {
 
 		String userJson = inv.getController().getSessionAttr(Consts.SESSION_WECHAT_USER);
 
-//		if (StringUtils.isBlank(userJson)) {
-//			inv.invoke();
-//			return;
-//		}
+		if (StringUtils.isNotBlank(userJson)) {
+			inv.invoke();
+			return;
+		}
 
 		String appid = OptionQuery.me().findValue("wechat_appid");
 		if (StringUtils.isBlank(appid)) {
@@ -62,9 +58,12 @@ public class WechatUserInterceptor implements Interceptor {
 		if (StringUtils.isNotBlank(queryString)) {
 			toUrl = toUrl.concat("?").concat(queryString);
 		}
+		toUrl = toUrl.replaceAll(request.getContextPath(), "");
 		toUrl = StringUtils.urlEncode(toUrl);
-
-		String redirectUrl = request.getScheme() + "://" + request.getServerName() + "/wechat/callback?goto=" + toUrl;
+		String redirectUrl = request.getScheme() + "://" + 
+		        (request.getServerName().startsWith("1") ? request.getServerName()+":"+request.getServerPort() : request.getServerName()) + 
+		        request.getContextPath() +
+		        "/wechat/callback?goto=" + toUrl;
 		redirectUrl = StringUtils.urlEncode(redirectUrl);
 
 		String url = AUTHORIZE_URL.replace("{redirecturi}", redirectUrl).replace("{appid}", appid.trim());

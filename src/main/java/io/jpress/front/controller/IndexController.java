@@ -15,6 +15,7 @@
  */
 package io.jpress.front.controller;
 
+import com.jfinal.aop.Before;
 import com.jfinal.render.Render;
 import io.jpress.Consts;
 import io.jpress.core.BaseFrontController;
@@ -26,11 +27,13 @@ import io.jpress.model.query.OptionQuery;
 import io.jpress.router.RouterMapping;
 import io.jpress.ui.freemarker.tag.IndexPageTag;
 import io.jpress.utils.StringUtils;
+import io.jpress.wechat.WechatUserInterceptor;
 
 import java.util.HashMap;
 import java.util.List;
 
 @RouterMapping(url = "/")
+@Before(WechatUserInterceptor.class)
 public class IndexController extends BaseFrontController {
 
 	@ActionCache
