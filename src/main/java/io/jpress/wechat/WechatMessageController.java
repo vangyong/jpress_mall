@@ -15,6 +15,7 @@
  */
 package io.jpress.wechat;
 
+import java.util.Date;
 import java.util.List;
 
 import com.jfinal.aop.Before;
@@ -60,11 +61,13 @@ import com.jfinal.weixin.sdk.msg.out.OutTextMsg;
 import io.jpress.Consts;
 import io.jpress.core.JSession;
 import io.jpress.model.Content;
+import io.jpress.model.User;
 import io.jpress.model.query.ContentQuery;
 import io.jpress.model.query.OptionQuery;
 import io.jpress.router.RouterMapping;
 import io.jpress.template.TemplateManager;
 import io.jpress.template.TplModule;
+import io.jpress.utils.EncryptUtils;
 import io.jpress.utils.StringUtils;
 
 @RouterMapping(url = "/wechat")
@@ -86,7 +89,18 @@ public class WechatMessageController extends MsgController {
 		if (StringUtils.areNotBlank(appId, appSecret)) {
 			ApiResult result = WechatApi.getOpenId(appId, appSecret, code);
 			if (result != null) {
-				this.setSessionAttr(Consts.SESSION_WECHAT_USER, result.getJson());
+			    
+			    //获取openid后保存到数据库,jiangjb,20180110
+			    User user = new User();
+		        user.setFlag(User.FLAG_FRONT);
+		        user.setCreateSource(User.SOURCE_WECHAT);
+		        user.setOpenid(result.getStr("openid"));
+		        //user.setPopenid(popenid);
+		        user.setCreated(new Date());
+		        if (user.saveOrUpdate()) {
+		            this.setSessionAttr(Consts.SESSION_WECHAT_USER, result.getJson());
+		        }
+		        
 			}
 		}
 
