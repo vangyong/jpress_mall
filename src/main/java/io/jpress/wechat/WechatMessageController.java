@@ -100,8 +100,8 @@ public class WechatMessageController extends MsgController {
 			        User user = new User();
 			        user.setUsername(userInfo.getStr("nickname"));
 			        user.setNickname(userInfo.getStr("nickname"));
-			        Integer sex = userInfo.getInt("sex");
-			        user.setGender(sex ==1 ? "男" : sex == 2 ? "女" : "未知");
+			        Integer sex = userInfo.getInt("sex") == null ? 0 : userInfo.getInt("sex");
+			        user.setGender(sex == 1 ? "男" : sex == 2 ? "女" : "未知");
 			        user.setAvatar(userInfo.getStr("headimgurl"));
 			        user.setFlag(User.FLAG_FRONT);
 			        user.setCreateSource(User.SOURCE_WECHAT);
