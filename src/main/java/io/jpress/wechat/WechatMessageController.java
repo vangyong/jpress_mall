@@ -70,6 +70,7 @@ import io.jpress.model.query.OptionQuery;
 import io.jpress.router.RouterMapping;
 import io.jpress.template.TemplateManager;
 import io.jpress.template.TplModule;
+import io.jpress.utils.CookieUtils;
 import io.jpress.utils.StringUtils;
 
 @RouterMapping(url = "/wechat")
@@ -126,6 +127,7 @@ public class WechatMessageController extends MsgController {
                     
 			        if (user.saveOrUpdate()) {
 			            this.setSessionAttr(Consts.SESSION_WECHAT_USER, result.getJson());
+			            CookieUtils.put(this, Consts.COOKIE_LOGINED_USER, user.getId());
 			        }
 			    }
 			    
