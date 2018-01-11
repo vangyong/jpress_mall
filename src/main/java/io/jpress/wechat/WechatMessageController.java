@@ -75,14 +75,13 @@ import io.jpress.utils.StringUtils;
 @RouterMapping(url = "/wechat")
 public class WechatMessageController extends MsgController {
 
-	@Override
+	private static final String UID = "uid=";
+
+    @Override
 	public ApiConfig getApiConfig() {
 		return WechatApi.getApiConfig();
 	}
-public static void main(String[] args) {
-    String ss ="/?uid=1008011";
-    System.out.println(ss.substring(ss.indexOf("uid=") + 4));
-}
+	
 	@Before(WechatApiConfigInterceptor.class)
 	public void callback() {
 		String gotoUrl = getPara("goto");
@@ -97,7 +96,6 @@ public static void main(String[] args) {
 			    String openid = result.getStr("openid");
 			    ApiResult userInfo = WechatApi.getUserInfo(openid);
 			    if (userInfo != null) {
-			        String pidStr = gotoUrl.substring(gotoUrl.indexOf("uid=") + 4);
 			        //获取用户后保存到数据库,jiangjb,20180110
 			        User user = new User();
 			        user.setUsername(userInfo.getStr("nickname"));
@@ -114,7 +112,16 @@ public static void main(String[] args) {
                     if (r != null) {
                         user.setId(r.getBigInteger("id"));
                     } else { //只有新增用户才保存pid，跟新用户pid不变
-                        user.setPid(StringUtils.isNotBlank(pidStr) ? new BigInteger(pidStr) : new BigInteger("0"));
+                        String pidStr = "";
+                        BigInteger pid = new BigInteger("0");
+                        if (gotoUrl.contains(UID)) {
+                            pidStr = gotoUrl.substring(gotoUrl.indexOf(UID) + 4);
+                            try {
+                                pid = StringUtils.isNotBlank(pidStr) ? new BigInteger(pidStr) : new BigInteger("0");
+                            } catch (Exception e) {
+                            }
+                        }
+                        user.setPid(pid);
                     }
                     
 			        if (user.saveOrUpdate()) {
