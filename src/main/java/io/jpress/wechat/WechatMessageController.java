@@ -15,11 +15,14 @@
  */
 package io.jpress.wechat;
 
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
 import com.jfinal.aop.Before;
 import com.jfinal.core.Controller;
+import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.ehcache.CacheKit;
 import com.jfinal.weixin.sdk.api.ApiConfig;
 import com.jfinal.weixin.sdk.api.ApiResult;
@@ -67,7 +70,6 @@ import io.jpress.model.query.OptionQuery;
 import io.jpress.router.RouterMapping;
 import io.jpress.template.TemplateManager;
 import io.jpress.template.TplModule;
-import io.jpress.utils.EncryptUtils;
 import io.jpress.utils.StringUtils;
 
 @RouterMapping(url = "/wechat")
@@ -77,7 +79,10 @@ public class WechatMessageController extends MsgController {
 	public ApiConfig getApiConfig() {
 		return WechatApi.getApiConfig();
 	}
-
+public static void main(String[] args) {
+    String ss ="/?uid=1008011";
+    System.out.println(ss.substring(ss.indexOf("uid=") + 4));
+}
 	@Before(WechatApiConfigInterceptor.class)
 	public void callback() {
 		String gotoUrl = getPara("goto");
@@ -89,17 +94,34 @@ public class WechatMessageController extends MsgController {
 		if (StringUtils.areNotBlank(appId, appSecret)) {
 			ApiResult result = WechatApi.getOpenId(appId, appSecret, code);
 			if (result != null) {
+			    String openid = result.getStr("openid");
+			    ApiResult userInfo = WechatApi.getUserInfo(openid);
+			    if (userInfo != null) {
+			        String pidStr = gotoUrl.substring(gotoUrl.indexOf("uid=") + 4);
+			        //获取用户后保存到数据库,jiangjb,20180110
+			        User user = new User();
+			        user.setUsername(userInfo.getStr("nickname"));
+			        user.setNickname(userInfo.getStr("nickname"));
+			        Integer sex = userInfo.getInt("sex");
+			        user.setGender(sex ==1 ? "男" : sex == 2 ? "女" : "未知");
+			        user.setAvatar(userInfo.getStr("headimgurl"));
+			        user.setFlag(User.FLAG_FRONT);
+			        user.setCreateSource(User.SOURCE_WECHAT);
+			        user.setOpenid(openid);
+			        user.setCreated(new Date());
+			        
+			        Record r = Db.findFirst("select id from jp_user where openid = ?" , openid);
+                    if (r != null) {
+                        user.setId(r.getBigInteger("id"));
+                    } else { //只有新增用户才保存pid，跟新用户pid不变
+                        user.setPid(StringUtils.isNotBlank(pidStr) ? new BigInteger(pidStr) : new BigInteger("0"));
+                    }
+                    
+			        if (user.saveOrUpdate()) {
+			            this.setSessionAttr(Consts.SESSION_WECHAT_USER, result.getJson());
+			        }
+			    }
 			    
-			    //获取openid后保存到数据库,jiangjb,20180110
-			    User user = new User();
-		        user.setFlag(User.FLAG_FRONT);
-		        user.setCreateSource(User.SOURCE_WECHAT);
-		        user.setOpenid(result.getStr("openid"));
-		        //user.setPopenid(popenid);
-		        user.setCreated(new Date());
-		        if (user.saveOrUpdate()) {
-		            this.setSessionAttr(Consts.SESSION_WECHAT_USER, result.getJson());
-		        }
 		        
 			}
 		}

@@ -37,6 +37,9 @@ public class User extends BaseUser<User> {
 	public static final String STATUS_NORMAL = "normal";
 	public static final String STATUS_FROZEN = "frozen";
 
+    public static final String SOURCE_ALIPAY = "alipay";//支付宝用户
+    public static final String SOURCE_WECHAT = "wechat";//微信用户
+
 	public boolean isAdministrator() {
 		return ROLE_ADMINISTRATOR.equals(getRole());
 	}

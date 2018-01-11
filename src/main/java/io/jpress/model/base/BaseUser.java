@@ -451,5 +451,25 @@ public abstract class BaseUser<M extends BaseUser<M>> extends JModel<M> implemen
 	public java.lang.String getFlag() {
 		return get("flag");
 	}
+	
+	public void setOpenid(java.lang.String openid) {
+	    set("openid", openid);
+	}
+
+    public java.lang.String getOpenid() {
+        return get("openid");
+    }
+    
+    public void setPid(java.math.BigInteger pid) {
+        set("pid", pid);
+    }
+
+    public java.math.BigInteger getPid() {
+        Object pid = get("pid");
+        if (pid == null)
+            return null;
+
+        return pid instanceof BigInteger ? (BigInteger)pid : new BigInteger(pid.toString());
+    }
 
 }
