@@ -53,7 +53,7 @@ public class AdminMenuInitListener implements MessageListener {
 		menuMnager.addMenuGroup(createTemplateMenuGroup());
 		//menuMnager.addMenuGroup(createAddonMenuGroup());
 		//menuMnager.addMenuGroup(createToolsMenuGroup());
-		//menuMnager.addMenuGroup(createSettingMenuGroup());
+		menuMnager.addMenuGroup(createSettingMenuGroup());
 	}
 
 	public void initModuleMenuGroup(MenuManager menuMnager) {
@@ -172,21 +172,21 @@ public class AdminMenuInitListener implements MessageListener {
 //		return group;
 //	}
 
-//	private MenuGroup createSettingMenuGroup() {
-//		MenuGroup group = new MenuGroup("option", "fa fa-cog", "系统设置");
-//		{
-//			group.addMenuItem(new MenuItem("list", "/admin/option/web", "常规"));
-//			group.addMenuItem(new MenuItem("edit", "/admin/option/comment", "评论"));
-//			group.addMenuItem(new MenuItem("n", "/admin/option/notification", "通知"));
-//			group.addMenuItem(new MenuItem("seo", "/admin/option/seo", "SEO"));
-//			group.addMenuItem(new MenuItem("watermark", "/admin/option/watermark", "水印"));
-//			group.addMenuItem(new MenuItem("url", "/admin/option/url", "连接形式"));
-//			group.addMenuItem(new MenuItem("reg", "/admin/option/register", "登录注册"));
-//			group.addMenuItem(new MenuItem("cdn", "/admin/option/cdn", "CDN加速"));
-//			group.addMenuItem(new MenuItem("api", "/admin/api", "API应用"));
-//		}
-//		return group;
-//	}
+	private MenuGroup createSettingMenuGroup() {
+		MenuGroup group = new MenuGroup("option", "fa fa-cog", "系统设置");
+		{
+			group.addMenuItem(new MenuItem("list", "/admin/option/web", "常规"));
+			group.addMenuItem(new MenuItem("edit", "/admin/option/comment", "评论"));
+			group.addMenuItem(new MenuItem("n", "/admin/option/notification", "通知"));
+			group.addMenuItem(new MenuItem("seo", "/admin/option/seo", "SEO"));
+			group.addMenuItem(new MenuItem("watermark", "/admin/option/watermark", "水印"));
+			group.addMenuItem(new MenuItem("url", "/admin/option/url", "连接形式"));
+			group.addMenuItem(new MenuItem("reg", "/admin/option/register", "登录注册"));
+			group.addMenuItem(new MenuItem("cdn", "/admin/option/cdn", "CDN加速"));
+			group.addMenuItem(new MenuItem("api", "/admin/api", "API应用"));
+		}
+		return group;
+	}
 
 //	private MenuGroup createToolsMenuGroup() {
 //		MenuGroup group = new MenuGroup("tools", "fa fa-wrench", "系统工具");
