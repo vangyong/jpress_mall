@@ -87,6 +87,7 @@ public class WechatMessageController extends MsgController {
 	public void callback() {
 		String gotoUrl = getPara("goto");
 		String code = getPara("code");
+		String uid = getPara("uid");
 
 		String appId = OptionQuery.me().findValue("wechat_appid");
 		String appSecret = OptionQuery.me().findValue("wechat_appsecret");
@@ -128,6 +129,7 @@ public class WechatMessageController extends MsgController {
 			        if (user.saveOrUpdate()) {
 			            this.setSessionAttr(Consts.SESSION_WECHAT_USER, result.getJson());
 			            CookieUtils.put(this, Consts.COOKIE_LOGINED_USER, user.getId());
+			            CookieUtils.put(this, "test_key", "test_value");
 			        }
 			    }
 			    
