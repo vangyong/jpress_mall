@@ -17,6 +17,7 @@ package io.jpress.front.controller;
 
 import com.jfinal.aop.Before;
 import com.jfinal.render.Render;
+
 import io.jpress.Consts;
 import io.jpress.core.BaseFrontController;
 import io.jpress.core.addon.HookInvoker;

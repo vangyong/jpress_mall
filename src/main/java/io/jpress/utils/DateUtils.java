@@ -23,6 +23,7 @@ import java.util.Date;
 public class DateUtils {
 
 	static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	static SimpleDateFormat sdf1 = new SimpleDateFormat("yyyyMMddHHmmss");
 	static SimpleDateFormat dateSdf = new SimpleDateFormat("yyyyMMdd");
 
 	public static String now() {
@@ -39,6 +40,10 @@ public class DateUtils {
 
 		return sdf.format(date);
 	}
+
+    public static Date parse1(String dateStr) throws ParseException {
+        return sdf1.parse(dateStr);
+    }
 
 	/**
 	 * 统计两个日期之间包含的天数。

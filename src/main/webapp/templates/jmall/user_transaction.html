@@ -1,5 +1,10 @@
 <#include "_inc/_layout.html"/>
 <#macro script>
+	//微信支付--jiangjb
+	function reWechatPay(id){
+		window.location.href="${CPATH}/wechatpay/prepay?ucode=${ucode!}&id="+id;
+    }
+	
     function reAlipay(id){
         $.ajax({
             type: "POST",
@@ -87,7 +92,7 @@
                             <span style="float: right;">
                                 <#if "1"==transaction.status!>
                                     <a href="javascript:void(0)" class="button" onclick="del('${transaction.id!}')">删除</a>
-                                    &nbsp;<a href="javascript:void(0)" class="button special" onclick="reAlipay('${transaction.id!}')">立即支付</a>
+                                    &nbsp;<a href="javascript:void(0)" class="button special" onclick="reWechatPay('${transaction.id!}')">立即支付</a>
                                 <#elseif "3"==transaction.status!>
                                     <a href="javascript:void(0)" class="button" onclick="received('${transaction.id!}')">确认收货</a>
                                 <#elseif "4"==transaction.status!>
