@@ -100,6 +100,13 @@ public class Consts {
 	public final static String INDEX_BANNER="index_banner";
 	public final static BigInteger INDEX_BANNER_ID=BigInteger.valueOf(1);
 	
+	
+	public static final String WECHAT_APPID = "wechat_appid";
+	public static final String WECHAT_APPSECRET = "wechat_appsecret";
+	public static final String WECHAT_SIGNATURE = "wechat_signature";
+	public static final String WECHAT_TIMESTAMP = "wechat_timestamp";
+	public static final String WECHAT_TOKEN = "wechat_timestamp";
+	public static final String WECHAT_NONCESTR = "wechat_nonceStr";
 	public static final String TSET = "/test";
 	public static final String TSET1 =TSET + "/test1";
 	public static final String TSET2 =TSET + "/test2";
