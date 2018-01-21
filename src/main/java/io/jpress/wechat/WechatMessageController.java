@@ -117,7 +117,7 @@ public class WechatMessageController extends MsgController {
                         String pidStr = "";
                         BigInteger pid = new BigInteger("0");
                         if (gotoUrl.contains(UID)) {
-                            pidStr = gotoUrl.substring(gotoUrl.indexOf(UID) + 4);
+                            pidStr = gotoUrl.substring(gotoUrl.indexOf(UID) + 4,gotoUrl.indexOf("&"));
                             try {
                                 pid = StringUtils.isNotBlank(pidStr) ? new BigInteger(pidStr) : new BigInteger("0");
                             } catch (Exception e) {
