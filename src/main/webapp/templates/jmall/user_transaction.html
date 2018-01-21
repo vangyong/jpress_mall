@@ -5,13 +5,18 @@
 	function onBridgeReady(){
 		WeixinJSBridge.invoke(
 			'getBrandWCPayRequest', 
-			wechatPayData,
+			JSON.parse(wechatPayData),
 			function(res){
 				// 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
 				if(res.err_msg == "get_brand_wcpay_request:ok" ) {
-					alert('支付成功！');
+					layer.msg('支付成功！</br>正在转到订单界面', function(){
+	                    window.location.href="${CPATH}/user/userTransaction?goto=${CPATH}/user/userTransaction";
+	                });
 				} else {
-					alert(JSON.stringify(res));
+					//alert(JSON.stringify(res));
+					layer.msg('支付失败了！</br>正在转到待支付界面', function(){
+	                    window.location.href="${CPATH}/user/userUnpayed?goto=${CPATH}/user/userUnpayed";
+	                });
 				}
 			}
 		); 
@@ -29,6 +34,8 @@
             },
             success: function(data){
                 if(data.errorCode == 0){
+                	//alert("111:"+data.data);
+                	//alert("222:"+JSON.stringify(data.data));
                     wechatPayData = data.data;
                     
                     //触发微信支付

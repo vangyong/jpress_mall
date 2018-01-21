@@ -1,10 +1,13 @@
 package io.jpress.front.controller;
 
 import com.jfinal.aop.Before;
+import com.jfinal.aop.Clear;
 import com.jfinal.kit.HttpKit;
 import com.jfinal.kit.PropKit;
 import com.jfinal.kit.StrKit;
 import com.jfinal.log.Log;
+import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.plugin.activerecord.IAtom;
 import com.jfinal.plugin.activerecord.tx.Tx;
 import com.jfinal.weixin.sdk.api.ApiResult;
 import com.jfinal.weixin.sdk.api.PaymentApi;
@@ -21,10 +24,14 @@ import io.jpress.model.*;
 import io.jpress.model.query.*;
 import io.jpress.router.RouterMapping;
 import io.jpress.utils.DateUtils;
+import io.jpress.utils.RandomUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.sql.SQLException;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -67,61 +74,8 @@ public class WechatpayController extends BaseFrontController {
                 return;
             }
             
-            // 统一下单文档地址：https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_1
+            String jsonStr = wechartPrePay(openId, transaction.getOrderNo(), transaction.getTotleFee());
             
-            Map<String, String> params = new HashMap<>();
-            params.put("appid", appid);
-            params.put("mch_id", partner);
-            params.put("body", OptionQuery.me().findValue("wechat_transferDesc"));
-            params.put("out_trade_no", transaction.getOrderNo());
-            params.put("total_fee", Integer.toString(transaction.getTotleFee().multiply(BigDecimal.valueOf(100.00)).intValue()));
-            
-            String ip = IpKit.getRealIp(getRequest());
-            if (StrKit.isBlank(ip)) {
-                ip = "127.0.0.1";
-            }
-            
-            params.put("spbill_create_ip", ip);
-            params.put("trade_type", TradeType.JSAPI.name());
-            params.put("nonce_str", Long.toString(System.currentTimeMillis() / 1000));
-            params.put("notify_url", notifyUrl);
-            params.put("openid", openId);
-            System.out.println("微信统一下单输入参数：" + params);
-            
-            String sign = PaymentKit.createSign(params, paternerKey);
-            params.put("sign", sign);
-            String xmlResult = PaymentApi.pushOrder(params);
-            
-            System.out.println("微信统一下单返回参数：" + xmlResult);
-            Map<String, String> result = PaymentKit.xmlToMap(xmlResult);
-            
-            String returnCode = result.get("return_code");
-            String returnMsg = result.get("return_msg");
-            if (StrKit.isBlank(returnCode) || !SUCCESS.equals(returnCode)) {
-                log.error(returnMsg);
-                renderAjaxResult("系统异常", Consts.ERROR_CODE_SYSTEM_ERROR, null);
-                return;
-            }
-            String resultCode = result.get("result_code");
-            if (StrKit.isBlank(resultCode) || !SUCCESS.equals(resultCode)) {
-                log.error(returnMsg);
-                renderAjaxResult("系统异常", Consts.ERROR_CODE_SYSTEM_ERROR, null);
-                return;
-            }
-            // 以下字段在return_code 和result_code都为SUCCESS的时候有返回
-            String prepayId = result.get("prepay_id");
-            
-            Map<String, String> packageParams = new HashMap<>();
-            packageParams.put("appId", appid);
-            packageParams.put("timeStamp", Long.toString(System.currentTimeMillis() / 1000));
-            packageParams.put("nonceStr", Long.toString(System.currentTimeMillis()));
-            packageParams.put("package", "prepay_id=" + prepayId);
-            packageParams.put("signType", "MD5");
-            String packageSign = PaymentKit.createSign(packageParams, paternerKey);
-            packageParams.put("paySign", packageSign);
-            
-            String jsonStr = JsonUtils.toJson(packageParams);
-//            setAttr("json", jsonStr);
             System.out.println(jsonStr);
             renderAjaxResult("操作成功", 0, jsonStr);
         } catch (Exception e) {
@@ -129,7 +83,63 @@ public class WechatpayController extends BaseFrontController {
             renderAjaxResult("系统异常", Consts.ERROR_CODE_SYSTEM_ERROR, null);
         }
     }
+
+    private String wechartPrePay(String openId, String orderNo, BigDecimal totalFee) {
+        // 统一下单文档地址：https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_1
+        
+        Map<String, String> params = new HashMap<>();
+        params.put("appid", appid);
+        params.put("mch_id", partner);
+        params.put("body", OptionQuery.me().findValue("wechat_transferDesc"));
+        params.put("out_trade_no", orderNo);
+        params.put("total_fee", Integer.toString(totalFee.multiply(BigDecimal.valueOf(100.00)).intValue()));
+        
+        String ip = IpKit.getRealIp(getRequest());
+        if (StrKit.isBlank(ip)) {
+            ip = "127.0.0.1";
+        }
+        
+        params.put("spbill_create_ip", ip);
+        params.put("trade_type", TradeType.JSAPI.name());
+        params.put("nonce_str", Long.toString(System.currentTimeMillis() / 1000));
+        params.put("notify_url", notifyUrl);
+        params.put("openid", openId);
+        System.out.println("微信统一下单输入参数：" + params);
+        
+        String sign = PaymentKit.createSign(params, paternerKey);
+        params.put("sign", sign);
+        String xmlResult = PaymentApi.pushOrder(params);
+        
+        System.out.println("微信统一下单返回参数：" + xmlResult);
+        Map<String, String> result = PaymentKit.xmlToMap(xmlResult);
+        
+        String returnCode = result.get("return_code");
+        String returnMsg = result.get("return_msg");
+        if (StrKit.isBlank(returnCode) || !SUCCESS.equals(returnCode)) {
+            log.error(returnMsg);
+            renderAjaxResult("系统异常", Consts.ERROR_CODE_SYSTEM_ERROR, null);
+        }
+        String resultCode = result.get("result_code");
+        if (StrKit.isBlank(resultCode) || !SUCCESS.equals(resultCode)) {
+            log.error(returnMsg);
+            renderAjaxResult("系统异常", Consts.ERROR_CODE_SYSTEM_ERROR, null);
+        }
+        // 以下字段在return_code 和result_code都为SUCCESS的时候有返回
+        String prepayId = result.get("prepay_id");
+        
+        Map<String, String> packageParams = new HashMap<>();
+        packageParams.put("appId", appid);
+        packageParams.put("timeStamp", Long.toString(System.currentTimeMillis() / 1000));
+        packageParams.put("nonceStr", Long.toString(System.currentTimeMillis()));
+        packageParams.put("package", "prepay_id=" + prepayId);
+        packageParams.put("signType", "MD5");
+        String packageSign = PaymentKit.createSign(packageParams, paternerKey);
+        packageParams.put("paySign", packageSign);
+        
+        return JsonUtils.toJson(packageParams);
+    }
     
+    @Clear({UserInterceptor.class})
     @Before(Tx.class)
     public void pay() {
         try {
@@ -159,7 +169,7 @@ public class WechatpayController extends BaseFrontController {
                         log.error("微信支付通知错误：orderNo [" + orderNo + "] is not exists!params = []" + params);
                         return;
                     }
-                    if ("1".equals(transaction.getStatus()) || "2".equals(transaction.getStatus())) {//订单状态不对
+                    if (!"0".equals(transaction.getStatus()) && !"1".equals(transaction.getStatus())) {//订单状态不对
                         log.error("微信支付通知错误：order status[" + transaction.getStatus() + "] is error!params = []" + params);
                         return;
                     }
@@ -192,8 +202,219 @@ public class WechatpayController extends BaseFrontController {
         }
     }
     
-    public void test() {
-        render("weixinpay.html");
+    //购物车结算微信支付
+    @Before(UCodeInterceptor.class)
+    public void shoppingCartWechatpay(){
+        try {
+            final String remark=getPara("remark");
+            final BigInteger userAddressId=getParaToBigInteger("userAddressId");
+            final BigInteger[] shoppingCartIds=getParaValuesToBigInteger("shoppingCartIds");
+            if (userAddressId==null) {
+                renderAjaxResultForError("收货地址不能为空");
+                return;
+            }
+            if (shoppingCartIds==null) {
+                renderAjaxResultForError("结算商品不能为空");
+                return;
+            }
+
+            final BigInteger userId=getLoginedUser().getId();
+
+            final UserAddress userAddress=UserAddressQuery.me().findById(userAddressId);
+            if (userAddress==null) {
+                renderAjaxResultForError("收货地址不存在");
+                return;
+            }
+
+            final StringBuilder shoppingCartIdSb=new StringBuilder();
+            for (BigInteger shoppingCartId:shoppingCartIds) {
+                ShoppingCart shoppingCart=ShoppingCartQuery.me().findById(shoppingCartId);
+                if (shoppingCart==null) {
+                    renderAjaxResultForError("购物车中的结算商品不存在");
+                    return;
+                }
+                Content content=ContentQuery.me().findById(shoppingCart.getContentId());
+                if(content==null){
+                    renderAjaxResultForError("结算商品不存在");
+                    return;
+                }
+                if(!"normal".equals(content.getStatus())){
+                    renderAjaxResultForError("商品已经下架");
+                    return;
+                }
+                ContentSpecItem contentSpecItem=ContentSpecItemQuery.me().findByContentIdAndSpecValueId(shoppingCart.getContentId(), shoppingCart.getSpecValueId());
+                if(contentSpecItem==null || shoppingCart.getQuantity()>contentSpecItem.getStock()){
+                    renderAjaxResultForError(content.getTitle()+"货存不足");
+                    return;
+                }
+                shoppingCartIdSb.append(shoppingCartId).append(",");
+            }
+
+            // 商户订单号，商户网站订单系统中唯一订单号，必填
+            final String orderNo=RandomUtils.randomKey(null, userId.toString());
+            // 付款金额，必填
+            final BigDecimal totalFee=ShoppingCartQuery.me().getTotalFee(shoppingCartIdSb.substring(0, shoppingCartIdSb.length()-1), userId);
+
+            boolean saved=Db.tx(new IAtom() {
+                @Override
+                public boolean run() throws SQLException {
+
+                    Transaction transaction=new Transaction();
+                    transaction.setRemark(remark);
+                    transaction.setUserId(userId);
+                    transaction.setUserAddress(userAddress.getAddress()+" "+userAddress.getName()+" "+userAddress.getMobile());
+                    transaction.setOrderNo(orderNo);
+                    transaction.setTotleFee(totalFee);
+                    transaction.setPayType(Transaction.PAY_TYPE_WECHATPAY);
+                    transaction.setStatus(Transaction.STATUS_1);
+                    transaction.setCreated(new Date());
+                    if(!transaction.save()){
+                        return false;
+                    }
+
+                    List<ShoppingCart> list=ShoppingCartQuery.me().findList(shoppingCartIdSb.substring(0, shoppingCartIdSb.length()-1), null);
+                    if(list.isEmpty()){
+                        return false;
+                    }else{
+                        for(ShoppingCart shoppingCart:list){
+                            TransactionItem transactionItem=new TransactionItem();
+                            transactionItem.setTransactionId(transaction.getId());
+                            transactionItem.setContentId(shoppingCart.getContentId());
+                            transactionItem.setSpecValueId(shoppingCart.getSpecValueId());
+                            transactionItem.setPrice(shoppingCart.getPrice());
+                            transactionItem.setQuantity(shoppingCart.getQuantity());
+                            transactionItem.setCreated(new Date());
+                            if(!transactionItem.save()){
+                                return false;
+                            }
+                        }
+                    }
+
+                    ShoppingCartQuery.me().deleteByIds(shoppingCartIdSb.substring(0, shoppingCartIdSb.length()-1));
+
+                    return true;
+                }
+            });
+
+            if(saved){
+                String userJson = this.getSessionAttr(Consts.SESSION_WECHAT_USER);
+                String openId = new ApiResult(userJson).getStr("openid");
+                String jsonStr = wechartPrePay(openId, orderNo, totalFee);
+                
+                System.out.println(jsonStr);
+                renderAjaxResult("操作成功", 0, jsonStr);
+            }else{
+                log.error("保存订单数据失败了!!");
+                renderAjaxResultForError("操作失败");
+            }
+        }catch(Exception e) {
+            log.error("系统异常:",e);
+            renderAjaxResult("系统异常", Consts.ERROR_CODE_SYSTEM_ERROR, null);
+        }
+    }
+
+    //商品立即购买微信支付
+    @Before(UCodeInterceptor.class)
+    public void contentWechatpay(){
+        try {
+            final String remark=getPara("remark");
+            final BigInteger userAddressId=getParaToBigInteger("userAddressId");
+            final BigInteger contentId=getParaToBigInteger("contentId");
+            final BigInteger specValueId=getParaToBigInteger("specValueId");
+            final Integer quantity=getParaToInt("quantity");
+
+            if (userAddressId==null) {
+                renderAjaxResultForError("收货地址不能为空");
+                return;
+            }
+            if (contentId==null) {
+                renderAjaxResultForError("商品id不能为空");
+                return;
+            }
+            if (specValueId==null) {
+                renderAjaxResultForError("规格值id不能为空");
+                return;
+            }
+            if (quantity==null) {
+                renderAjaxResultForError("数量不能为空");
+                return;
+            }
+
+            final BigInteger userId=getLoginedUser().getId();
+
+            final UserAddress userAddress=UserAddressQuery.me().findById(userAddressId);
+            if (userAddress==null) {
+                renderAjaxResultForError("收货地址不存在");
+                return;
+            }
+
+            final Content content=ContentQuery.me().findById(contentId);
+            if(content==null){
+                renderAjaxResultForError("商品不存在");
+                return;
+            }
+            if(!"normal".equals(content.getStatus())){
+                renderAjaxResultForError("商品已经下架");
+                return;
+            }
+
+            final ContentSpecItem contentSpecItem=ContentSpecItemQuery.me().findByContentIdAndSpecValueId(content.getId(), specValueId);
+            if(contentSpecItem==null || quantity>contentSpecItem.getStock()){
+                renderAjaxResultForError("货存不足");
+                return;
+            }
+
+            // 商户订单号，商户网站订单系统中唯一订单号，必填
+            final String orderNo=RandomUtils.randomKey(null, userId.toString());
+            // 付款金额，必填
+            final BigDecimal totalFee=contentSpecItem.getPrice().multiply(new BigDecimal(quantity));
+
+            boolean saved=Db.tx(new IAtom() {
+                @Override
+                public boolean run() throws SQLException {
+                    Transaction transaction=new Transaction();
+                    transaction.setRemark(remark);
+                    transaction.setUserId(userId);
+                    transaction.setUserAddress(userAddress.getAddress()+" "+userAddress.getName()+" "+userAddress.getMobile());
+                    transaction.setOrderNo(orderNo);
+                    transaction.setTotleFee(totalFee);
+                    transaction.setPayType(Transaction.PAY_TYPE_WECHATPAY);
+                    transaction.setStatus(Transaction.STATUS_1);
+                    transaction.setCreated(new Date());
+                    if(!transaction.save()){
+                        return false;
+                    }
+
+                    TransactionItem transactionItem=new TransactionItem();
+                    transactionItem.setTransactionId(transaction.getId());
+                    transactionItem.setContentId(content.getId());
+                    transactionItem.setSpecValueId(contentSpecItem.getSpecValueId());
+                    transactionItem.setPrice(contentSpecItem.getPrice());
+                    transactionItem.setQuantity(quantity);
+                    transactionItem.setCreated(new Date());
+                    if(!transactionItem.save()){
+                        return false;
+                    }
+
+                    return true;
+                }
+            });
+
+            if(saved){
+                String userJson = this.getSessionAttr(Consts.SESSION_WECHAT_USER);
+                String openId = new ApiResult(userJson).getStr("openid");
+                String jsonStr = wechartPrePay(openId, orderNo, totalFee);
+                
+                System.out.println(jsonStr);
+                renderAjaxResult("操作成功", 0, jsonStr);
+            }else{
+                log.error("保存订单数据失败了!!");
+                renderAjaxResultForError("操作失败");
+            }
+        }catch(Exception e) {
+            log.error("系统异常:",e);
+            renderAjaxResult("系统异常", Consts.ERROR_CODE_SYSTEM_ERROR, null);
+        }
     }
 
 }

@@ -1,5 +1,27 @@
 <#include "_inc/_layout.html"/>
 <#macro script>
+	//微信支付--jiangjb
+	var wechatPayData = '';
+	function onBridgeReady(){
+		WeixinJSBridge.invoke(
+			'getBrandWCPayRequest', 
+			JSON.parse(wechatPayData),
+			function(res){
+				// 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
+				if(res.err_msg == "get_brand_wcpay_request:ok" ) {
+					layer.msg('支付成功！</br>正在转到订单界面', function(){
+	                    window.location.href="${CPATH}/user/userTransaction?goto=${CPATH}/user/userTransaction";
+	                });
+				} else {
+					//alert(JSON.stringify(res));
+					layer.msg('支付失败了！</br>正在转到待支付界面', function(){
+	                    window.location.href="${CPATH}/user/userUnpayed?goto=${CPATH}/user/userUnpayed";
+	                });
+				}
+			}
+		); 
+	}
+	
 	function doShoppingCartSettlement(){
 		var remark=$("#remark").val();
 		var shoppingCarts=$("input[name='shoppingCart.id']");
@@ -17,11 +39,12 @@
 			layer.msg('请选择收货地址');
 			return;
 		}
-		<!--支付宝支付-->
+		<!--微信支付-->
 		$.ajax({
 			type: "POST",
 			traditional: true,
-			url: "${CPATH}/transaction/shoppingCartAlipay",
+			//url: "${CPATH}/transaction/shoppingCartAlipay",
+			url: "${CPATH}/wechatpay/shoppingCartWechatpay",
 			data: {
 				ucode:'${ucode!}',
 				remark:remark,
@@ -30,7 +53,19 @@
 			},
 			success: function(data){
 				if(data.errorCode == 0){
-					$("#alipayDiv").append(data.data);
+					//$("#alipayDiv").append(data.data);
+					wechatPayData = data.data;
+                    //触发微信支付
+                    if (typeof WeixinJSBridge == "undefined"){
+						if( document.addEventListener ){
+							document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+						}else if (document.attachEvent){
+							document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
+							document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+						}
+					}else{
+						onBridgeReady();
+					}
 				}else if(data.errorCode == 2){
 					var goto=window.location.href;
 					var url="${CPATH}"+data.data+"?goto="+goto;
@@ -60,11 +95,12 @@
 			layer.msg('请选择收货地址');
 			return;
 		}
-		<!--支付宝支付-->
+		<!--微信支付-->
 		$.ajax({
 			type: "POST",
 			traditional: true,
-			url: "${CPATH}/transaction/contentAlipay",
+			//url: "${CPATH}/transaction/contentAlipay",
+			url: "${CPATH}/wechatpay/contentWechatpay",
 			data: {
 				ucode:'${ucode!}',
 				remark:remark,
@@ -75,7 +111,19 @@
 			},
 			success: function(data){
 				if(data.errorCode == 0){
-					$("#alipayDiv").append(data.data);
+					//$("#alipayDiv").append(data.data);
+					wechatPayData = data.data;
+                    //触发微信支付
+                    if (typeof WeixinJSBridge == "undefined"){
+						if( document.addEventListener ){
+							document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+						}else if (document.attachEvent){
+							document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
+							document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+						}
+					}else{
+						onBridgeReady();
+					}
 				}else if(data.errorCode == 2){
 					var goto=window.location.href;
 					var url="${CPATH}"+data.data+"?goto="+goto;
@@ -113,6 +161,7 @@
 								<option value="${userAddress.id!}">${userAddress.address!}&nbsp;${userAddress.name!}&nbsp;${userAddress.mobile!}</p></option>
 							</#list>
 						</select>
+						<!-- <a href="${CPATH}/user/userAddress" class="icon fa-plane">添加地址</a> -->
 					</div>
 				</div>
 			</div>
