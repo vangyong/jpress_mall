@@ -1,8 +1,65 @@
 <#include "_inc/_layout.html"/>
 <#macro script>
 	//微信支付--jiangjb
+	var wechatPayData = '';
+	function onBridgeReady(){
+		WeixinJSBridge.invoke(
+			'getBrandWCPayRequest', 
+			wechatPayData,
+			function(res){
+				// 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。
+				if(res.err_msg == "get_brand_wcpay_request:ok" ) {
+					alert('支付成功！');
+				} else {
+					alert(JSON.stringify(res));
+				}
+			}
+		); 
+	}
+	
 	function reWechatPay(id){
-		window.location.href="${CPATH}/wechatpay/prepay?ucode=${ucode!}&id="+id;
+		// window.location.href="${CPATH}/wechatpay/prepay?ucode=${ucode!}&id="+id;
+		$.ajax({
+            type: "POST",
+            traditional: true,
+            url: "${CPATH}/wechatpay/prepay",
+            data: {
+                ucode:'${ucode!}',
+                id:id
+            },
+            success: function(data){
+                if(data.errorCode == 0){
+                    wechatPayData = data.data;
+                    
+                    //触发微信支付
+                    if (typeof WeixinJSBridge == "undefined"){
+						if( document.addEventListener ){
+							document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
+						}else if (document.attachEvent){
+							document.attachEvent('WeixinJSBridgeReady', onBridgeReady); 
+							document.attachEvent('onWeixinJSBridgeReady', onBridgeReady);
+						}
+					}else{
+						onBridgeReady();
+					}
+					
+                }else if(data.errorCode == 2){
+                    var goto=window.location.href;
+                    var url="${CPATH}"+data.data+"?goto="+goto;
+                    window.location.href=url;
+                }else if(data.errorCode == 3){
+                    layer.msg(data.message+" 几秒后自动刷新", function(){
+                        location.reload();
+                    });
+                }else{
+                    layer.msg(data.message);
+                }
+            },error: function(){
+                layer.msg('系统异常 几秒后自动跳转', function(){
+                    window.location.href="${CPATH}/user/center";
+                });
+            }
+        });
     }
 	
     function reAlipay(id){
