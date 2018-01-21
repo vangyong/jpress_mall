@@ -28,7 +28,7 @@
                 <ul class="actions">
                     <li><img class="litter-avatar" src="${CPATH}${USER.avatar!TPATH+'/images/avatar.jpg'}"/></li>
                     <li>${USER.username!}</li>
-                    <li ><a href="javascript:void(0)" onclick="modifyPassword()" class="icon fa-warning">修改密码</a></li>
+                    <!-- <li ><a href="javascript:void(0)" onclick="modifyPassword()" class="icon fa-warning">修改密码</a></li> -->
                     <li><a href="${CPATH}/user/userAddress" class="icon fa-plane">地址管理</a></li>
                 </ul>
             </div>
@@ -44,13 +44,13 @@
                     </ul>
                 </div>
             </div>
-            <div class="12u$">
+           <!--  <div class="12u$">
                 <ul class="actions fit">
                     <li></li>
                     <li><a href="${CPATH}/user/logout?ucode=${ucode!}" class="button special fit">退出</a></li>
                     <li></li>
                 </ul>
-            </div>
+            </div> -->
         </div>
     </div>
     <#include "_inc/_user_bottom_bar.html"/>
