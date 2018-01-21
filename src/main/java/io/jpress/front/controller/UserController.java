@@ -251,9 +251,12 @@ public class UserController extends BaseFrontController {
 
 	//用户中心
 	public void center() {
-		setAttr("unpayed", TransactionQuery.me().findcount(getLoginedUser().getId(), Transaction.STATUS_1));
-		setAttr("unreceived", TransactionQuery.me().findcount(getLoginedUser().getId(), Transaction.STATUS_3));
-		setAttr("uncomment", TransactionQuery.me().findcount(getLoginedUser().getId(), Transaction.STATUS_4));
+		User loginedUser = getLoginedUser();
+		if(loginedUser!=null) {
+			setAttr("unpayed", TransactionQuery.me().findcount(getLoginedUser().getId(), Transaction.STATUS_1));
+			setAttr("unreceived", TransactionQuery.me().findcount(getLoginedUser().getId(), Transaction.STATUS_3));
+			setAttr("uncomment", TransactionQuery.me().findcount(getLoginedUser().getId(), Transaction.STATUS_4));
+		}
 		render("user_center.html");
 	}
 
