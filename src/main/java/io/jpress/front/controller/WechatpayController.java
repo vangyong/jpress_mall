@@ -50,8 +50,77 @@ public class WechatpayController extends BaseFrontController {
     @Before(UCodeInterceptor.class)
     public void prepay() {
         try {
+            // openId，采用 网页授权获取 access_token API：SnsAccessTokenApi获取
+            String userJson = this.getSessionAttr(Consts.SESSION_WECHAT_USER);
+            String openId = new ApiResult(userJson).getStr("openid");
+
             
-            String jsonStr = "{\"timeStamp\":\"1516526141\",\"package\":\"prepay_id=wx2018012117150606ac003fb20827751109\",\"paySign\":\"FCFF07F3A6E55C3989840420A59ADF3F\",\"appId\":\"wxd0b33231fc543b7b\",\"signType\":\"MD5\",\"nonceStr\":\"1516526141486\"}";
+            final BigInteger id=getParaToBigInteger("id");
+
+            if (id==null) {
+                renderAjaxResultForError("订单id不能为空");
+                return;
+            }
+            final Transaction transaction=TransactionQuery.me().findById(id);
+            if (transaction==null) {
+                renderAjaxResultForError("订单不存在");
+                return;
+            }
+            
+            // 统一下单文档地址：https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_1
+            
+            Map<String, String> params = new HashMap<>();
+            params.put("appid", appid);
+            params.put("mch_id", partner);
+            params.put("body", OptionQuery.me().findValue("wechat_transferDesc"));
+            params.put("out_trade_no", transaction.getOrderNo());
+            params.put("total_fee", Integer.toString(transaction.getTotleFee().multiply(BigDecimal.valueOf(100.00)).intValue()));
+            
+            String ip = IpKit.getRealIp(getRequest());
+            if (StrKit.isBlank(ip)) {
+                ip = "127.0.0.1";
+            }
+            
+            params.put("spbill_create_ip", ip);
+            params.put("trade_type", TradeType.JSAPI.name());
+            params.put("nonce_str", Long.toString(System.currentTimeMillis() / 1000));
+            params.put("notify_url", notifyUrl);
+            params.put("openid", openId);
+            System.out.println("微信统一下单输入参数：" + params);
+            
+            String sign = PaymentKit.createSign(params, paternerKey);
+            params.put("sign", sign);
+            String xmlResult = PaymentApi.pushOrder(params);
+            
+            System.out.println("微信统一下单返回参数：" + xmlResult);
+            Map<String, String> result = PaymentKit.xmlToMap(xmlResult);
+            
+            String returnCode = result.get("return_code");
+            String returnMsg = result.get("return_msg");
+            if (StrKit.isBlank(returnCode) || !SUCCESS.equals(returnCode)) {
+                log.error(returnMsg);
+                renderAjaxResult("系统异常", Consts.ERROR_CODE_SYSTEM_ERROR, null);
+                return;
+            }
+            String resultCode = result.get("result_code");
+            if (StrKit.isBlank(resultCode) || !SUCCESS.equals(resultCode)) {
+                log.error(returnMsg);
+                renderAjaxResult("系统异常", Consts.ERROR_CODE_SYSTEM_ERROR, null);
+                return;
+            }
+            // 以下字段在return_code 和result_code都为SUCCESS的时候有返回
+            String prepayId = result.get("prepay_id");
+            
+            Map<String, String> packageParams = new HashMap<>();
+            packageParams.put("appId", appid);
+            packageParams.put("timeStamp", Long.toString(System.currentTimeMillis() / 1000));
+            packageParams.put("nonceStr", Long.toString(System.currentTimeMillis()));
+            packageParams.put("package", "prepay_id=" + prepayId);
+            packageParams.put("signType", "MD5");
+            String packageSign = PaymentKit.createSign(packageParams, paternerKey);
+            packageParams.put("paySign", packageSign);
+            
+            String jsonStr = JsonUtils.toJson(packageParams);
 //            setAttr("json", jsonStr);
             System.out.println(jsonStr);
             renderAjaxResult("操作成功", 0, jsonStr);
