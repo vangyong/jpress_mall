@@ -115,7 +115,7 @@ public class WechatMessageController extends MsgController {
                         currUid = r.getBigInteger("id");
                         user.setId(currUid);
                     } 
-                    if (currUid == null || currUid.compareTo(new BigInteger("43")) == 0) { //只有新增用户才保存pid，跟新用户pid不变，43为自己id用来测试更新pid
+                    if (currUid == null || currUid.compareTo(new BigInteger("0")) == 0) { //只有新增用户或者pid为0的用户才修改其pid的值
                         String pidStr = "";
                         BigInteger pid = new BigInteger("0");
                         
