@@ -142,11 +142,14 @@ public class WechatUserInterceptor implements Interceptor {
 		
 		// 获取用户将要去的路径
 		String queryString = request.getQueryString();
-
 		// 被拦截前的请求URL
 		String toUrl = request.getRequestURI();
 		if (StringUtils.isNotBlank(queryString)) {
-			toUrl = toUrl.concat("?").concat(queryString);
+			String newQueryString =queryString;
+			if(queryString.contains("?")) {
+				newQueryString = queryString.replace("?","&");
+			}
+ 			toUrl =  toUrl.concat(newQueryString);
 		}
 		toUrl = toUrl.replaceAll(request.getContextPath(), "");
 		toUrl = StringUtils.urlEncode(toUrl);
@@ -160,5 +163,13 @@ public class WechatUserInterceptor implements Interceptor {
 		controller.redirect(url);
 
 	}
+	
+public static void main(String[] args) {
+	String a = "uid=122?from=singlemsg";
+	String asd = a.replace("?", "&");
+	
+	
+}
+	
 
 }
