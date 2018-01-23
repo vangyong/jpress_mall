@@ -32,7 +32,7 @@ public class TestController extends BaseFrontController {
 			file.getFile().getAbsolutePath();
 		}
 		renderText("test upload file");
-
+		
 	}
 
 	// 测试1
