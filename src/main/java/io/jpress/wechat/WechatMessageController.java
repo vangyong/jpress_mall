@@ -82,12 +82,11 @@ public class WechatMessageController extends MsgController {
 	public ApiConfig getApiConfig() {
 		return WechatApi.getApiConfig();
 	}
-	
+    
 	@Before(WechatApiConfigInterceptor.class)
 	public void callback() {
 		String gotoUrl = getPara("goto");
 		String code = getPara("code");
-		String uid = getPara("uid");
 
 		String appId = OptionQuery.me().findValue("wechat_appid");
 		String appSecret = OptionQuery.me().findValue("wechat_appsecret");
@@ -111,13 +110,23 @@ public class WechatMessageController extends MsgController {
 			        user.setCreated(new Date());
 			        
 			        Record r = Db.findFirst("select id from jp_user where openid = ?" , openid);
-                    if (r != null) {
-                        user.setId(r.getBigInteger("id"));
-                    } else { //只有新增用户才保存pid，跟新用户pid不变
+			        BigInteger currUid = null;
+                    if (r != null) {//
+                        currUid = r.getBigInteger("id");
+                        user.setId(currUid);
+                    } 
+                    if (currUid == null || currUid.compareTo(new BigInteger("0")) == 0) { //只有新增用户或者pid为0的用户才修改其pid的值
                         String pidStr = "";
                         BigInteger pid = new BigInteger("0");
-                        if (gotoUrl.contains(UID)) {
-                            pidStr = gotoUrl.substring(gotoUrl.indexOf(UID) + 4,gotoUrl.indexOf("&"));
+                        
+                        String [] urlArr = gotoUrl.split("\\?");
+                        String uidUrl = urlArr[0];
+                        if (urlArr.length > 1) {
+                            uidUrl = urlArr[1] + "&";
+                        }
+                        
+                        if (uidUrl.contains(UID)) {
+                            pidStr = uidUrl.substring(uidUrl.indexOf(UID) + 4,uidUrl.indexOf("&"));
                             try {
                                 pid = StringUtils.isNotBlank(pidStr) ? new BigInteger(pidStr) : new BigInteger("0");
                             } catch (Exception e) {
@@ -502,4 +511,17 @@ public class WechatMessageController extends MsgController {
 		// TODO Auto-generated method stub
 		
 	}
+    
+    public static void main(String[] args) {
+        String url ="/?uid=11?from=singlemsg";
+        String [] urlArr = url.split("\\?");
+        String uidUrl = urlArr[0];
+        if (urlArr.length > 1) {
+            uidUrl = urlArr[1] + "&";;
+        }
+        System.out.println(uidUrl);
+        String pidStr = uidUrl.substring(uidUrl.indexOf(UID) + 4,uidUrl.indexOf("&"));
+        System.out.println(pidStr);
+    }
+    
 }
