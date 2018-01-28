@@ -144,6 +144,7 @@ public class WechatUserInterceptor implements Interceptor {
 		String queryString = request.getQueryString();
 		// 被拦截前的请求URL
 		String toUrl = request.getRequestURI();
+		String totalUrl = request.getRequestURL().toString();
 		if (StringUtils.isNotBlank(queryString)) {
 			String newQueryString =queryString;
 			if(queryString.contains("?")) {

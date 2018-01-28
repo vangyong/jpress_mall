@@ -84,7 +84,7 @@ public class IndexController extends BaseFrontController {
 
 		String para = getPara();
 
-		if (StringUtils.isBlank(para)) {
+		if (StringUtils.isBlank(para)||(!para.contains("-"))) {
 			setAttr(IndexPageTag.TAG_NAME, new IndexPageTag(getRequest(), null, 1, null));
 			render("index.html");
 			return;

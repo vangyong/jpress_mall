@@ -53,7 +53,7 @@ public class TestController extends BaseFrontController {
 	
 	// 测试2
 	@ActionKey(Consts.TSET2)
-	@Before(WechatUserInterceptor.class)
+	//@Before(WechatUserInterceptor.class)
 	public void test2() {
 //		String fromUserId=getPara("fromUserId");
 //		if(StringUtils.isNotBlank(fromUserId)) {

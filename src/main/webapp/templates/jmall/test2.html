@@ -5,12 +5,24 @@
 
 <script>
 
+var URL ='http://192.168.0.103:8080/test/test2?uid=123';
+
+if (!!(window.history && history.pushState)){
+	  // 支持History API
+	  console.log("支持History API");
+	  history.pushState(null,null,URL);
+	  console.log(window.location.href);
+	} else {
+	  // 不支持
+		console.log("不支持History API");
+	}
+
 wx.config({
    // debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
     appId: 'wx341e1ecdc00e388f', // 必填，公众号的唯一标识
-    timestamp:'1515911321', // 必填，生成签名的时间戳
-    nonceStr: 'da085dd8-9e4d-4b1a-97de-834a3f74f7cc', // 必填，生成签名的随机串
-    signature: '7ec17548a34db7801c90849e65273fe161bb163a',// 必填，签名，见附录1
+    timestamp:'1517150834', // 必填，生成签名的时间戳
+    nonceStr: 'e2c1ae5d-f271-480f-95a6-fe7ef6392cb5', // 必填，生成签名的随机串
+    signature: 'b0be85df75ca273884b4006bf51c8071967d4bac',// 必填，签名，见附录1
     jsApiList: ['checkJsApi','openLocation','getLocation','onMenuShareTimeline','onMenuShareAppMessage','getLocation'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
 });
 
@@ -27,26 +39,11 @@ wx.ready(function(){
     		}
     }
     
-    console.log('userId:'+userId);
-    
-    //监测jsapi
-	/* wx.checkJsApi({
-        jsApiList: [
-            'getLocation',
-            'onMenuShareTimeline',
-            'onMenuShareAppMessage'
-        ],
-        success: function (res) {
-            console.log(JSON.stringify(res));
-            console.log("接口监测成功")
-        }
-    }); */
-    
 	//分享到朋友圈
 	wx.onMenuShareTimeline({
 	    title: '分享到朋友圈标题', // 分享标题
-	    link: 'http://192.168.0.103:8080/jpress_mall/test/test2?uid='+userId, // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
-	    imgUrl: '', // 分享图标
+	    link: 'http://192.168.0.103:8080/test/test2?uid=123', // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+	    	imgUrl: '', // 分享图标
 	    success: function () {
 	    		// 用户确认分享后执行的回调函数
 	    		var userId = $("#userId").val();
