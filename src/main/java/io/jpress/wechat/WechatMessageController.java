@@ -16,13 +16,14 @@
 package io.jpress.wechat;
 
 import java.math.BigInteger;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
 import com.jfinal.aop.Before;
 import com.jfinal.core.Controller;
 import com.jfinal.plugin.activerecord.Db;
-import com.jfinal.plugin.activerecord.Record;
+import com.jfinal.plugin.activerecord.IAtom;
 import com.jfinal.plugin.ehcache.CacheKit;
 import com.jfinal.weixin.sdk.api.ApiConfig;
 import com.jfinal.weixin.sdk.api.ApiResult;
@@ -67,6 +68,7 @@ import io.jpress.model.Content;
 import io.jpress.model.User;
 import io.jpress.model.query.ContentQuery;
 import io.jpress.model.query.OptionQuery;
+import io.jpress.model.query.UserQuery;
 import io.jpress.router.RouterMapping;
 import io.jpress.template.TemplateManager;
 import io.jpress.template.TplModule;
@@ -93,57 +95,101 @@ public class WechatMessageController extends MsgController {
 
 		if (StringUtils.areNotBlank(appId, appSecret)) {
 			ApiResult result = WechatApi.getOpenId(appId, appSecret, code);
-			if (result != null) {
-			    String openid = result.getStr("openid");
-			    ApiResult userInfo = WechatApi.getUserInfo(openid);
+			if (result != null && StringUtils.isNotBlank(result.getStr("openid"))) {
+			    final String openid = result.getStr("openid");
+			    final ApiResult userInfo = WechatApi.getUserInfo(openid);
 			    if (userInfo != null) {
-			        //获取用户后保存到数据库,jiangjb,20180110
-			        User user = new User();
-			        user.setUsername(userInfo.getStr("nickname"));
-			        user.setNickname(userInfo.getStr("nickname"));
-			        Integer sex = userInfo.getInt("sex") == null ? 0 : userInfo.getInt("sex");
-			        user.setGender(sex == 1 ? "男" : sex == 2 ? "女" : "未知");
-			        user.setAvatar(userInfo.getStr("headimgurl"));
-			        user.setFlag(User.FLAG_FRONT);
-			        user.setCreateSource(User.SOURCE_WECHAT);
-			        user.setOpenid(openid);
-			        user.setCreated(new Date());
+			        final BigInteger pid = getPidByUrl(gotoUrl);//解析地址中的pid
 			        
-			        Record r = Db.findFirst("select id from jp_user where openid = ?" , openid);
-			        BigInteger currUid = null;
-                    if (r != null) {//
-                        currUid = r.getBigInteger("id");
-                        user.setId(currUid);
-                    } 
-                    if (currUid == null || currUid.compareTo(new BigInteger("0")) == 0) { //只有新增用户或者pid为0的用户才修改其pid的值
-                        String pidStr = "";
-                        BigInteger pid = new BigInteger("0");
-                        
-                        String [] urlArr = gotoUrl.split("\\?");
-                        String uidUrl = urlArr[0];
-                        if (urlArr.length > 1) {
-                            uidUrl = urlArr[1] + "&";
-                        }
-                        
-                        if (uidUrl.contains(UID)) {
-	                        	if(gotoUrl.contains("&")) {
-	                   			 pidStr = gotoUrl.substring(gotoUrl.indexOf(UID) + 4,gotoUrl.indexOf("&"));
-	                   		}else {
-	                   			pidStr = gotoUrl.substring(gotoUrl.indexOf(UID)+4);
-	                   		}
-                            try {
-                                pid = StringUtils.isNotBlank(pidStr) ? new BigInteger(pidStr) : new BigInteger("0");
-                            } catch (Exception e) {
+			        final Controller ctr = this;
+                    boolean res = Db.tx(new IAtom() {
+                        @Override
+                        public boolean run() throws SQLException {
+                          //获取用户后保存到数据库,jiangjb,20180110
+                            User currUser = UserQuery.me().findByOpenId(openid);
+                            User pUser = null;//父节点-C
+                            BigInteger currUid = null;
+                            if (currUser != null) {//
+                                currUid = currUser.getId();
+                                pUser = UserQuery.me().findById(currUser.getPid());
+                            } else {
+                                currUser = new User();
                             }
+                            
+                            boolean setPid = false;
+                            if (currUid == null || currUser.getPid().compareTo(BigInteger.valueOf(0)) == 0) { //只有新增用户或者pid为0的用户才修改其pid的值
+                                pUser = UserQuery.me().findById(pid);
+                                if (pUser == null ) {
+                                    currUser.setPid(BigInteger.valueOf(0)); //系统找不到父亲的用户数据则记录为-1
+                                } else {
+                                    currUser.setPid(pid); //设置当前用户的父id
+                                    setPid = true;
+                                }
+                            }
+                            
+                            //更新用户的信息
+                            currUser.setUsername(userInfo.getStr("nickname"));
+                            currUser.setNickname(userInfo.getStr("nickname"));
+                            Integer sex = userInfo.getInt("sex") == null ? 0 : userInfo.getInt("sex");
+                            currUser.setGender(sex == 1 ? "男" : sex == 2 ? "女" : "未知");
+                            currUser.setAvatar(userInfo.getStr("headimgurl"));
+                            currUser.setFlag(User.FLAG_FRONT);
+                            currUser.setCreateSource(User.SOURCE_WECHAT);
+                            currUser.setOpenid(openid);
+                            currUser.setCreated(new Date());
+                            if (!currUser.saveOrUpdate()) {
+                                return false;
+                            }
+ 
+                            //更新了用户的pid时，各个父级的团队人数加1
+                            if (setPid) {
+                                //跟新父亲（C）的团队人数
+                                if (pUser != null) {
+                                    if (Db.update("update jp_user set childNum = childNum + 1 where id = ?", pUser.getId()) <= 0) {
+                                        return false;
+                                    }
+                                    if (Db.update("update jp_user set teamNum = teamNum + 1 where id = ?", pUser.getId()) <= 0) {
+                                        return false;
+                                    }
+                                } else {
+                                    return true;
+                                }
+                                
+                                //更新父亲的父亲（B）的团队人数
+                                User ppUser = UserQuery.me().findById(pUser.getPid());
+                                if (ppUser != null) {
+                                    if (Db.update("update jp_user set childNum = childNum + 1 where id = ?", ppUser.getId()) <= 0) {
+                                        return false;
+                                    }
+                                    if (Db.update("update jp_user set teamNum = teamNum + 1 where id = ?", ppUser.getId()) <= 0) {
+                                        return false;
+                                    }
+                                } else {
+                                    return true;
+                                }
+                                
+                                //更新父亲的父亲的父亲（A）的团队人数
+                                User pppUser = UserQuery.me().findById(ppUser.getPid());
+                                if (pppUser != null) {
+                                    if (Db.update("update jp_user set childNum = childNum + 1 where id = ?", pppUser.getId()) <= 0) {
+                                        return false;
+                                    }
+                                    if (Db.update("update jp_user set teamNum = teamNum + 1 where id = ?", pppUser.getId()) <= 0) {
+                                        return false;
+                                    }
+                                }
+                            }
+
+                            CookieUtils.put(ctr, Consts.COOKIE_LOGINED_USER, currUser.getId());//缓存当前用户id
+                            return true;
                         }
-                        user.setPid(pid);
+                    });
+                    
+                    if (res) { //订单更新失败
+                        this.setSessionAttr(Consts.SESSION_WECHAT_USER, result.getJson());
+                        CookieUtils.put(this, "test_key", "test_value");
                     }
                     
-			        if (user.saveOrUpdate()) {
-			            this.setSessionAttr(Consts.SESSION_WECHAT_USER, result.getJson());
-			            CookieUtils.put(this, Consts.COOKIE_LOGINED_USER, user.getId());
-			            CookieUtils.put(this, "test_key", "test_value");
-			        }
 			    }
 			    
 		        
@@ -151,6 +197,30 @@ public class WechatMessageController extends MsgController {
 		}
 
 		redirect(gotoUrl);
+	}
+	
+	private BigInteger getPidByUrl(String gotoUrl){
+	    String pidStr = "";
+        BigInteger pid = new BigInteger("0");
+        
+        String [] urlArr = gotoUrl.split("\\?");
+        String uidUrl = urlArr[0];
+        if (urlArr.length > 1) {
+            uidUrl = urlArr[1] + "&";
+        }
+        
+        if (uidUrl.contains(UID)) {
+                if(gotoUrl.contains("&")) {
+                 pidStr = gotoUrl.substring(gotoUrl.indexOf(UID) + 4,gotoUrl.indexOf("&"));
+            }else {
+                pidStr = gotoUrl.substring(gotoUrl.indexOf(UID)+4);
+            }
+            try {
+                pid = StringUtils.isNotBlank(pidStr) ? new BigInteger(pidStr) : new BigInteger("0");
+            } catch (Exception e) {
+            }
+        }
+        return pid;
 	}
 	
 	@Override

@@ -20,6 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import com.jfinal.aop.Before;
 import com.jfinal.core.Controller;
 
 import io.jpress.Consts;
@@ -32,8 +33,10 @@ import io.jpress.model.query.TaxonomyQuery;
 import io.jpress.router.RouterMapping;
 import io.jpress.utils.DateUtils;
 import io.jpress.utils.StringUtils;
+import io.jpress.wechat.WechatUserInterceptor;
 
 @RouterMapping(url = "/sitemap")
+@Before(WechatUserInterceptor.class)
 public class SitemapController extends Controller {
 	private static final String contentType = "text/xml; charset=" + Consts.CHARTSET_UTF8;
 

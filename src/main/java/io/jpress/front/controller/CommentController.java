@@ -26,12 +26,14 @@ import io.jpress.model.query.*;
 import io.jpress.router.RouterMapping;
 import io.jpress.utils.CookieUtils;
 import io.jpress.utils.StringUtils;
+import io.jpress.wechat.WechatUserInterceptor;
 
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.List;
 
 @RouterMapping(url = "/comment")
+@Before(WechatUserInterceptor.class)
 public class CommentController extends BaseFrontController {
 
 	public void index() {

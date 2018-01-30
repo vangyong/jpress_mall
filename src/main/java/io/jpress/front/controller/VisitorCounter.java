@@ -17,16 +17,19 @@ package io.jpress.front.controller;
 
 import java.math.BigInteger;
 
+import com.jfinal.aop.Before;
 import com.jfinal.aop.Clear;
 import com.jfinal.plugin.ehcache.CacheKit;
 
 import io.jpress.core.JBaseController;
 import io.jpress.router.RouterMapping;
 import io.jpress.router.RouterNotAllowConvert;
+import io.jpress.wechat.WechatUserInterceptor;
 
 @Clear
 @RouterNotAllowConvert
 @RouterMapping(url = "/counter")
+@Before(WechatUserInterceptor.class)
 public class VisitorCounter extends JBaseController {
 
 	private static final String CACHE_NAME = "visitor_counter";

@@ -140,6 +140,7 @@ public class WechatUserInterceptor implements Interceptor {
 		request.setAttribute("timestamp", timestamp);
 		request.setAttribute("nonceStr", nonceStr);
 		
+		
 		// 获取用户将要去的路径
 		String queryString = request.getQueryString();
 		// 被拦截前的请求URL
@@ -149,7 +150,7 @@ public class WechatUserInterceptor implements Interceptor {
 			if(queryString.contains("?")) {
 				newQueryString = queryString.replace("?","&");
 			}
- 			toUrl =  toUrl.concat(newQueryString);
+ 			toUrl =  toUrl.concat("?").concat(newQueryString);
 		}
 		toUrl = toUrl.replaceAll(request.getContextPath(), "");
 		toUrl = StringUtils.urlEncode(toUrl);

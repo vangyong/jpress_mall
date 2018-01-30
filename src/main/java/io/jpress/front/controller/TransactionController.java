@@ -18,6 +18,7 @@ import io.jpress.model.query.*;
 import io.jpress.router.RouterMapping;
 import io.jpress.utils.RandomUtils;
 import io.jpress.utils.StringUtils;
+import io.jpress.wechat.WechatUserInterceptor;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
@@ -31,7 +32,8 @@ import java.util.*;
  * @date 2017-6-23 15:07
  */
 @RouterMapping(url = "/transaction")
-@Before(UserInterceptor.class)
+//@Before(UserInterceptor.class)
+@Before(WechatUserInterceptor.class)
 public class TransactionController extends BaseFrontController {
 
     //购物车结算支付宝支付

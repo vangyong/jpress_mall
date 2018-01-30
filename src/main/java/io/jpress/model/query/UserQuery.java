@@ -28,7 +28,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class UserQuery extends JBaseQuery {
-	protected static final User DAO = new User();
+	public static final User DAO = new User();
 	private static final UserQuery QUERY = new UserQuery();
 
 	public static UserQuery me() {
@@ -103,6 +103,15 @@ public class UserQuery extends JBaseQuery {
 			}
 		});
 	}
+
+    public User findByOpenId(final String openId) {
+        return DAO.getCache(openId, new IDataLoader() {
+            @Override
+            public Object load() {
+                return DAO.findFirst("select * from jp_user where openid = ?" , openId);
+            }
+        });
+    }
 
 	public User findUserByEmailAndFlag(final String email, final String flag) {
 		return DAO.getCache(flag+":"+email, new IDataLoader() {

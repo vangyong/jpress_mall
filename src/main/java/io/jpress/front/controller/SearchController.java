@@ -22,10 +22,14 @@ import io.jpress.router.RouterMapping;
 import io.jpress.template.TemplateManager;
 import io.jpress.ui.freemarker.tag.SearchResultPageTag;
 import io.jpress.utils.StringUtils;
+import io.jpress.wechat.WechatUserInterceptor;
 
 import java.io.UnsupportedEncodingException;
 
+import com.jfinal.aop.Before;
+
 @RouterMapping(url = "/s")
+@Before(WechatUserInterceptor.class)
 public class SearchController extends BaseFrontController {
 
 	@ActionCache

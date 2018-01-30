@@ -15,6 +15,7 @@
  */
 package io.jpress.front.controller;
 
+import com.jfinal.aop.Before;
 import com.jfinal.render.Render;
 import io.jpress.Consts;
 import io.jpress.core.BaseFrontController;
@@ -31,10 +32,12 @@ import io.jpress.ui.freemarker.tag.ContentPageTag;
 import io.jpress.ui.freemarker.tag.MenusTag;
 import io.jpress.ui.freemarker.tag.TaxonomysTag;
 import io.jpress.utils.StringUtils;
+import io.jpress.wechat.WechatUserInterceptor;
 
 import java.util.List;
 
 @RouterMapping(url = Consts.ROUTER_TAXONOMY)
+@Before(WechatUserInterceptor.class)
 public class TaxonomyController extends BaseFrontController {
 
 	protected TplModule module;

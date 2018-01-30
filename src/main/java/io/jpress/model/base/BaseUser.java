@@ -472,4 +472,28 @@ public abstract class BaseUser<M extends BaseUser<M>> extends JModel<M> implemen
         return pid instanceof BigInteger ? (BigInteger)pid : new BigInteger(pid.toString());
     }
 
+    public void setChildNum(java.lang.Long childNum) {
+        set("childNum", childNum);
+    }
+
+    public java.lang.Long getChildNum() {
+        return get("childNum");
+    }
+
+    public void setTeamNum(java.lang.Long teamNum) {
+        set("teamNum", teamNum);
+    }
+
+    public java.lang.Long getTeamNum() {
+        return get("teamNum");
+    }
+
+    public void setTeamBuyAmount(java.math.BigDecimal teamBuyAmount) {
+        set("teamBuyAmount", teamBuyAmount);
+    }
+
+    public java.math.BigDecimal getTeamBuyAmount() {
+        return get("teamBuyAmount");
+    }
+
 }

@@ -15,6 +15,7 @@
  */
 package io.jpress.front.controller;
 
+import com.jfinal.aop.Before;
 import com.jfinal.render.Render;
 import io.jpress.Consts;
 import io.jpress.core.BaseFrontController;
@@ -30,12 +31,14 @@ import io.jpress.ui.freemarker.tag.MenusTag;
 import io.jpress.ui.freemarker.tag.NextContentTag;
 import io.jpress.ui.freemarker.tag.PreviousContentTag;
 import io.jpress.utils.StringUtils;
+import io.jpress.wechat.WechatUserInterceptor;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 
 @RouterMapping(url = Consts.ROUTER_CONTENT)
+@Before(WechatUserInterceptor.class)
 public class ContentController extends BaseFrontController {
 
 	private String slug;

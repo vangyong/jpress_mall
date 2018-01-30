@@ -1,5 +1,13 @@
 package io.jpress.front.controller;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.SQLException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Clear;
 import com.jfinal.kit.HttpKit;
@@ -8,7 +16,6 @@ import com.jfinal.kit.StrKit;
 import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.IAtom;
-import com.jfinal.plugin.activerecord.tx.Tx;
 import com.jfinal.weixin.sdk.api.ApiResult;
 import com.jfinal.weixin.sdk.api.PaymentApi;
 import com.jfinal.weixin.sdk.api.PaymentApi.TradeType;
@@ -20,19 +27,25 @@ import io.jpress.Consts;
 import io.jpress.core.BaseFrontController;
 import io.jpress.interceptor.UCodeInterceptor;
 import io.jpress.interceptor.UserInterceptor;
-import io.jpress.model.*;
-import io.jpress.model.query.*;
+import io.jpress.model.Bonus;
+import io.jpress.model.Content;
+import io.jpress.model.ContentSpecItem;
+import io.jpress.model.ShoppingCart;
+import io.jpress.model.Transaction;
+import io.jpress.model.TransactionItem;
+import io.jpress.model.User;
+import io.jpress.model.UserAddress;
+import io.jpress.model.query.ContentQuery;
+import io.jpress.model.query.ContentSpecItemQuery;
+import io.jpress.model.query.OptionQuery;
+import io.jpress.model.query.ShoppingCartQuery;
+import io.jpress.model.query.TransactionQuery;
+import io.jpress.model.query.UserAddressQuery;
+import io.jpress.model.query.UserQuery;
 import io.jpress.router.RouterMapping;
 import io.jpress.utils.DateUtils;
 import io.jpress.utils.RandomUtils;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.sql.SQLException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import io.jpress.wechat.WechatUserInterceptor;
 
 /**
  * <b>Description:</b>
@@ -41,11 +54,16 @@ import java.util.Map;
  * <br>@author <b>jianb.jiang</b>
  */
 @RouterMapping(url = "/wechatpay")
-@Before(UserInterceptor.class)
+//@Before(UserInterceptor.class)
+@Before(WechatUserInterceptor.class)
 public class WechatpayController extends BaseFrontController {
 
     private static final String SUCCESS = "SUCCESS";
 
+    private static final BigDecimal BOUNS_RATIO_LEVEL1 = BigDecimal.valueOf(0.3);
+
+    private static final BigDecimal BOUNS_RATIO_LEVEL2 = BigDecimal.valueOf(0.05);
+    
     private static final Log log = Log.getLog(WechatpayController.class);
     
     String appid = OptionQuery.me().findValue("wechat_appid");
@@ -140,7 +158,6 @@ public class WechatpayController extends BaseFrontController {
     }
     
     @Clear({UserInterceptor.class})
-    @Before(Tx.class)
     public void pay() {
         try {
             // 支付结果通用通知文档: https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_7
@@ -148,6 +165,15 @@ public class WechatpayController extends BaseFrontController {
             System.out.println("支付通知=" + xmlMsg);
             Map<String, String> params = PaymentKit.xmlToMap(xmlMsg);
 
+            //-----------test-----------------------
+//            Map<String, String> params = new HashMap<>();
+//            params.put("result_code", "SUCCESS");
+//            params.put("total_fee", "10000");
+//            params.put("out_trade_no", "1801142043572365216");
+//            params.put("transaction_id", "wx_fdskfsalkfalsjdl11");
+//            params.put("time_end", "20180125182222");
+            //-----------test-----------------------
+            
             String resultCode = params.get("result_code");
             // 总金额
             String totalFeeStr = params.get("total_fee");
@@ -162,9 +188,10 @@ public class WechatpayController extends BaseFrontController {
             // 避免已经成功、关闭、退款的订单被再次更新
 
             if (PaymentKit.verifyNotify(params, paternerKey)) {
+              // test -- if (true) {
                 if (SUCCESS.equals(resultCode)) {
                     //更新订单信息
-                    Transaction transaction = new Transaction().findFirst("select * from jp_transaction where order_no = ?", orderNo);
+                    final Transaction transaction = new Transaction().findFirst("select * from jp_transaction where order_no = ?", orderNo);
                     if (transaction == null) { //订单不存在
                         log.error("微信支付通知错误：orderNo [" + orderNo + "] is not exists!params = []" + params);
                         return;
@@ -181,17 +208,32 @@ public class WechatpayController extends BaseFrontController {
                     transaction.setTradeNo(tradeNo);
                     transaction.setStatus("2");//订单状态修改为已支付
                     transaction.setPayed(DateUtils.parse1(payed));
-                    boolean res = transaction.update();
+                    
+                    boolean res = Db.tx(new IAtom() {
+                        @Override
+                        public boolean run() throws SQLException {
+
+                            if (!transaction.update()) { //跟新订单状态
+                                return false;
+                            }
+
+                            if (!calculateBonus(transaction)) { //计算并分配奖金
+                                return false;
+                            }
+
+                            return true;
+                        }
+                    });
+                    
                     if (!res) { //订单更新失败
                         log.error("微信支付通知错误：order update failed!params = []" + params);
                         return;
                     }
-
+                    
                     Map<String, String> xml = new HashMap<>();
                     xml.put("return_code", SUCCESS);
                     xml.put("return_msg", "OK");
                     renderText(PaymentKit.toXml(xml));
-                    return;
                 } else {
                     log.error("微信支付通知错误：result_code =" + resultCode);
                 }
@@ -199,6 +241,118 @@ public class WechatpayController extends BaseFrontController {
             renderText("");
         } catch (Exception e) {
             log.error("微信支付通知错误：", e);
+        }
+    }
+    
+    private boolean calculateBonus(Transaction transaction) {
+        User currUser = UserQuery.DAO.findById(transaction.getUserId());//当前消费用户（不从缓存读取，因为缓存中的团队人数和团队金额不是最新值）
+        BigDecimal totleFee = transaction.getTotleFee();//本次消费总金额
+        BigInteger transactionId = transaction.getId();
+        
+        //计算当前用户的父亲的奖金
+        User pUser = UserQuery.DAO.findById(currUser.getPid());
+        if (pUser != null) {
+            if (!calculationBounsByUserLevel(totleFee, transactionId, pUser, "C")) {
+                return false;
+            }
+        } else {
+            return true;
+        }
+        
+        //计算当前用户的父亲的父亲的奖金
+        User ppUser = UserQuery.DAO.findById(pUser.getPid());
+        if (ppUser != null) {
+            if (!calculationBounsByUserLevel(totleFee, transactionId, ppUser, "B")) {
+                return false;
+            }
+        } else {
+            return true;
+        }
+        
+        //计算当前用户的父亲的父亲的父亲的奖金
+        User pppUser = UserQuery.DAO.findById(ppUser.getPid());
+        if (pppUser != null) {
+            if (!calculationBounsByUserLevel(totleFee, transactionId, pppUser, "A")) {
+                return false;
+            }
+        } else {
+            return true;
+        }
+        
+        return true;
+    }
+
+    private boolean calculationBounsByUserLevel(BigDecimal totleFee, BigInteger transactionId, User user, String level) {
+        //此笔消费计入团队总消费金额
+        if (Db.update("update jp_user set teamBuyAmount = teamBuyAmount + ? where id = ?", totleFee, user.getId()) <= 0) {
+            return false;
+        }
+        //计算获得的个人直推奖金
+        if ("C".equals(level) || "B".equals(level)) {
+            Bonus bonusUser = new Bonus();
+            BigDecimal bonusUseramount = totleFee.multiply(BOUNS_RATIO_LEVEL2);//间接推广提成5%
+            bonusUser.setBonusType(2L);//间接推广
+            if ("C".equals(level)) {
+                bonusUseramount = totleFee.multiply(BOUNS_RATIO_LEVEL1);//直接推广提成30%
+                bonusUser.setBonusType(1L);//直接推广
+            }
+            bonusUser.setAmount(bonusUseramount);
+            bonusUser.setBonusTime(new Date());
+            bonusUser.setBonusCycle(1L);//奖金计算周期类型（1 按订单结算也就是实时结算;2 按月结算）
+            bonusUser.setTransactionId(transactionId);
+            bonusUser.setUserId(user.getId());
+            if (!bonusUser.save()) {
+                return false;
+            }
+            if (Db.update("update jp_user set amount = amount + ? where id = ?", bonusUseramount, user.getId()) <= 0) {
+                return false;
+            }
+        }
+        
+        //计算获得的团队奖金
+        BigDecimal bounsTeamAmount = calculationTeamBouns(user,totleFee);
+        if (bounsTeamAmount != null) {
+            Bonus bounsTeam = new Bonus();
+            bounsTeam.setAmount(bounsTeamAmount);
+            bounsTeam.setBonusCycle(1L);//奖金计算周期类型（1 按订单结算也就是实时结算;2 按月结算）
+            bounsTeam.setBonusTime(new Date());
+            bounsTeam.setBonusType(3L);//奖金分类（1 个人提成-直接推广;2 个人提成-间接推广;3 团队提成;4 团队管理费）
+            bounsTeam.setTransactionId(transactionId);
+            bounsTeam.setUserId(user.getId());
+            if (!bounsTeam.save()) {
+                return false;
+            }
+            if (Db.update("update jp_user set amount = amount + ? where id = ?", bounsTeamAmount, user.getId()) <= 0) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    /**
+     * <b>Description.根据用户等级计算团队提成:</b><br>
+     * <b>Author:jianb.jiang</b>
+     * <br><b>Date:</b> 2018年1月29日 下午10:53:14
+     * @param user
+     * @param totleFee
+     * @return
+     */
+    BigDecimal calculationTeamBouns(User user, BigDecimal totleFee){
+        long childNum = user.getChildNum().longValue();
+        long teamNum = user.getTeamNum().longValue();
+        if (childNum >= 50 && teamNum >= 800) {
+            return totleFee.multiply(BigDecimal.valueOf(0.2));//提成20%
+        } else if (childNum >= 20 && teamNum >= 200) {
+            return totleFee.multiply(BigDecimal.valueOf(0.15));//提成15%
+        } else if (childNum >= 12 && teamNum >= 80) {
+            return totleFee.multiply(BigDecimal.valueOf(0.1));//提成10%
+        } else if (childNum >= 5 && teamNum >= 25) {
+            return totleFee.multiply(BigDecimal.valueOf(0.08));//提成8%
+        } else if (childNum >= 3 && teamNum >= 10) {
+            return totleFee.multiply(BigDecimal.valueOf(0.05));//提成5%
+        } else {
+            return null;
         }
     }
     
