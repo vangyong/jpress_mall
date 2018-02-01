@@ -42,7 +42,7 @@ import io.jpress.wechat.WechatUserInterceptor;
 
 @RouterMapping(url = Consts.ROUTER_USER)
 //@Before(UserInterceptor.class)
-@Before(WechatUserInterceptor.class)
+//@Before(WechatUserInterceptor.class)
 public class UserController extends BaseFrontController {
 
 	private void gotoUrl(){
@@ -541,4 +541,12 @@ public class UserController extends BaseFrontController {
 		render("user_transaction_item.html");
 	}
 
+	
+	//用户收货地址列表
+		public void userSetting(){
+			int pageNumber=getParaToInt("pageNumber", 1);
+			BigInteger userId=getLoginedUser().getId();
+			setAttr(UserAddressPageTag.TAG_NAME, new UserAddressPageTag(getRequest(), pageNumber, userId, null));
+			render("user_setting.html");
+		}
 }
