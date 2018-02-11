@@ -63,7 +63,22 @@
 		-moz-border-radius: 50%;
 		border-radius: 50%;
 	}
-
+	.topbar{
+		position: fixed;
+		top: 0;
+		width: 100%;
+		background-color: #eff1f2;
+		z-index: 99;
+		border-top-width: 1px;
+		border-top-style: solid;
+		display:flex;
+		flex-direction：column;
+		justify-content:space-between;
+		align-items:center;
+		margin: 0 0 -1em -2em;
+		border-color: #ebe6e6;
+		padding: 0.8em;
+	}
 	.bottombar {
 		position: fixed;
 		bottom: 0;
@@ -3582,7 +3597,7 @@
 	}
 
 		#main > .inner {
-			padding: 0 6em 0.1em 6em ;
+			padding: 0 6em 0em 6em ;
 			margin: 0 auto;
 			max-width: 110em;
 		}
@@ -3599,7 +3614,7 @@
 		@media screen and (max-width: 1680px) {
 
 			#main > .inner {
-				padding: 0 5em 0.1em 5em ;
+				padding: 0 5em 0em 5em ;
 			}
 
 				#main > .inner > section {
@@ -3611,7 +3626,7 @@
 		@media screen and (max-width: 1280px) {
 
 			#main > .inner {
-				padding: 0 4em 0.1em 4em ;
+				padding: 0 4em 0em 4em ;
 			}
 
 				#main > .inner > section {
@@ -3623,11 +3638,11 @@
 		@media screen and (max-width: 736px) {
 
 			#main > .inner {
-				padding: 0 2em 0.1em 2em ;
+				padding: 0 2em 0em 2em ;
 			}
 
 				#main > .inner > section {
-					padding: 2em 0 1em 0 ;
+					padding: 0em 0 0em 0 ;
 				}
 
 		}

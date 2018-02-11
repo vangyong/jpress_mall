@@ -1,17 +1,17 @@
-<div class="bottombar">
+<div class="bottombar" style="background: url(/templates/jmall/assets/images/backBottom.png) 100% 100%">
 	<ul class="icons">
-		<li style="width: 30%;" onclick="window.location.href='${CPATH}/';">
-			<span class="icon fa-home"></span>
+		<li style="width: 45%;" onclick="window.location.href='${CPATH}/';">
+			<img src="/templates/jmall/assets/images/indexBottom.png" style="width:21px;height:32px"/>
 		</li>
-		<li style="width: 30%;" onclick="window.location.href='${CPATH}/user/shoppingCart';">
+		<!-- <li style="width: 30%;" onclick="window.location.href='${CPATH}/user/shoppingCart';">
 			<span class="icon fa-shopping-cart">
 				<#if USER??>
 					<span class="mainRed">（${USER.getShoppingCartCount()!}）</span>
 				</#if>
 			</span>
-		</li>
-		<li style="width: 30%;" onclick="window.location.href='${CPATH}/user/center';">
-			<span class="icon fa-user"></span>
+		</li> -->
+		<li style="width: 45%;" onclick="window.location.href='${CPATH}/user/center';">
+			<img src="/templates/jmall/assets/images/myBottom.png" style="width:21px;height:32px"/>
 		</li>
 	</ul>
 </div>
