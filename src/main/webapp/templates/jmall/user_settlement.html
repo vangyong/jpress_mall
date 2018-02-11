@@ -142,7 +142,25 @@
 			}
 		});
 	}
-
+	
+	function couponList() {
+		layer.open({
+		  type: 1,
+		  title: false,
+		  closeBtn: 0,
+		  shadeClose: true,
+		  skin: 'yourclass',
+		  content: $('#couponList')
+		});
+	}
+	
+	function chooseCoupon(obj) {
+		alert(obj.id);
+		layer.close(layer.index);
+		//TODO 展示出选中的优惠券
+	}
+	
+	
 </#macro>
 <@layout>
 <section>
@@ -240,6 +258,13 @@
 					</div>
 				</div>
 			</diV>
+			<diV class="box alt">
+				<div class="12u$" style="text-align: right;color: red;">
+	                   <ul class="actions fit">
+	                       <li onclick="couponList()">选择优惠券</li>
+	                   </ul>
+	             </div>
+             </diV>
 		</#if>
 		<diV class="box alt">
 			<div class="row uniform">
@@ -265,5 +290,29 @@
 		</div>
 	</div>
 	<div id="alipayDiv"></div>
+	
+	<div id="couponList" class="table-wrapper" style="display: none">
+		<#if couponList?size gt 0>
+			<table>
+				<tbody>
+					<#list couponList as coupon>
+						<tr id="${coupon.couponUsedId!}" onclick="chooseCoupon(this)">
+							<td>
+								<input class="couponChecked" type="radio" id="coupon${coupon.couponUsedId!}" value="${coupon.couponUsedId!}">
+								<label for="coupon${coupon.id!}"></label>
+							</td>
+							<td>
+								<P>${coupon.name!}</P>
+								<P>${coupon.amount!}</P>
+								<P>${coupon.desc!}</P>
+							</td>
+						</tr>
+					</#list>
+				</tbody>
+			</table>
+		<#else>
+			<p>您暂时还没有可用的优惠券噢...</p>
+		</#if>
+	</div>
 </section>
 </@layout>

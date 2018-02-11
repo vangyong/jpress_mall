@@ -143,5 +143,27 @@ public class BaseTransaction<M extends BaseTransaction<M>> extends JModel<M> imp
     public java.util.Date getCreated() {
         return get("created");
     }
+    public void setCouponFee(java.math.BigDecimal couponFee) {
+        set("coupon_fee", couponFee);
+    }
 
+    public java.math.BigDecimal getCouponFee() {
+        return get("coupon_fee");
+    }
+
+    public void setAmountFee(java.math.BigDecimal amountFee) {
+        set("amount_fee", amountFee);
+    }
+
+    public java.math.BigDecimal getAmountFee() {
+        return get("amount_fee");
+    }
+
+    public void setCashFee(java.math.BigDecimal cashFee) {
+        set("cash_fee", cashFee);
+    }
+
+    public java.math.BigDecimal getCashFee() {
+        return get("cash_fee");
+    }
 }

@@ -487,6 +487,11 @@ public class UserController extends BaseFrontController {
 		Content content=ContentQuery.me().find(contentId, specValueId);
 		setAttr("content", content);
 		setAttr("quantity", quantity);
+		
+		//查询当前用户的优惠券信息
+		List<Coupon> couponList = CouponQuery.me().findListByUserId(1, 100, userId);
+		setAttr("couponList", couponList);
+		
 		render("user_settlement.html");
 	}
 
