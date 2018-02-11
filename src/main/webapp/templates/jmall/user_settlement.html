@@ -290,26 +290,27 @@
 		</div>
 	</div>
 	<div id="alipayDiv"></div>
-	
+	 <div id="couponList" class="table-wrapper" >
+		
+		<p>您暂时还没有可用的优惠券噢...</p>
+	</div>
 	<div id="couponList" class="table-wrapper" style="display: none">
 		<#if couponList?size gt 0>
-			<table>
-				<tbody>
-					<#list couponList as coupon>
-						<tr id="${coupon.couponUsedId!}" onclick="chooseCoupon(this)">
-							<td>
-								<input class="couponChecked" type="radio" id="coupon${coupon.couponUsedId!}" value="${coupon.couponUsedId!}">
-								<label for="coupon${coupon.id!}"></label>
-							</td>
-							<td>
-								<P>${coupon.name!}</P>
-								<P>${coupon.amount!}</P>
-								<P>${coupon.desc!}</P>
-							</td>
-						</tr>
-					</#list>
-				</tbody>
-			</table>
+			<div>
+				<#list couponList as coupon>
+					<div style="display: flex;flex-direction:row;align-items:center">
+						<div id="${coupon.couponUsedId!}" onclick="chooseCoupon(this)">
+							<input class="couponChecked" type="radio" id="coupon${coupon.couponUsedId!}" value="${coupon.couponUsedId!}">
+							<label for="coupon${coupon.id!}"></label>
+						</div>
+						<span style="color: #ff7a7b;font-size: 22px;width: 20%;text-align: center;display: block;">￥578 ${coupon.amount!}</span>
+						<div style="padding-left: 30px">
+							<P style="padding: 10px 0px 5px;margin: 0px;color: #000000;font-size: 16px;">活动专用券 ${coupon.name!}</P>
+							<P style="padding: 0px 0px 10px 0px;margin: 0px;color: #888888;">营养保健 ${coupon.desc!}</P>
+						</div>
+					</div>
+				</#list>
+			</div>
 		<#else>
 			<p>您暂时还没有可用的优惠券噢...</p>
 		</#if>
