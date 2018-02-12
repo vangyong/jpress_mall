@@ -14,6 +14,8 @@ import java.util.Random;
 */
 public class RandomUtils {
 
+    public static final String KeyString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    
 	public static String randomKey(String startaKey, String endKey){
 		String simpleDate=new SimpleDateFormat("yyMMddHHmmss").format(new Date());
 		String result=simpleDate+randomSixNum();
@@ -40,5 +42,19 @@ public class RandomUtils {
 		int randomNum=(int)((Math.random()*9+1)*100000);
 		return randomNum;
 	}
-
+	
+	//获取指定位数的随机字符串(包含小写字母、大写字母、数字,0<length)
+	public static String getRandomString(String preStr, int length) {
+	    //随机字符串的随机字符库
+	    StringBuilder sb = new StringBuilder();
+	    int len = KeyString.length();
+	    sb.append(preStr);
+	    for (int i = 0; i < length; i++) {
+	       sb.append(KeyString.charAt((int) Math.round(Math.random() * (len - 1))));
+	    }
+	    return sb.toString();
+	}
+public static void main(String[] args) {
+    System.out.println(RandomUtils.getRandomString("Coupon",19));
+}
 }
