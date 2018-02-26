@@ -20,18 +20,14 @@
 <@layout>
 <section>
  <#include "_inc/_user_top_bar.html"/>
-    <!-- <header class="major">
-        <h4>用户中心</h4>
-    </header> -->
     <div class="box alt bottom" style="padding: 0 0 0 0;background: url(/templates/jmall/assets/images/indexBack.png) 100% 100%;margin:0 -2em 0 -2em;">
         <div class="row uniform" style="padding:0 0 1em 0">
             <div class="12u$" style="text-align: center;background: url(/templates/jmall/assets/images/userBack.png) 100% 100%;padding-bottom: 4em;padding-top: 7em">
-                <ul class="actions">
+                <!-- <ul class="actions">
                     <li><img class="litter-avatar" src="${CPATH}${USER.avatar!TPATH+'/images/avatar.jpg'}"/></li>
-                </ul>
+                </ul> -->
                 <ul class="actions">
-                    <li> ${USER.username!}</li>
-                	<li style="margin-right: 3em"><img src="/templates/jmall/assets/images/myQRcode.png" style="width: 27;height:49"/></li>
+                		<li style="margin-right: 3em"><img src="/templates/jmall/assets/images/myQRcode.png" style="width: 27;height:49"/></li>
                     <li>
                     	<img class="litter-avatar" src="${CPATH}${USER.avatar!TPATH+'/images/avatar11.jpg'}" style="width:7em;height:7em"/>
                     	<p style="color: #FFFFFF;margin-top: 1em"> ${USER.username!}</p>
