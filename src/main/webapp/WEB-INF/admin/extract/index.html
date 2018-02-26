@@ -1,0 +1,27 @@
+<#include "../_inc/_layout.html"/> 
+<#include "../_inc/_layer.html"/>
+<#macro script>
+function agree(id){
+	$.get("${CPATH}/admin/extract/changeStatus?status=1&id="+id, function(data){
+		if(data.errorCode > 0){
+			toastr.error(data.message,'操作失败');
+		}else{
+			location.reload();
+		}
+	});
+}
+
+function unagree(id){
+	$.get("${CPATH}/admin/extract/changeStatus?status=2&id="+id, function(data){
+		if(data.errorCode > 0){
+			toastr.error(data.message,'操作失败');
+		}else{
+			location.reload();
+		}
+	});
+}
+
+</#macro> 
+<@layout active_id=p child_active_id=c>
+<#include include/>
+</@layout>

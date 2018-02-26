@@ -45,6 +45,7 @@ public class AdminMenuInitListener implements MessageListener {
 
 		menuMnager.addMenuGroup(createAttachmentMenuGroup());
 		menuMnager.addMenuGroup(createTransactionMenuGroup());
+		menuMnager.addMenuGroup(createExtractMenuGroup());
 		menuMnager.addMenuGroup(createWechatMenuGroup());
 		menuMnager.addMenuGroup(createAlipayMenuGroup());
 		menuMnager.addMenuGroup(createUserMenuGroup());
@@ -90,6 +91,14 @@ public class AdminMenuInitListener implements MessageListener {
 		MenuGroup group = new MenuGroup("transaction", "fa fa-cny", "交易记录");
 		{
 			group.addMenuItem(new MenuItem("list", "/admin/transaction?m="+ Consts.MODULE_MALL, "所有交易记录"));
+		}
+		return group;
+	}
+	
+	private MenuGroup createExtractMenuGroup() {
+		MenuGroup group = new MenuGroup("extract", "fa fa-cny", "提现申请");
+		{
+			group.addMenuItem(new MenuItem("list", "/admin/extract?m="+ Consts.MODULE_MALL, "所有提现申请"));
 		}
 		return group;
 	}

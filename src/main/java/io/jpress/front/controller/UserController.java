@@ -18,6 +18,9 @@ package io.jpress.front.controller;
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Clear;
 import com.jfinal.core.ActionKey;
+import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.plugin.activerecord.IAtom;
+
 import io.jpress.Consts;
 import io.jpress.core.BaseFrontController;
 import io.jpress.interceptor.UCodeInterceptor;
@@ -33,11 +36,10 @@ import io.jpress.ui.freemarker.tag.UserAddressPageTag;
 import io.jpress.utils.CookieUtils;
 import io.jpress.utils.EncryptUtils;
 import io.jpress.utils.StringUtils;
-
 import java.math.BigInteger;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
-
 import io.jpress.wechat.WechatUserInterceptor;
 
 @RouterMapping(url = Consts.ROUTER_USER)
@@ -253,6 +255,11 @@ public class UserController extends BaseFrontController {
 	public void center() {
 		User loginedUser = getLoginedUser();
 		if(loginedUser!=null) {
+			setAttr("accountMoney", "123");
+			setAttr("extractedMoney", "10");
+			setAttr("teamNum", "13");
+			setAttr("teamBuyAmount", "12000");
+			
 			setAttr("unpayed", TransactionQuery.me().findcount(getLoginedUser().getId(), Transaction.STATUS_1));
 			setAttr("unreceived", TransactionQuery.me().findcount(getLoginedUser().getId(), Transaction.STATUS_3));
 			setAttr("uncomment", TransactionQuery.me().findcount(getLoginedUser().getId(), Transaction.STATUS_4));
@@ -542,11 +549,66 @@ public class UserController extends BaseFrontController {
 	}
 
 	
-	//用户收货地址列表
-		public void userSetting(){
-			int pageNumber=getParaToInt("pageNumber", 1);
-			BigInteger userId=getLoginedUser().getId();
-			setAttr(UserAddressPageTag.TAG_NAME, new UserAddressPageTag(getRequest(), pageNumber, userId, null));
-			render("user_setting.html");
+	//用户基本信息设置
+	public void userSetting(){
+		BigInteger userId=getLoginedUser().getId();
+		setAttr("user", UserQuery.me().findById(userId));
+		render("user_setting.html");
+	}
+	
+	//保存用户信息
+	public void doSaveUserSetting() {
+		final User user = getModel(User.class);
+		if (StringUtils.isBlank(user.getRealname())) {
+			renderAjaxResultForError("姓名不能为空。");
+			return;
 		}
+		if (StringUtils.isBlank(user.getMobile())) {
+			renderAjaxResultForError("手机号码不能为空。");
+			return;
+		}
+		
+		if (StringUtils.isNotBlank(user.getEmail())) {
+			User dbUser = UserQuery.me().findUserByEmailAndFlag(user.getEmail(), User.FLAG_ADMIN);
+			if (dbUser != null && user.getId().compareTo(dbUser.getId()) != 0) {
+				renderAjaxResultForError("邮件地址已经存在，不能修改为该邮箱。");
+				return;
+			}
+		}
+		if (StringUtils.isNotBlank(user.getMobile())) {
+			User dbUser = UserQuery.me().findUserByMobileAndFlag(user.getMobile(), User.FLAG_ADMIN);
+			if (dbUser != null && user.getId().compareTo(dbUser.getId()) != 0) {
+				renderAjaxResultForError("手机号码地址已经存在，不能修修改为该手机号码。");
+				return;
+			}
+		}
+		boolean saved = Db.tx(new IAtom() {
+			@Override
+			public boolean run() throws SQLException {
+
+				if (!user.saveOrUpdate()) {
+					return false;
+				}
+				return true;
+			}
+		});
+
+		if (saved) {
+			renderAjaxResultForSuccess();
+		} else {
+			renderAjaxResultForError();
+		}
+		user.saveOrUpdate();
+
+		renderAjaxResultForSuccess("ok");
+	}
+	
+	
+	//账户余额
+	public void accountMoney(){
+		BigInteger userId=getLoginedUser().getId();
+		setAttr("user", UserQuery.me().findById(userId));
+		render("account_money.html");
+	}
+	
 }

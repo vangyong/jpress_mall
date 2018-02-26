@@ -26,10 +26,8 @@
         <div class="row uniform">
             <div class="12u$" style="text-align: center;">
                 <ul class="actions">
-                		<!-- <li><a href="${CPATH}/user/userSetting" class="icon fa-shopping-cart">设置</a></li> -->
                     <li><img class="litter-avatar" src="${CPATH}${USER.avatar!TPATH+'/images/avatar.jpg'}"/></li>
                     <!-- <li ><a href="javascript:void(0)" onclick="modifyPassword()" class="icon fa-warning">修改密码</a></li> -->
-                    <!-- <li><a href="${CPATH}/user/userAddress" class="icon fa-plane">地址管理</a></li> -->
                 </ul>
                 <ul class="actions">
                     <li> ${USER.username!}</li>
@@ -41,12 +39,12 @@
                 </div>
                 <div class="box" style="text-align: center;">
                     <ul class="actions fit">
-                        <li ><a style="color: #3d4449;" href="${CPATH}/user/userAmount?goto=${CPATH}/user/userAmount" class="icon fa-jpy">账户余额<span class="mainRed">（${unpayed!}）</span></a></li>
-                        <li><a style="color: #3d4449;" href="${CPATH}/user/userRecovered?goto=${CPATH}/user/userRecovered" class="icon fa-truck">已提金额<span class="mainRed">（${unreceived!}）</span></a></li>
+                        <li ><a style="color: #3d4449;" href="${CPATH}/user/userAmount?goto=${CPATH}/user/accountMoney" class="icon fa-jpy">账户余额<span class="mainRed">（${accountMoney!}）</span></a></li>
+                        <li><a style="color: #3d4449;" href="${CPATH}/user/userRecovered?goto=${CPATH}/user/userRecovered" class="icon fa-truck">已提金额<span class="mainRed">（${extractedMoney!}）</span></a></li>
                     </ul>
                     <ul class="actions fit">
-                        <li><a style="color: #3d4449;" href="${CPATH}/user/userTeamNum?goto=${CPATH}/user/userTeamNum" class="icon fa-pencil-square-o">团队人数<span class="mainRed">（${uncomment!}）</span></a></li>
-                    		<li><a style="color: #3d4449;" href="${CPATH}/user/userTeamBuyAmount?goto=${CPATH}/user/userTeamBuyAmount" class="icon fa-pencil-square-o">团队消费总额<span class="mainRed">（${uncomment!}）</span></a></li>
+                        <li><a style="color: #3d4449;" href="${CPATH}/user/userTeamNum?goto=${CPATH}/user/userTeamNum" class="icon fa-pencil-square-o">团队人数<span class="mainRed">（${teamNum!}）</span></a></li>
+                    		<li><a style="color: #3d4449;" href="${CPATH}/user/userTeamBuyAmount?goto=${CPATH}/user/userTeamBuyAmount" class="icon fa-pencil-square-o">团队消费总额<span class="mainRed">（${teamBuyAmount!}）</span></a></li>
                     </ul>
                 </div>
             </div>
@@ -71,18 +69,11 @@
                 </div>
                 <div class="box" style="text-align: center;">
                     <ul class="actions fit">
-                        <li ><a style="color: #3d4449;" href="${CPATH}/user/userSetting" class="icon fa-jpy">基本信息<span class="mainRed">（${unpayed!}）</span></a></li>
-                        <li><a style="color: #3d4449;" href="${CPATH}/user/userAddress" class="icon fa-truck">地址管理<span class="mainRed">（${unreceived!}）</span></a></li>
+                        <li ><a style="color: #3d4449;" href="${CPATH}/user/userSetting" class="icon fa-jpy">基本信息</a></li>
+                        <li><a style="color: #3d4449;" href="${CPATH}/user/userAddress" class="icon fa-truck">地址管理</a></li>
                     </ul>
                 </div>
             </div>
-           <!--  <div class="12u$">
-                <ul class="actions fit">
-                    <li></li>
-                    <li><a href="${CPATH}/user/logout?ucode=${ucode!}" class="button special fit">退出</a></li>
-                    <li></li>
-                </ul>
-            </div> -->
         </div>
     </div>
     <#include "_inc/_user_bottom_bar.html"/>

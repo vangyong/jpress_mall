@@ -1,0 +1,93 @@
+<!-- Main content -->
+<section class="content">
+	<form action="${CPATH}/admin/extract/paymoney" method="post" id="form">
+	<input type="hidden" name="user.id" value="${(user.id)!}">
+	<input type="hidden" name="user.role" value="${(user.role)!'visitor'}">
+	<input type="hidden" name="user.flag" value="${(user.flag)!}">
+	<div class="col-xs-12 ">
+		<div class="row">
+			<h4 class="jp-set-pad jp-set-title">用户信息</h4>
+			<ul class="list-unstyled">
+				<li class="jp-set-pad">
+					<div class="col-sm-3 jp-common-pad  jp-set-info">用户名</div>
+					<div class="col-sm-9 jp-common-pad ">
+						<div class="col-sm-6  ">
+							<input class="form-control input-md" type="text" name="user.username" value="${(user.username)!}">
+						</div>
+					</div>
+					<div class="clr"></div>
+				</li>
+
+				<li class="jp-set-pad">
+					<div class="col-sm-3 jp-common-pad  jp-set-info">昵称</div>
+					<div class="col-sm-9 jp-common-pad ">
+						<div class="col-sm-6  ">
+							<input class="form-control input-md" type="text" name="user.nickname" value="${(user.nickname)!}">
+						</div>
+					</div>
+					<div class="clr"></div>
+				</li>
+				
+				<li class="jp-set-pad">
+					<div class="col-sm-3 jp-common-pad  jp-set-info">真实姓名</div>
+					<div class="col-sm-9 jp-common-pad ">
+						<div class="col-sm-6  ">
+							<input class="form-control input-md" type="text" name="user.realname" value="${(user.realname)!}">
+						</div>
+					</div>
+					<div class="clr"></div>
+				</li>
+			</ul>
+			
+		</div>
+		<div class="row">
+			<h4 class="jp-set-pad jp-set-title">提现信息</h4>
+			<ul class="list-unstyled">
+				<li class="jp-set-pad">
+					<div class="col-sm-3 jp-common-pad  jp-set-info">提现金额</div>
+					<div class="col-sm-9 jp-common-pad ">
+						<div class="col-sm-6  ">
+							<input class="form-control input-md" type="text" name="extract.extract_money" value="${(extract.extract_money)!}">
+						</div>
+					</div>
+					<div class="clr"></div>
+				</li>
+
+				<li class="jp-set-pad">
+					<div class="col-sm-3 jp-common-pad  jp-set-info">支付金额</div>
+					<div class="col-sm-9 jp-common-pad ">
+						<div class="col-sm-6  ">
+							<input class="form-control input-md" type="text" name="extract.payed_money" value="${(extract.payed_money)!}">
+						</div>
+					</div>
+					<div class="clr"></div>
+				</li>
+
+				<li class="jp-set-pad">
+					<div class="col-sm-3 jp-common-pad  jp-set-info">支付时间</div>
+					<div class="col-sm-9 jp-common-pad ">
+						<div class="col-sm-6  ">
+							<input class="form-control input-md" type="text" name="extract.payed_time" value="${(extract.payed_time)!}">
+						</div>
+					</div>
+					<div class="clr"></div>
+				</li>
+
+				<li class="jp-set-pad">
+					<div class="col-sm-3 jp-common-pad  jp-set-info">联系电话</div>
+					<div class="col-sm-9 jp-common-pad ">
+						<div class="col-sm-6  ">
+							<input class="form-control input-md" type="text" name="extract.telephone" value="${(extract.telephone)!}">
+						</div>
+					</div>
+					<div class="clr"></div>
+				</li>
+			</ul>
+		</div>
+	</div>
+	
+	</form>
+</section>
+
+
+
