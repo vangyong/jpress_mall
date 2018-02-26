@@ -473,27 +473,27 @@ public abstract class BaseUser<M extends BaseUser<M>> extends JModel<M> implemen
     }
 
     public void setChildNum(java.lang.Long childNum) {
-        set("childNum", childNum);
+        set("child_num", childNum);
     }
 
     public java.lang.Long getChildNum() {
-        return get("childNum");
+        return get("child_num");
     }
 
     public void setTeamNum(java.lang.Long teamNum) {
-        set("teamNum", teamNum);
+        set("team_num", teamNum);
     }
 
     public java.lang.Long getTeamNum() {
-        return get("teamNum");
+        return get("team_num");
     }
 
     public void setTeamBuyAmount(java.math.BigDecimal teamBuyAmount) {
-        set("teamBuyAmount", teamBuyAmount);
+        set("team_buy_amount", teamBuyAmount);
     }
 
     public java.math.BigDecimal getTeamBuyAmount() {
-        return get("teamBuyAmount");
+        return get("team_buy_amount");
     }
 
 }

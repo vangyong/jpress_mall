@@ -19,21 +19,36 @@
 </#macro>
 <@layout>
 <section>
+ <#include "_inc/_user_top_bar.html"/>
     <!-- <header class="major">
         <h4>用户中心</h4>
     </header> -->
-    <div class="box alt bottom">
-        <div class="row uniform">
-            <div class="12u$" style="text-align: center;">
+    <div class="box alt bottom" style="padding: 0 0 0 0;background: url(/templates/jmall/assets/images/indexBack.png) 100% 100%;margin:0 -2em 0 -2em;">
+        <div class="row uniform" style="padding:0 0 1em 0">
+            <div class="12u$" style="text-align: center;background: url(/templates/jmall/assets/images/userBack.png) 100% 100%;padding-bottom: 4em;padding-top: 7em">
                 <ul class="actions">
                     <li><img class="litter-avatar" src="${CPATH}${USER.avatar!TPATH+'/images/avatar.jpg'}"/></li>
-                    <!-- <li ><a href="javascript:void(0)" onclick="modifyPassword()" class="icon fa-warning">修改密码</a></li> -->
                 </ul>
                 <ul class="actions">
                     <li> ${USER.username!}</li>
+                	<li style="margin-right: 3em"><img src="/templates/jmall/assets/images/myQRcode.png" style="width: 27;height:49"/></li>
+                    <li>
+                    	<img class="litter-avatar" src="${CPATH}${USER.avatar!TPATH+'/images/avatar11.jpg'}" style="width:7em;height:7em"/>
+                    	<p style="color: #FFFFFF;margin-top: 1em"> ${USER.username!}</p>
+                    </li>
+                    <li style="margin-left: 3em"><img  src="/templates/jmall/assets/images/myOrder.png" style="width: 27;height:49"/></li>
                 </ul>
             </div>
-            <div class="12u$">
+             <div style="width: 100%;padding: 0;position: relative;">
+				<li style="background: url(/templates/jmall/assets/images/userRim.png) 100% 100%;width：100%;height:31px;display: block;">
+				</li>
+				<div style="background: url(/templates/jmall/assets/images/userMoney.png) no-repeat;position: absolute;display: flex;flex-direction:column;text-align:center;width: 118px;height: 118px;top:-45px;left: 37%">
+					<span style="color: #ffed27;margin-top: 23px;font-size: 12px">MEMBER POINTS</span>
+					<span style="color: #ffed27;font-size: 28px">999.99</span>
+					<span style="color: #ffed27">会员钱包</span>
+				</div>
+			</div>
+            <!-- <div class="12u$">
             		<div  style="text-align: left;">
                     <h5><font color="red">推广奖励</font></h5>
                 </div>
@@ -74,8 +89,61 @@
                     </ul>
                 </div>
             </div>
+            <div class="12u$">
+                <ul class="actions fit">
+                    <li></li>
+                    <li><a href="${CPATH}/user/logout?ucode=${ucode!}" class="button special fit">退出</a></li>
+                    <li></li>
+                </ul>
+            </div> -->
+        </div> 
+        <div style="padding-bottom: 3em;padding-top: 2.8em">
+        	<ul class="icons" style="text-align: center;margin: 1em 0em 1em 0em;padding:1em -2em 1em -2em ">
+				<li style="width: 25%;padding:0;margin-left:-1em" >
+					<img src="/templates/jmall/assets/images/userAmount.png" style="width:45px;height:50px"/>
+				</li>
+				<li style="width: 25%;padding:0;margin-left:-1em" >
+					<img src="/templates/jmall/assets/images/userRecovered.png" style="width:45px;height:50px"/>
+				</li>
+				<li style="width: 25%;padding:0;margin-left:-1em" >
+					<img src="/templates/jmall/assets/images/userTeamNum.png" style="width:45px;height:50px"/>
+				</li>
+				<li style="width: 25%;padding:0;margin-left:-1em" >
+					<img src="/templates/jmall/assets/images/userTeamBuyAmount.png" style="width:56px;height:50px"/>
+				</li>
+			</ul>
+			<ul class="icons" style="text-align: center;margin: 1em 0em 1em 0em;padding:1em -2em 1em -2em ">
+				<li style="width: 25%;padding:0;margin-left:-1em" >
+					<img src="/templates/jmall/assets/images/userUncomment.png" style="width:45px;height:50px"/>
+				</li>
+				<li style="width: 25%;padding:0;margin-left:-1em" >
+					<img src="/templates/jmall/assets/images/userShoping.png" style="width:45px;height:50px"/>
+				</li>
+				<li style="width: 25%;padding:0;margin-left:-1em" >
+					<img src="/templates/jmall/assets/images/userUnreceived.png" style="width:45px;height:50px"/>
+				</li>
+				<li style="width: 25%;padding:0;margin-left:-1em" >
+					<img src="/templates/jmall/assets/images/userService.png" style="width:45px;height:50px"/>
+				</li>
+			</ul>
+			<ul class="icons" style="text-align: center;margin: 1em 0em 1em 0em;padding:1em -2em 1em -2em ">
+				<li style="width: 25%;padding:0;margin-left:-1em" >
+					<img src="/templates/jmall/assets/images/userAddress.png" style="width:45px;height:50px"/>
+				</li>
+				<li style="width: 25%;padding:0;margin-left:-1em" >
+					<img src="/templates/jmall/assets/images/userQuestion.png" style="width:45px;height:50px"/>
+				</li>
+				<li style="width: 25%;padding:0;margin-left:-1em" >
+					<img src="/templates/jmall/assets/images/userSetup.png" style="width:45px;height:50px"/>
+				</li>
+				<li style="width: 25%;padding:0;margin-left:-1em" >
+					<img src="/templates/jmall/assets/images/userSetting.png" style="width:45px;height:50px"/>
+				</li>
+			</ul>
+			<div style="text-align: center;margin-top: 2em"><img src="/templates/jmall/assets/images/userBeing.png" style="width:177;height:41"/></div>
         </div>
     </div>
+   
     <#include "_inc/_user_bottom_bar.html"/>
 </section>
 </@layout>
