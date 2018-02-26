@@ -568,15 +568,32 @@ public class WechatpayController extends BaseFrontController {
                         Coupon coupon = CouponQuery.me().findByUserIdAndUsedId(userId,couponUsedId);
                         if(coupon != null) {
                             //修改couponUsed的used、transaction_id
-                            CouponUsed cu = CouponUsedQuery.DAO.findById(couponUsedId);
-                            cu.setTransactionId(transaction.getId());
-                            cu.setUsed(1L);
-                            if(!cu.update()) {
-                                log.error("优惠券[{"+ cu.getId() +"}]使用状态更新失败..");
+                            if(Db.update("update jp_coupon_used set used = 1 and transaction_id = ? where id = ? and used = 0 and transaction_id is null", 
+                                    transaction.getId(), couponUsedId) <= 0) {
+                                log.error("优惠券[{"+ couponUsedId +"}]使用状态更新失败..");
                                 return false;
                             }
                             //TODO 修改订单的cash_fee、amount_fee、coupon_fee
+                            BigDecimal couponFee = coupon.getAmount();
+                            
+                            //先抵扣优惠券金额
+                            cashFee = totalFee.subtract(couponFee);
+                            if (cashFee.compareTo(BigDecimal.valueOf(0)) <= 0) {
+                                cashFee = BigDecimal.valueOf(0);
+                                transaction.setCouponFee(totalFee);//优惠券金额比商品金额大时，优惠券金额就为商品金额
+                            }
+                            
                             //TODO 扣减用户的余额
+                            if (Db.update("update jp_user set amount = amount - ? where id = ? and (amount - ?) > 0", cashFee, userId, cashFee) <= 0) {
+                                log.info("用户账户余额不足以支付整个订单...");
+                            } else {
+                                //获取用户账户余额
+                                User currUser = UserQuery.DAO.findById(transaction.getUserId());
+                                BigDecimal userAmount = currUser.getAmount();
+                                if(){
+                                    
+                                }
+                            }
                         }
                     }
                     return true;
