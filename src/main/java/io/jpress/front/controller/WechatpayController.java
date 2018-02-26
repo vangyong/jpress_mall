@@ -531,14 +531,17 @@ public class WechatpayController extends BaseFrontController {
             final String orderNo=RandomUtils.randomKey(null, userId.toString());
             // 商品总金额，必填
             final BigDecimal totalFee = contentSpecItem.getPrice().multiply(new BigDecimal(quantity));
-            // 现金支付金额
-            final BigDecimal cashFee = totalFee;//默认情况下商品总金额就为用户现金支付金额
+            
+            final Transaction transaction=new Transaction();
 
             boolean saved=Db.tx(new IAtom() {
                 @Override
                 public boolean run() throws SQLException {
-
-                    Transaction transaction=new Transaction();
+                    // 现金支付金额
+                    BigDecimal couponFee = BigDecimal.valueOf(0);//默认优惠券支付金额为0。【支付扣减优先级为1】
+                    BigDecimal amountFee = BigDecimal.valueOf(0);//默认余额支付金额为0。【支付扣减优先级为2】
+                    BigDecimal cashFee = totalFee;//默认情况下商品总金额就为用户现金支付金额。【支付扣减优先级为3】
+                    
                     transaction.setRemark(remark);
                     transaction.setUserId(userId);
                     transaction.setUserAddress(userAddress.getAddress()+" "+userAddress.getName()+" "+userAddress.getMobile());
@@ -573,38 +576,55 @@ public class WechatpayController extends BaseFrontController {
                                 log.error("优惠券[{"+ couponUsedId +"}]使用状态更新失败..");
                                 return false;
                             }
-                            //TODO 修改订单的cash_fee、amount_fee、coupon_fee
-                            BigDecimal couponFee = coupon.getAmount();
                             
-                            //先抵扣优惠券金额
-                            cashFee = totalFee.subtract(couponFee);
+                            couponFee = coupon.getAmount();
+                            
+                            //1、先抵扣优惠券金额
+                            cashFee = cashFee.subtract(couponFee);
                             if (cashFee.compareTo(BigDecimal.valueOf(0)) <= 0) {
                                 cashFee = BigDecimal.valueOf(0);
                                 transaction.setCouponFee(totalFee);//优惠券金额比商品金额大时，优惠券金额就为商品金额
                             }
                             
-                            //TODO 扣减用户的余额
-                            if (Db.update("update jp_user set amount = amount - ? where id = ? and (amount - ?) > 0", cashFee, userId, cashFee) <= 0) {
+                            //2、再扣减用户的余额
+                            User currUser = UserQuery.DAO.findById(transaction.getUserId());
+                            BigDecimal userAmount = currUser.getAmount();
+                            if (Db.update("update jp_user set amount = amount - ? where id = ? and (amount - ?) >= 0", cashFee, userId, cashFee) <= 0) {
                                 log.info("用户账户余额不足以支付整个订单...");
-                            } else {
                                 //获取用户账户余额
-                                User currUser = UserQuery.DAO.findById(transaction.getUserId());
-                                BigDecimal userAmount = currUser.getAmount();
-                                if(){
-                                    
+                                amountFee = userAmount;//账户余额小于抵扣优化券后的商品金额时，余额支付金额就为账户余额
+                                if(Db.update("update jp_user set amount = amount - ? where id = ? and (amount - ?) >= 0", amountFee, userId, amountFee) <= 0){
+                                    log.error("用户[{"+ userId +"}]账户余额扣减失败..");
+                                    return false;
                                 }
+                                cashFee = cashFee.subtract(amountFee);//扣减账户余额
+                            } else {
+                                //账户余额足以支付整个订单
+                                amountFee = cashFee;//账户余额大于等于抵扣优化券后的商品金额时，余额支付金额就为抵扣优化券后的商品金额
+                                cashFee = BigDecimal.valueOf(0);//即不需要现金支付，现金支付金额为0
                             }
                         }
+                    }
+                    
+                    //修改订单的cash_fee、amount_fee、coupon_fee
+                    transaction.setCouponFee(couponFee);
+                    transaction.setAmountFee(amountFee);
+                    transaction.setCashFee(cashFee);
+                    if(!transaction.update()){
+                        log.error("订单[{"+ transaction.getOrderNo() +"}]更新金额失败..");
+                        return false;
                     }
                     return true;
                 }
             });
 
             if(saved){
-                String userJson = this.getSessionAttr(Consts.SESSION_WECHAT_USER);
-                String openId = new ApiResult(userJson).getStr("openid");
-                String jsonStr = wechartPrePay(openId, orderNo, cashFee);
-                
+                String jsonStr = "0.00";//表示本次无需支付现金
+                if (transaction.getCashFee().compareTo(BigDecimal.valueOf(0)) > 0) {
+                    String userJson = this.getSessionAttr(Consts.SESSION_WECHAT_USER);
+                    String openId = new ApiResult(userJson).getStr("openid");
+                    jsonStr = wechartPrePay(openId, orderNo, transaction.getCashFee());
+                }
                 System.out.println(jsonStr);
                 renderAjaxResult("操作成功", 0, jsonStr);
             }else{
