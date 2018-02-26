@@ -164,6 +164,14 @@ public abstract class BaseCouponUsed<M extends BaseCouponUsed<M>> extends JModel
 		return get("used");
 	}
 
+    public void setTransactionId(java.math.BigInteger transactionId) {
+        set("transaction_id", transactionId);
+    }
+
+    public java.math.BigInteger getTransactionId() {
+        return get("transaction_id");
+    }
+
 	public void setCreatedTime(java.util.Date createdTime) {
 		set("created_time", createdTime);
 	}

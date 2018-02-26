@@ -31,9 +31,11 @@ CREATE TABLE `jp_coupon_used` (
   `coupon_id` bigint(20) unsigned NOT NULL COMMENT '优惠券表ID',
   `user_id` BIGINT(20) UNSIGNED NOT NULL COMMENT '领取优惠券的用户ID',
   `used` int(2) unsigned DEFAULT '0' COMMENT '是否使用：1 是 0 否',
+  `transaction_id` bigint(20) unsigned DEFAULT NULL COMMENT '订单id',
   `created_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `modified_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
   PRIMARY KEY (`id`),
+  KEY `transaction_id` (`transaction_id`),
   UNIQUE KEY `coupon_user` (`coupon_id`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='优惠券使用记录';
 

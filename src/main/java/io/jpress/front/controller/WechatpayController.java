@@ -22,6 +22,7 @@ import com.jfinal.weixin.sdk.api.PaymentApi.TradeType;
 import com.jfinal.weixin.sdk.kit.IpKit;
 import com.jfinal.weixin.sdk.kit.PaymentKit;
 import com.jfinal.weixin.sdk.utils.JsonUtils;
+import com.sun.media.jfxmedia.logging.Logger;
 
 import io.jpress.Consts;
 import io.jpress.core.BaseFrontController;
@@ -30,6 +31,8 @@ import io.jpress.interceptor.UserInterceptor;
 import io.jpress.model.Bonus;
 import io.jpress.model.Content;
 import io.jpress.model.ContentSpecItem;
+import io.jpress.model.Coupon;
+import io.jpress.model.CouponUsed;
 import io.jpress.model.ShoppingCart;
 import io.jpress.model.Transaction;
 import io.jpress.model.TransactionItem;
@@ -37,6 +40,8 @@ import io.jpress.model.User;
 import io.jpress.model.UserAddress;
 import io.jpress.model.query.ContentQuery;
 import io.jpress.model.query.ContentSpecItemQuery;
+import io.jpress.model.query.CouponQuery;
+import io.jpress.model.query.CouponUsedQuery;
 import io.jpress.model.query.OptionQuery;
 import io.jpress.model.query.ShoppingCartQuery;
 import io.jpress.model.query.TransactionQuery;
@@ -92,7 +97,7 @@ public class WechatpayController extends BaseFrontController {
                 return;
             }
             
-            String jsonStr = wechartPrePay(openId, transaction.getOrderNo(), transaction.getTotleFee());
+            String jsonStr = wechartPrePay(openId, transaction.getOrderNo(), transaction.getCashFee());
             
             System.out.println(jsonStr);
             renderAjaxResult("操作成功", 0, jsonStr);
@@ -102,7 +107,7 @@ public class WechatpayController extends BaseFrontController {
         }
     }
 
-    private String wechartPrePay(String openId, String orderNo, BigDecimal totalFee) {
+    private String wechartPrePay(String openId, String orderNo, BigDecimal cashFee) {
         // 统一下单文档地址：https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_1
         
         Map<String, String> params = new HashMap<>();
@@ -110,7 +115,7 @@ public class WechatpayController extends BaseFrontController {
         params.put("mch_id", partner);
         params.put("body", OptionQuery.me().findValue("wechat_transferDesc"));
         params.put("out_trade_no", orderNo);
-        params.put("total_fee", Integer.toString(totalFee.multiply(BigDecimal.valueOf(100.00)).intValue()));
+        params.put("total_fee", Integer.toString(cashFee.multiply(BigDecimal.valueOf(100.00)).intValue()));
         
         String ip = IpKit.getRealIp(getRequest());
         if (StrKit.isBlank(ip)) {
@@ -175,8 +180,8 @@ public class WechatpayController extends BaseFrontController {
             //-----------test-----------------------
             
             String resultCode = params.get("result_code");
-            // 总金额
-            String totalFeeStr = params.get("total_fee");
+            // 支付总金额
+            String cashFeeStr = params.get("total_fee");
             // 商户订单号
             String orderNo = params.get("out_trade_no");
             // 微信支付订单号
@@ -200,9 +205,9 @@ public class WechatpayController extends BaseFrontController {
                         log.error("微信支付通知错误：order status[" + transaction.getStatus() + "] is error!params = []" + params);
                         return;
                     }
-                    BigDecimal totalFee = new BigDecimal(totalFeeStr).divide(new BigDecimal("100"));
-                    if (transaction.getTotleFee().compareTo(totalFee) != 0) { //订单金额与支付金额不相等
-                        log.error("微信支付通知错误：orderTotalFee[" + transaction.getTotleFee() + "] <> payTotalFee[" + totalFee + "]!params = []" + params);
+                    BigDecimal cashFee = new BigDecimal(cashFeeStr).divide(new BigDecimal("100"));
+                    if (transaction.getCashFee().compareTo(cashFee) != 0) { //订单现金支付金额与实际支付金额不相等
+                        log.error("微信支付通知错误：orderCashFee[" + transaction.getCashFee() + "] <> payCashFee[" + cashFee + "]!params = []" + params);
                         return;
                     }
                     transaction.setTradeNo(tradeNo);
@@ -246,13 +251,13 @@ public class WechatpayController extends BaseFrontController {
     
     private boolean calculateBonus(Transaction transaction) {
         User currUser = UserQuery.DAO.findById(transaction.getUserId());//当前消费用户（不从缓存读取，因为缓存中的团队人数和团队金额不是最新值）
-        BigDecimal totleFee = transaction.getTotleFee();//本次消费总金额
+        BigDecimal spending = transaction.getCashFee().add(transaction.getAmountFee());//本次消费总金额 = 余额消费金额 + 现金消费金额，即不包括优惠券金额
         BigInteger transactionId = transaction.getId();
         
         //计算当前用户的父亲的奖金
         User pUser = UserQuery.DAO.findById(currUser.getPid());
         if (pUser != null) {
-            if (!calculationBounsByUserLevel(totleFee, transactionId, pUser, "C")) {
+            if (!calculationBounsByUserLevel(spending, transactionId, pUser, "C")) {
                 return false;
             }
         } else {
@@ -262,7 +267,7 @@ public class WechatpayController extends BaseFrontController {
         //计算当前用户的父亲的父亲的奖金
         User ppUser = UserQuery.DAO.findById(pUser.getPid());
         if (ppUser != null) {
-            if (!calculationBounsByUserLevel(totleFee, transactionId, ppUser, "B")) {
+            if (!calculationBounsByUserLevel(spending, transactionId, ppUser, "B")) {
                 return false;
             }
         } else {
@@ -272,7 +277,7 @@ public class WechatpayController extends BaseFrontController {
         //计算当前用户的父亲的父亲的父亲的奖金
         User pppUser = UserQuery.DAO.findById(ppUser.getPid());
         if (pppUser != null) {
-            if (!calculationBounsByUserLevel(totleFee, transactionId, pppUser, "A")) {
+            if (!calculationBounsByUserLevel(spending, transactionId, pppUser, "A")) {
                 return false;
             }
         } else {
@@ -282,18 +287,18 @@ public class WechatpayController extends BaseFrontController {
         return true;
     }
 
-    private boolean calculationBounsByUserLevel(BigDecimal totleFee, BigInteger transactionId, User user, String level) {
+    private boolean calculationBounsByUserLevel(BigDecimal spending, BigInteger transactionId, User user, String level) {
         //此笔消费计入团队总消费金额
-        if (Db.update("update jp_user set teamBuyAmount = teamBuyAmount + ? where id = ?", totleFee, user.getId()) <= 0) {
+        if (Db.update("update jp_user set team_buy_amount = team_buy_amount + ? where id = ?", spending, user.getId()) <= 0) {
             return false;
         }
         //计算获得的个人直推奖金
         if ("C".equals(level) || "B".equals(level)) {
             Bonus bonusUser = new Bonus();
-            BigDecimal bonusUseramount = totleFee.multiply(BOUNS_RATIO_LEVEL2);//间接推广提成5%
+            BigDecimal bonusUseramount = spending.multiply(BOUNS_RATIO_LEVEL2);//间接推广提成5%
             bonusUser.setBonusType(2L);//间接推广
             if ("C".equals(level)) {
-                bonusUseramount = totleFee.multiply(BOUNS_RATIO_LEVEL1);//直接推广提成30%
+                bonusUseramount = spending.multiply(BOUNS_RATIO_LEVEL1);//直接推广提成30%
                 bonusUser.setBonusType(1L);//直接推广
             }
             bonusUser.setAmount(bonusUseramount);
@@ -310,7 +315,7 @@ public class WechatpayController extends BaseFrontController {
         }
         
         //计算获得的团队奖金
-        BigDecimal bounsTeamAmount = calculationTeamBouns(user,totleFee);
+        BigDecimal bounsTeamAmount = calculationTeamBouns(user,spending);
         if (bounsTeamAmount != null) {
             Bonus bounsTeam = new Bonus();
             bounsTeam.setAmount(bounsTeamAmount);
@@ -335,22 +340,22 @@ public class WechatpayController extends BaseFrontController {
      * <b>Author:jianb.jiang</b>
      * <br><b>Date:</b> 2018年1月29日 下午10:53:14
      * @param user
-     * @param totleFee
+     * @param spending
      * @return
      */
-    BigDecimal calculationTeamBouns(User user, BigDecimal totleFee){
+    BigDecimal calculationTeamBouns(User user, BigDecimal spending){
         long childNum = user.getChildNum().longValue();
         long teamNum = user.getTeamNum().longValue();
         if (childNum >= 50 && teamNum >= 800) {
-            return totleFee.multiply(BigDecimal.valueOf(0.2));//提成20%
+            return spending.multiply(BigDecimal.valueOf(0.2));//提成20%
         } else if (childNum >= 20 && teamNum >= 200) {
-            return totleFee.multiply(BigDecimal.valueOf(0.15));//提成15%
+            return spending.multiply(BigDecimal.valueOf(0.15));//提成15%
         } else if (childNum >= 12 && teamNum >= 80) {
-            return totleFee.multiply(BigDecimal.valueOf(0.1));//提成10%
+            return spending.multiply(BigDecimal.valueOf(0.1));//提成10%
         } else if (childNum >= 5 && teamNum >= 25) {
-            return totleFee.multiply(BigDecimal.valueOf(0.08));//提成8%
+            return spending.multiply(BigDecimal.valueOf(0.08));//提成8%
         } else if (childNum >= 3 && teamNum >= 10) {
-            return totleFee.multiply(BigDecimal.valueOf(0.05));//提成5%
+            return spending.multiply(BigDecimal.valueOf(0.05));//提成5%
         } else {
             return null;
         }
@@ -408,7 +413,9 @@ public class WechatpayController extends BaseFrontController {
             final String orderNo=RandomUtils.randomKey(null, userId.toString());
             // 付款金额，必填
             final BigDecimal totalFee=ShoppingCartQuery.me().getTotalFee(shoppingCartIdSb.substring(0, shoppingCartIdSb.length()-1), userId);
-
+            // 现金支付金额
+            final BigDecimal cashFee = totalFee;//默认情况下商品总金额就为用户现金支付金额
+            
             boolean saved=Db.tx(new IAtom() {
                 @Override
                 public boolean run() throws SQLException {
@@ -453,7 +460,7 @@ public class WechatpayController extends BaseFrontController {
             if(saved){
                 String userJson = this.getSessionAttr(Consts.SESSION_WECHAT_USER);
                 String openId = new ApiResult(userJson).getStr("openid");
-                String jsonStr = wechartPrePay(openId, orderNo, totalFee);
+                String jsonStr = wechartPrePay(openId, orderNo, cashFee);
                 
                 System.out.println(jsonStr);
                 renderAjaxResult("操作成功", 0, jsonStr);
@@ -476,6 +483,8 @@ public class WechatpayController extends BaseFrontController {
             final BigInteger contentId=getParaToBigInteger("contentId");
             final BigInteger specValueId=getParaToBigInteger("specValueId");
             final Integer quantity=getParaToInt("quantity");
+            final BigDecimal payAmount=getParaToBigDecimal("payAmount");
+            final BigInteger couponUsedId=getParaToBigInteger("couponUsedId");
 
             if (userAddressId==null) {
                 renderAjaxResultForError("收货地址不能为空");
@@ -520,12 +529,15 @@ public class WechatpayController extends BaseFrontController {
 
             // 商户订单号，商户网站订单系统中唯一订单号，必填
             final String orderNo=RandomUtils.randomKey(null, userId.toString());
-            // 付款金额，必填
-            final BigDecimal totalFee=contentSpecItem.getPrice().multiply(new BigDecimal(quantity));
+            // 商品总金额，必填
+            final BigDecimal totalFee = contentSpecItem.getPrice().multiply(new BigDecimal(quantity));
+            // 现金支付金额
+            final BigDecimal cashFee = totalFee;//默认情况下商品总金额就为用户现金支付金额
 
             boolean saved=Db.tx(new IAtom() {
                 @Override
                 public boolean run() throws SQLException {
+
                     Transaction transaction=new Transaction();
                     transaction.setRemark(remark);
                     transaction.setUserId(userId);
@@ -536,6 +548,7 @@ public class WechatpayController extends BaseFrontController {
                     transaction.setStatus(Transaction.STATUS_1);
                     transaction.setCreated(new Date());
                     if(!transaction.save()){
+                        log.error("订单[{"+ transaction.getOrderNo() +"}]保存失败..");
                         return false;
                     }
 
@@ -547,9 +560,25 @@ public class WechatpayController extends BaseFrontController {
                     transactionItem.setQuantity(quantity);
                     transactionItem.setCreated(new Date());
                     if(!transactionItem.save()){
+                        log.error("订单[{"+ transaction.getOrderNo() +"}]的订单项保存失败..");
                         return false;
                     }
-
+                    
+                    if (couponUsedId.compareTo(BigInteger.valueOf(0)) > 0) {
+                        Coupon coupon = CouponQuery.me().findByUserIdAndUsedId(userId,couponUsedId);
+                        if(coupon != null) {
+                            //修改couponUsed的used、transaction_id
+                            CouponUsed cu = CouponUsedQuery.DAO.findById(couponUsedId);
+                            cu.setTransactionId(transaction.getId());
+                            cu.setUsed(1L);
+                            if(!cu.update()) {
+                                log.error("优惠券[{"+ cu.getId() +"}]使用状态更新失败..");
+                                return false;
+                            }
+                            //TODO 修改订单的cash_fee、amount_fee、coupon_fee
+                            //TODO 扣减用户的余额
+                        }
+                    }
                     return true;
                 }
             });
@@ -557,7 +586,7 @@ public class WechatpayController extends BaseFrontController {
             if(saved){
                 String userJson = this.getSessionAttr(Consts.SESSION_WECHAT_USER);
                 String openId = new ApiResult(userJson).getStr("openid");
-                String jsonStr = wechartPrePay(openId, orderNo, totalFee);
+                String jsonStr = wechartPrePay(openId, orderNo, cashFee);
                 
                 System.out.println(jsonStr);
                 renderAjaxResult("操作成功", 0, jsonStr);

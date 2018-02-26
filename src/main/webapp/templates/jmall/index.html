@@ -1,5 +1,7 @@
 <#include "_inc/_layout.html"/>
 <#macro script>
+	layer.load();
+
 	function getQueryString(name) {
 	    var result = window.location.search.match(new RegExp("[\?\&]" + name + "=([^\&]+)", "i"));
 	    if (result == null || result.length < 1) {
@@ -9,6 +11,7 @@
 	}
 
 	window.onload=function(){ 
+		layer.closeAll('loading');
 		var cp_code = getQueryString("cp_code");
 		if (cp_code != null && cp_code != '' &&　cp_code.length > 0) {
 			$.ajax({
