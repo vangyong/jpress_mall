@@ -49,4 +49,8 @@ public class CouponQuery extends JBaseQuery {
 
     }
 
+	public Coupon findByCode(final String code) {
+	    return DAO.findFirst("select * from jp_coupon where code = ?" , code);
+    }
+	
 }

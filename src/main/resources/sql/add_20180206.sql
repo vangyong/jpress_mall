@@ -21,8 +21,8 @@ CREATE TABLE `jp_coupon` (
   `created_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `modified_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
   PRIMARY KEY (`id`),
-  KEY `code` (`code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='优惠券';
+  UNIQUE KEY `code` (`code`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COMMENT='优惠券';
 
 
 DROP TABLE IF EXISTS `jp_coupon_used`;
@@ -34,8 +34,7 @@ CREATE TABLE `jp_coupon_used` (
   `created_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `modified_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '修改时间',
   PRIMARY KEY (`id`),
-  KEY `coupon_id` (`coupon_id`),
-  KEY `user_id` (`user_id`)
+  UNIQUE KEY `coupon_user` (`coupon_id`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='优惠券使用记录';
 
 

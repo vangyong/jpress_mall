@@ -1,5 +1,44 @@
-
 <#include "_inc/_layout.html"/>
+<#macro script>
+	function getQueryString(name) {
+	    var result = window.location.search.match(new RegExp("[\?\&]" + name + "=([^\&]+)", "i"));
+	    if (result == null || result.length < 1) {
+	        return "";
+	    }
+	    return result[1];
+	}
+
+	window.onload=function(){ 
+		var cp_code = getQueryString("cp_code");
+		if (cp_code != null && cp_code != '' &&　cp_code.length > 0) {
+			$.ajax({
+				type: "POST",
+				traditional: true,
+				url: "${CPATH}/getCoupon",
+				data: {
+					cp_code:cp_code
+				},
+				success: function(data){
+					if(data.errorCode == 0){
+						var coupon = data.data;
+	                    $('#coupon_span').html(coupon.amount + "元");
+	                    layer.open({
+						  type: 1,
+						  title: false,
+						  closeBtn: 0,
+						  shadeClose: true,
+						  content: $('#coupon_div')
+						});
+					}
+				}
+			});
+		}
+	} 
+	
+	function closeCouponDiv() {
+		layer.close(layer.index);
+	}
+</#macro>
 <@layout>
 <!-- Banner -->
 <!-- <#include "_inc/_banner.html"/> -->
@@ -67,6 +106,11 @@
     <div>
     	<img src="/templates/jmall/assets/images/indexShoping.png" style="width:46px;position: fixed;bottom: 0px;right: 0px;z-index: 98;"/>
     </div>
+    
+    <div id="coupon_div" style="background: url(/templates/jmall/assets/images/userPacket.png);width: 290px;height:227px;display: none" onclick="closeCouponDiv()">
+    	<span id="coupon_span" style="color:#ffaf66;font-size: 40px;padding-top: 23%;margin-left: 15.7%;font-weight: bolder;display: block;"></span>
+    </div>
+    
     <#include "_inc/_user_bottom_bar.html"/>
 </section>
 </@layout>
