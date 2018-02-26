@@ -1,0 +1,131 @@
+<section class="content-header">
+	<h1>
+		提现申请
+	</h1>
+</section>
+
+<!-- Main content -->
+<section class="content">
+
+	<div class="row content-row">
+		<form id="form" action="${CPATH}/admin/extract?m=${m!}&p=${p!}&c=${c!}" method="POST" class="form-inline">
+			<div class="form-group">
+				<input id="post-search-input" style="width:350px;" class="form-control input-sm" type="search" value="${k!}" name="k" placeholder="输入本地订单号，微信/支付宝订单号进行搜索">
+			</div>
+			<div class="form-group">
+				<select class="form-control input-sm" name="status" >
+					<option value="">请选择申请状态</option>
+					<option value="0" <#if '0'==status! >selected</#if> >待审核</option>
+					<option value="1" <#if '1'==status! >selected</#if> >审核通过</option>
+					<option value="2" <#if '2'==status! >selected</#if> >审核不通过</option>
+					<option value="3" <#if '3'==status! >selected</#if> >支付完成</option>
+				</select>
+			</div>
+			<div class="form-group">
+				<input type="submit" class="btn btn-block btn-sm btn-default" style="width:100px;" value="搜索" />
+			</div>
+		</form>
+	</div>
+	
+	<div class="box">
+		<!-- /.box-header -->
+		<div class="box-body">
+			<form action="" method="POST">
+				<input type="hidden" name="ucode" value="${ucode}">
+				<table class="table table-striped" style="word-break:break-all">
+					<thead>
+						<tr>
+							<th style="width:20px;"><input name="dataItem" onclick="checkAll(this)" type="checkbox" value="0"></th>
+							<th>真实姓名</th>
+							<th>用户电话</th>
+							<th>提现金额</th>
+							<th>申请状态</th>
+							<th>申请时间</th>
+							<th>支付时间</th>
+							<th>备注</th>
+						</tr>
+					</thead>
+					<tbody>
+						<#if page??> <#list page.getList() as bean>
+						<tr class="jp-onmouse">
+							<td><input name="dataItem" type="checkbox" value="${bean.id!}"></td>
+							<td>
+								${(bean.realname)!}
+								<div class="jp-flash-comment">
+									<p class="row-actions jp-cancel-pad">
+										<span class="approve"><a class="vim-a" onclick="openLayer('60%', '80%', '详情','${CPATH}/admin/user/view?id=${bean.user_id}&c=${c!}&p=${p!}&m=${m!}')">详情</a></span>
+									</p>
+								</div>
+							</td>
+							<td>${(bean.telephone)!}</td>
+							<td>
+								${(bean.extract_money)!}
+								<div class="jp-flash-comment">
+									<p class="row-actions jp-cancel-pad">
+										<#if "0"==bean.status!>
+											<span class="spam"> | <a class="vim-s vim-destructive" href="javascript:;" onclick="agree('${bean.id}')">通过</a></span> 
+											<span class="spam"> | <a class="vim-s vim-destructive" href="javascript:;" onclick="unagree('${bean.id}')">不通过</a></span> 
+										</#if>
+										<#if "1"==bean.status!>
+											<span class="approve"><a class="vim-a" onclick="openLayer('60%', '80%', '支付','${CPATH}/admin/extract/pay?id=${bean.id}&c=${c!}&p=${p!}&m=${m!}')">支付</a></span>
+										</#if>
+										<#if "2"==bean.status!>
+											<span class="spam"> | <a class="vim-s vim-destructive" href="javascript:;" onclick="agree('${bean.id}')">通过</a></span> 
+										</#if>
+									
+									</p>
+								</div>	
+							</td>
+							<td>
+								<#if "0"==bean.status!>
+									待审核
+								<#elseif "1"==bean.status!>
+									审核通过
+								<#elseif "2"==bean.status!>
+									审核不通过
+								<#elseif "3"==bean.status!>
+									支付完成
+								</#if>
+							</td>
+							<td>${(bean.created_time)!}</td>
+							<td>${(bean.payed_time)!}</td>
+							<td>
+								${(bean.remark)!}
+								<div class="jp-flash-comment">
+									<p class="row-actions jp-cancel-pad">
+										<span class="approve"><a class="vim-a" onclick="openLayer('60%', '80%', '详情','${CPATH}/admin/extract/view?id=${bean.id}&c=${c!}&p=${p!}&m=${m!}')">详情</a></span>
+									</p>
+								</div>	
+							</td>
+						</tr>
+						</#list> 
+						</#if>
+					</tbody>
+					<tfoot>
+						<tr>
+							<th style="width:20px;"><input name="dataItem" onclick="checkAll(this)" type="checkbox" value="0"></th>
+							<th>真实姓名</th>
+							<th>用户电话</th>
+							<th>提现金额</th>
+							<th>申请状态</th>
+							<th>申请时间</th>
+							<th>支付时间</th>
+							<th>备注</th>
+						</tr>
+					</tfoot>
+				</table>
+				</form>
+		</div>
+		
+	</div>	
+	
+	<div class="cf">
+		<div class="pull-right " >			
+			<#if page??> 
+			<#include "../_inc/_paginate.html" /> 
+			<@paginate currentPage=page.pageNumber totalPage=page.totalPage actionUrl="?p="+(p!)+"&c="+(c!)+"&m="+(m!)+"&t="+(t!)+"&s="+(s!)+"&k="+(k!)+"&status="+(status!)+"&pay_type="+(pay_type!)+"&page="/>
+			</#if>
+		</div>
+	</div>
+		
+</section>

@@ -1,0 +1,106 @@
+<#include "_inc/_layout.html"/>
+<#macro script>
+
+//获取验证码正确性
+function getVerifyCode(){
+	var telephone = $("#mobile").val();
+	$.get("${CPATH}/verifyCode/getVerifyCode?telephone="+telephone, function(data){
+		if(data.errorCode > 0){
+			toastr.error(data.message,'操作失败');
+		}else{
+			//location.reload();
+		}
+	});
+ }
+ 
+ //获取验证码正确性
+function checkVerifyCode(){
+	var telephone = $("#mobile").val();
+	var verifyCode = $("#verifyCode").val();
+	$.get("${CPATH}/verifyCode/checkVerifyCode?telephone="+telephone+"&verifyCode="+verifyCode, function(data){
+		if(data.errorCode > 0){
+			return false;
+		}else{
+			return true;
+		}
+	});
+ }
+
+function doSubmit(){
+	//先校验验证码正确性
+	if(checkVerifyCode()){
+		$("#form").ajaxSubmit({
+			type : "post", 
+			dataType : "json", 
+			success : function(data) { 
+				if(data.errorCode == 0){
+					location.reload();
+				}else{
+					toastr.error(data.message,'操作失败');
+				}
+			},
+			error : function() {
+				alert("信息提交错误");
+			}
+		});
+	}else{
+		toastr.error('验证码有误');
+	}
+ }
+
+
+</#macro>
+<@layout>
+<section>
+	<header class="major">
+        <h4>个人信息</h4>
+    </header>
+    
+	<form action="${CPATH}/user/doSaveUserSetting" method="post" id="form">
+	<input type="hidden" name="user.id" value="${(user.id)!}">
+	<div class="col-xs-12 ">
+		<div class="row">
+			<ul class="list-unstyled">
+				<li class="jp-set-pad">
+					<div class="col-sm-9">
+						<div class="col-sm-3">真实姓名</div>
+						<div class="col-sm-6">
+							<input class="form-control input-md" type="text" id="realname" name="user.realname" value="${(user.realname)!}" >
+						</div>
+					</div>
+				</li>
+				
+				<li class="jp-set-pad">
+					<div class="col-sm-9">
+						<div class="col-sm-3">手机号码</div>
+						<div class="col-sm-6">
+							<input class="form-control input-md" type="text" id="mobile" name="user.mobile" value="${(user.mobile)!}" >
+							<button type="button" onclick="getVerifyCode()" class="btn btn-primary">获取验证码</button>
+						</div>
+					</div>
+				</li>
+				
+				<li class="jp-set-pad">
+					<div class="col-sm-9">
+						<div class="col-sm-3">验证码</div>
+						<div class="col-sm-6">
+							<input class="form-control input-md" type="text" id="verifyCode" name="verifyCode" >
+						</div>
+					</div>
+				</li>
+			</ul>
+		</div>
+		
+	</div>
+	
+	<div class="row">
+		<div class="col-xs-12">
+			<button type="button" onclick="doSubmit()" class="btn btn-primary">保存更改</button>
+		</div>
+	</div>
+	
+	
+	</form>
+	<#include "_inc/_user_bottom_bar.html"/>
+</section>
+</@layout>

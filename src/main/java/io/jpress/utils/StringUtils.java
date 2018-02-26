@@ -70,6 +70,10 @@ public class StringUtils {
 	public static boolean isNotEmpty(String string) {
 		return string != null && !string.equals("");
 	}
+	
+	public static boolean isEmpty(String string) {
+		return string == null||string.equals("");
+	}
 
 	public static boolean areNotBlank(String... strings) {
 		if (strings == null || strings.length == 0)

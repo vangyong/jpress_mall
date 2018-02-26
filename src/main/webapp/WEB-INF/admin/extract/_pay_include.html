@@ -1,0 +1,75 @@
+<!-- Content Header (Page header) -->
+<!-- Main content -->
+<section class="content">
+	<form action="${CPATH}/admin/extract/paymoney" method="post" id="form">
+	<input type="hidden" name="extractPay.extract_id" value="${(extract.id)!}">
+	<div class="col-xs-12 ">
+		<div class="row">
+			<h4 class="jp-set-pad jp-set-title">个人信息</h4>
+			<ul class="list-unstyled">
+				<li class="jp-set-pad">
+					<div class="col-sm-3 jp-common-pad  jp-set-info">昵称</div>
+					<div class="col-sm-9 jp-common-pad ">
+						<div class="col-sm-6  ">
+							<input class="form-control input-md" type="text" value="${(user.nickname)!}" readonly="readonly">
+						</div>
+					</div>
+					<div class="clr"></div>
+				</li>
+				
+				<li class="jp-set-pad">
+					<div class="col-sm-3 jp-common-pad  jp-set-info">真实姓名</div>
+					<div class="col-sm-9 jp-common-pad ">
+						<div class="col-sm-6  ">
+							<input class="form-control input-md" type="text" value="${(user.realname)!}" readonly="readonly">
+						</div>
+					</div>
+					<div class="clr"></div>
+				</li>
+			</ul>
+		</div>
+		<div class="row">
+			<h4 class="jp-set-pad jp-set-title">支付信息</h4>
+			<ul class="list-unstyled">
+				<li class="jp-set-pad">
+					<div class="col-sm-3 jp-common-pad  jp-set-info">申请金额</div>
+					<div class="col-sm-9 jp-common-pad ">
+						<div class="col-sm-6  ">
+							<input class="form-control input-md" type="text" name="extractPay.extract_money" value="${(extract.extract_money)!}" readonly="readonly">
+						</div>
+					</div>
+					<div class="clr"></div>
+				</li>
+				<li class="jp-set-pad">
+					<div class="col-sm-3 jp-common-pad  jp-set-info">支付金额(必填)</div>
+					<div class="col-sm-9 jp-common-pad ">
+						<div class="col-sm-6  ">
+							<input class="form-control input-md" type="text" name="extractPay.pay_money" value="${(extract.extract_money)!}">
+						</div>
+					</div>
+					<div class="clr"></div>
+				</li>
+				<li class="jp-set-pad">
+					<div class="col-sm-3 jp-common-pad  jp-set-info">备注</div>
+					<div class="col-sm-9 jp-common-pad ">
+						<div class="col-sm-6  ">
+							<input class="form-control input-md" type="text" name="extractPay.remark" value="${(extract.remark)!}">
+						</div>
+					</div>
+					<div class="clr"></div>
+				</li>
+			</ul>
+		</div>
+	</div>
+	
+	<div class="row">
+		<div class="col-xs-12">
+			<button type="button" onclick="doSubmit()" class="btn btn-primary">确认支付</button>
+		</div>
+	</div>
+	
+	</form>
+</section>
+
+
+
