@@ -4,50 +4,66 @@
 //获取验证码正确性
 function getVerifyCode(){
 	var telephone = $("#mobile").val();
-	$.get("${CPATH}/verifyCode/getVerifyCode?telephone="+telephone, function(data){
-		if(data.errorCode > 0){
-			toastr.error(data.message,'操作失败');
-		}else{
-			//location.reload();
-		}
-	});
+	if(telephone){
+		$.get("${CPATH}/verifyCode/getVerifyCode?telephone="+telephone, function(data){
+			if(data.errorCode > 0){
+				layer.msg('验证码获取失败：'+data.message);
+			}
+		});
+	}else{
+		layer.msg('请输入手机号码');
+	}
  }
  
  //获取验证码正确性
 function checkVerifyCode(){
+	var flag =false;
 	var telephone = $("#mobile").val();
 	var verifyCode = $("#verifyCode").val();
+	
+	if(typeof telephone == "undefined" || telephone == null || telephone == ""){
+		layer.msg('请输入手机号码');
+	}
+	if(typeof verifyCode == "undefined" || verifyCode == null || verifyCode == ""){
+		layer.msg('请输入验证码');
+	}
+	
 	$.get("${CPATH}/verifyCode/checkVerifyCode?telephone="+telephone+"&verifyCode="+verifyCode, function(data){
 		if(data.errorCode > 0){
-			return false;
+			flag = false;
 		}else{
-			return true;
+			flag =  true;
 		}
 	});
+	
+	return flag;
  }
 
 function doSubmit(){
+	var realname = $("#realname").val();
+	if(typeof realname == "undefined" || realname == null || realname == ""){
+		layer.msg('真实姓名');
+		return;
+	}
 	//先校验验证码正确性
-	if(checkVerifyCode()){
+	var flag = checkVerifyCode();
+	if(flag){
 		$("#form").ajaxSubmit({
 			type : "post", 
 			dataType : "json", 
-			success : function(data) { 
+			success : function(data) {
 				if(data.errorCode == 0){
-					location.reload();
+					window.location.href="${CPATH}/user/center";
 				}else{
-					toastr.error(data.message,'操作失败');
+					layer.msg('用户信息更新失败:'+data.message);
 				}
 			},
 			error : function() {
-				alert("信息提交错误");
+				layer.msg('用户信息更新失败');
 			}
 		});
-	}else{
-		toastr.error('验证码有误');
 	}
  }
-
 
 </#macro>
 <@layout>
