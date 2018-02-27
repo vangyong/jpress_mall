@@ -36,13 +36,13 @@ public class VerifyCodeQuery extends JBaseQuery{
     public VerifyCode checkVerifyCode(String telephone,String verifyCode){
         StringBuilder sql = new StringBuilder();
         sql.append(" SELECT t.* ");
-        sql.append(" FROM verifyCode t ");
+        sql.append(" FROM verifycode t ");
         sql.append(" WHERE 1=1 ");
         sql.append(" AND t.telephone = "+"'"+telephone+"'");
         sql.append(" AND t.code = "+"'"+verifyCode+"'");
         sql.append(" AND t.status = '"+VerifyCode.STATUS_UNVERIFY+"'");
         sql.append(" GROUP BY t.id ");
-        sql.append(" ORDER BY t.created DESC ");
+        sql.append(" ORDER BY t.created_time DESC ");
         return DAO.findFirst(sql.toString());
     }
     

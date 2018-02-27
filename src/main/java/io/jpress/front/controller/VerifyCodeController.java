@@ -72,8 +72,12 @@ public class VerifyCodeController extends BaseFrontController {
 			return;
 		}
 		VerifyCode verifyCodeObj = VerifyCodeQuery.me().checkVerifyCode(telephone,verifyCode);
-
-		renderAjaxResultForSuccess("ok");
+		
+		if (verifyCodeObj!=null) {
+			renderAjaxResultForSuccess();
+		} else {
+			renderAjaxResultForError();
+		}
 	}
 	
 }
