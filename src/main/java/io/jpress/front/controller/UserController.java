@@ -504,7 +504,7 @@ public class UserController extends BaseFrontController {
 
 	//用户待支付列表
 	public void userUnpayed(){
-		gotoUrl();
+		//gotoUrl();
 		int pageNumber=getParaToInt("pageNumber", 1);
 		BigInteger userId=getLoginedUser().getId();
 		setAttr("title","待支付订单");
@@ -514,7 +514,7 @@ public class UserController extends BaseFrontController {
 
 	//用户待收货列表
 	public void userUnreceived(){
-		gotoUrl();
+		//gotoUrl();
 		int pageNumber=getParaToInt("pageNumber", 1);
 		BigInteger userId=getLoginedUser().getId();
 		setAttr("title","待收货订单");
@@ -524,7 +524,7 @@ public class UserController extends BaseFrontController {
 
 	//用户待评价列表
 	public void userUncomment(){
-		gotoUrl();
+		//gotoUrl();
 		int pageNumber=getParaToInt("pageNumber", 1);
 		BigInteger userId=getLoginedUser().getId();
 		setAttr("title","待评价订单");
@@ -534,7 +534,7 @@ public class UserController extends BaseFrontController {
 
 	//用户所有订单列表
 	public void userTransaction(){
-		gotoUrl();
+		//gotoUrl();
 		int pageNumber=getParaToInt("pageNumber", 1);
 		BigInteger userId=getLoginedUser().getId();
 		setAttr("title","所有订单");
@@ -544,7 +544,7 @@ public class UserController extends BaseFrontController {
 
 	//用户订单详情
 	public void userTransactionItem(){
-		gotoUrl();
+		//gotoUrl();
 		BigInteger id=getParaToBigInteger("id");
 		Transaction transaction=TransactionQuery.me().findById(id);
 		List<TransactionItem> transactionItemList=TransactionItemQuery.me().findList(transaction.getId());
@@ -603,9 +603,6 @@ public class UserController extends BaseFrontController {
 		} else {
 			renderAjaxResultForError();
 		}
-		user.saveOrUpdate();
-
-		renderAjaxResultForSuccess("ok");
 	}
 	
 	
@@ -616,4 +613,32 @@ public class UserController extends BaseFrontController {
 		render("account_money.html");
 	}
 	
+	//报名成为吃货达人
+	public void userBeing(){
+		BigInteger userId=getLoginedUser().getId();
+		setAttr("user", UserQuery.me().findById(userId));
+		render("user_being.html");
+	}
+	
+	//用户成为吃货达人
+	public void doSaveUserBeing() {
+		BigInteger userId=getLoginedUser().getId();
+		final User user = UserQuery.me().findById(userId);
+		user.setAgentsLevel(user.AGENTS_LEVEL_1);
+		boolean saved = Db.tx(new IAtom() {
+			@Override
+			public boolean run() throws SQLException {
+				if (!user.saveOrUpdate()) {
+					return false;
+				}
+				return true;
+			}
+		});
+		if (saved) {
+			renderAjaxResultForSuccess();
+		} else {
+			renderAjaxResultForError();
+		}
+	}
+
 }

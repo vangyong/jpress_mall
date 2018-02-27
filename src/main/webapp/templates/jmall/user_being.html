@@ -1,0 +1,66 @@
+<#include "_inc/_layout.html"/>
+<#macro script>
+
+function unAgree(){
+	window.location.href="${CPATH}/user/center";
+ }
+
+function agree(){
+	$("#form").ajaxSubmit({
+		type : "post", 
+		dataType : "json", 
+		success : function(data) { 
+			if(data.errorCode == 0){
+				window.location.href="${CPATH}/user/center";
+			}else{
+				toastr.error(data.message,'操作失败');
+			}
+		},
+		error : function() {
+			alert("信息提交错误");
+		}
+	});
+ }
+
+</#macro>
+<@layout>
+<section>
+	<header class="major">
+        <h4>达人协议</h4>
+    </header>
+	<form action="${CPATH}/user/doSaveUserBeing" method="post" id="form">
+	<input type="hidden" name="user.id" value="${(user.id)!}">
+	<div class="col-xs-12 ">
+		<div class="row">
+			<span>
+			1　接受条款<br>
+
+		　　金苗网（以下简称“金苗”）根据以下服务条款为您提供服务。这些条款可由金苗随时更新，且毋须另行通知。金苗使用协议（以下简称“使用协议”）一旦发生变动，金苗将在网页上公布修改内容。修改后的使用协议一旦在网页上公布即有效代替原来的使用协议。
+		
+		　　您在使用金苗提供的各项服务之前，应仔细阅读本使用协议。如您不同意本使用协议及/或随时对其的修改，请您立即停止使用金苗网所提供的全部服务；您一旦使用金苗服务，即视为您已了解并完全同意本使用协议各项内容，包括金苗对使用协议随时所做的任何修改，并成为金苗用户（以下简称“用户”）。
+		2　服务说明
+		
+		　　金苗目前向用户提供如下服务：在线收听、下载有声图书；收藏图书；在金苗中发布评论、上传图片、上传音频文件；在论坛发布信息、回帖、发起投票、参与投票。除非本使用协议另有其它明示规定，增加或强化目前本服务的任何新功能，包括所推出的新产品，均受到本使用协议之规范。您了解并同意，本服务仅依其当前所呈现的状况提供，对于任何用户信息或个人化设定之时效、删除、传递错误、未予储存或其它任何问题，金苗均不承担任何责任。金苗保留不经事先通知为维修保养、升级或其它目的暂停本服务任何部分的权利。
+		3　遵守法律
+		
+		　　您同意遵守中华人民共和国相关法律法规的所有规定，并对以任何方式使用您的密码和您的帐号使用本服务的任何行为及其结果承担全部责任。如您的行为违反国家法律和法规的任何规定，有可能构成犯罪的，将被追究刑事责任，并由您承担全部法律责任。
+		
+		　　同时如果金苗有理由认为您的任何行为，包括但不限于您的任何言论和其它行为违反或可能违反国家法律和法规的任何规定，金苗可在任何时候不经任何事先通知终止向您提供服务。
+		4　您的注册义务
+		
+		　　为了能使用本服务，您同意以下事项：依本服务注册提示请您填写正确的手机号码，并确保今后更新的登陆邮箱、名号、头像等资料的有效性和合法性。若您提供任何违法、不道德或金苗认为不适合在金苗上展示的资料；或者金苗有理由怀疑你的资料属于程序或恶意操作，金苗有权暂停或终止您的帐号，并拒绝您于现在和未来使用本服务之全部或任何部分。
+		
+		　　金苗无须对任何用户的任何登记资料承担任何责任，包括但不限于鉴别、核实任何登记资料的真实性、正确性、完整性、适用性及/或是否为最新资料的责任。
+		5　用户帐号、密码及安全
+			</span>
+		</div>
+		<div class="row">
+			<button type="button" onclick="unAgree()" class="btn btn-primary">不同意</button>
+			<button type="button" onclick="agree()" class="btn btn-primary">同意</button>
+		</div>
+	</div>
+	
+	</form>
+	<#include "_inc/_user_bottom_bar.html"/>
+</section>
+</@layout>
