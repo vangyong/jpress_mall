@@ -117,6 +117,13 @@
 			success: function(data){
 				if(data.errorCode == 0){
 					//$("#alipayDiv").append(data.data);
+					if(data.data == '0.00'){//不需要支付
+						layer.msg('购买成功！</br>正在转到订单界面', function(){
+		                    window.location.href="${CPATH}/user/userTransaction?goto=${CPATH}/user/userTransaction";
+		                });
+		                return;
+					}
+					
 					wechatPayData = data.data;
                     //触发微信支付
                     if (typeof WeixinJSBridge == "undefined"){

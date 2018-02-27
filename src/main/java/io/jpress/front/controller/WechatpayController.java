@@ -22,7 +22,6 @@ import com.jfinal.weixin.sdk.api.PaymentApi.TradeType;
 import com.jfinal.weixin.sdk.kit.IpKit;
 import com.jfinal.weixin.sdk.kit.PaymentKit;
 import com.jfinal.weixin.sdk.utils.JsonUtils;
-import com.sun.media.jfxmedia.logging.Logger;
 
 import io.jpress.Consts;
 import io.jpress.core.BaseFrontController;
@@ -32,7 +31,6 @@ import io.jpress.model.Bonus;
 import io.jpress.model.Content;
 import io.jpress.model.ContentSpecItem;
 import io.jpress.model.Coupon;
-import io.jpress.model.CouponUsed;
 import io.jpress.model.ShoppingCart;
 import io.jpress.model.Transaction;
 import io.jpress.model.TransactionItem;
@@ -41,7 +39,6 @@ import io.jpress.model.UserAddress;
 import io.jpress.model.query.ContentQuery;
 import io.jpress.model.query.ContentSpecItemQuery;
 import io.jpress.model.query.CouponQuery;
-import io.jpress.model.query.CouponUsedQuery;
 import io.jpress.model.query.OptionQuery;
 import io.jpress.model.query.ShoppingCartQuery;
 import io.jpress.model.query.TransactionQuery;
@@ -610,6 +607,13 @@ public class WechatpayController extends BaseFrontController {
                     transaction.setCouponFee(couponFee);
                     transaction.setAmountFee(amountFee);
                     transaction.setCashFee(cashFee);
+                    
+                    //判断页面计算的支付金额是否与后台计算的支付金额相匹配
+                    if(payAmount.compareTo(transaction.getAmountFee().add(transaction.getCashFee())) != 0) {
+                        log.error("订单[{"+ transaction.getOrderNo() +"}]支付金额不匹配");
+                        return false;
+                    }
+                    
                     if(!transaction.update()){
                         log.error("订单[{"+ transaction.getOrderNo() +"}]更新金额失败..");
                         return false;
