@@ -255,10 +255,11 @@ public class UserController extends BaseFrontController {
 	public void center() {
 		User loginedUser = getLoginedUser();
 		if(loginedUser!=null) {
-			setAttr("accountMoney", "123");
-			setAttr("extractedMoney", "10");
-			setAttr("teamNum", "13");
-			setAttr("teamBuyAmount", "12000");
+		    User u = UserQuery.DAO.findById(loginedUser.getId());
+			setAttr("accountMoney", u.getAmount());
+			setAttr("extractedMoney", "10");//TODO
+			setAttr("teamNum", u.getTeamNum());
+			setAttr("teamBuyAmount", u.getTeamBuyAmount());
 			
 			setAttr("unpayed", TransactionQuery.me().findcount(getLoginedUser().getId(), Transaction.STATUS_1));
 			setAttr("unreceived", TransactionQuery.me().findcount(getLoginedUser().getId(), Transaction.STATUS_3));
@@ -460,6 +461,11 @@ public class UserController extends BaseFrontController {
 		setAttr("object", object);
 		setAttr(UserAddressPageTag.TAG_NAME, new UserAddressPageTag(getRequest(), pageNumber, userId, null));
 		setAttr(ShoppingCartPageTag.TAG_NAME, new ShoppingCartPageTag(getRequest(), pageNumber, ids, userId, null));
+		
+		//查询当前用户的优惠券信息
+        List<Coupon> couponList = CouponQuery.me().findListByUserId(1, 100, userId);
+        setAttr("couponList", couponList);
+        
 		render("user_settlement.html");
 	}
 
@@ -612,7 +618,7 @@ public class UserController extends BaseFrontController {
 	//账户余额
 	public void accountMoney(){
 		BigInteger userId=getLoginedUser().getId();
-		setAttr("user", UserQuery.me().findById(userId));
+		setAttr("user", UserQuery.DAO.findById(userId));
 		render("account_money.html");
 	}
 	

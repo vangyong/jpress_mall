@@ -26,6 +26,8 @@
 		var remark=$("#remark").val();
 		var shoppingCarts=$("input[name='shoppingCart.id']");
 		var userAddressId=$("#userAddress option:selected").val();
+		var payAmount =  $('#payAmount').val();
+		var couponUsedId =  $('#couponUsedId').val();
 		var shoppingCartIds=new Array();
 		if(shoppingCarts.length > 0){
 			$.each(shoppingCarts,function(n,shoppingCart) {
@@ -49,12 +51,21 @@
 				ucode:'${ucode!}',
 				remark:remark,
 				userAddressId:userAddressId,
-				shoppingCartIds:shoppingCartIds
+				shoppingCartIds:shoppingCartIds,
+				payAmount:payAmount,
+				couponUsedId:couponUsedId
 			},
 			success: function(data){
 				if(data.errorCode == 0){
 					//$("#alipayDiv").append(data.data);
 					wechatPayData = data.data;
+					if(data.data == '0.00'){//不需要支付
+						layer.msg('购买成功！</br>正在转到订单界面', function(){
+		                    window.location.href="${CPATH}/user/userTransaction?goto=${CPATH}/user/userTransaction";
+		                });
+		                return;
+					}
+					
                     //触发微信支付
                     if (typeof WeixinJSBridge == "undefined"){
 						if( document.addEventListener ){
@@ -238,6 +249,8 @@
 						<tbody>
 							<#list shoppingCarts as shoppingCart>
 								<input type="hidden" name="shoppingCart.id" value="${shoppingCart.id!}">
+								<input type="hidden" id="payAmount" name="payAmount" value="${object.get('price')!}">
+								<input type="hidden" id="couponUsedId" name="couponUsedId" value="0">
 								<tr>
 									<td style="width: 40%;">
 										<img class="image fit" src="${shoppingCart.thumbnail!}" alt="" />
@@ -267,14 +280,16 @@
 						</tfoot>-->
 					</table>
 				</div>
-				<diV class="box alt">
+				<div class="box alt">
 					<div class="row uniform">
 						<div class="12u$">
 							<p class="price">数量：${object.get('quantity')!}</p>
-							<p class="price">总金额：￥${object.get('price')!}</p>
+							<p class="price" id="totalAmount_P" value="${object.get('price')!}">总金额：￥${object.get('price')!}</p>
+							<p class="price" id="coupon_P" onclick="couponList()" style="cursor:pointer">优惠券></p>
+							<p class="price" id="payAmount_P" value="${object.get('price')!}">实付款：￥${object.get('price')!}</p>
 						</div>
 					</div>
-				</diV>
+				</div>
 			</@jp.shoppingCartPage>
 		</#if>
 		<#if content??>
@@ -284,8 +299,8 @@
 						<input type="hidden" id="contentId" name="contentId" value="${content.id!}">
 						<input type="hidden" id="specValueId" name="specValueId" value="${content.spec_value_id!}">
 						<input type="hidden" id="quantity" name="quantity" value="${quantity!}">
-						<input type="hidden" id="payAmount" name="payAmount" value="0">
-						<input type="hidden" id="couponUsedId" name="couponUsedId" value="">
+						<input type="hidden" id="payAmount" name="payAmount" value="${(content.price!)*(quantity!)}">
+						<input type="hidden" id="couponUsedId" name="couponUsedId" value="0">
 						<tr>
 							<td style="width: 40%;">
 								<img class="image fit" src="${content.thumbnail!}" alt="" />

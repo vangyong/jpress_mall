@@ -50,7 +50,7 @@
 			success : function(data) {
 				if(data.errorCode == 0){
 					var goto=window.location.href;
-					$("#form").attr("action","${CPATH}/user/userSettlement?goto="+goto+"").submit();
+					$("#form").attr("action","${CPATH}/user/userSettlement?goto="+encodeURI(encodeURI(goto))+"").submit();
 				}else if(data.errorCode == 2){
 					var goto=window.location.href;
 					var url="${CPATH}"+data.data+"?goto="+goto;
