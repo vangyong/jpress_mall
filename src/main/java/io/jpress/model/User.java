@@ -39,6 +39,9 @@ public class User extends BaseUser<User> {
 
     public static final String SOURCE_ALIPAY = "alipay";//支付宝用户
     public static final String SOURCE_WECHAT = "wechat";//微信用户
+    
+    public static final BigInteger AGENTS_LEVEL_1 = new BigInteger("1");//一级代理商
+    public static final BigInteger AGENTS_LEVEL_2 = new BigInteger("2");//二级代理商
 
 	public boolean isAdministrator() {
 		return ROLE_ADMINISTRATOR.equals(getRole());

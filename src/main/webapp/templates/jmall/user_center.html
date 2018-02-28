@@ -20,34 +20,27 @@
 <@layout>
 <section>
  <#include "_inc/_user_top_bar.html"/>
-    <!-- <header class="major">
-        <h4>用户中心</h4>
-    </header> -->
     <div class="box alt bottom" style="padding: 0 0 0 0;background: url(/templates/jmall/assets/images/indexBack.png) 100% 100%;margin:0 -2em 0 -2em;">
         <div class="row uniform" style="padding:0 0 1em 0">
             <div class="12u$" style="text-align: center;background: url(/templates/jmall/assets/images/userBack.png) 100% 100%;padding-bottom: 4em;padding-top: 7em">
+                <!-- <ul class="actions">
+                    <li><img class="litter-avatar" src="${CPATH}${USER.avatar!TPATH+'/images/avatar.jpg'}"/></li>
+                </ul> -->
                 <ul class="actions">
-                		<!-- <li><a href="${CPATH}/user/userSetting" class="icon fa-shopping-cart">设置</a></li> -->
-                	<li style="margin-right: 3em"><img src="/templates/jmall/assets/images/myQRcode.png" style="width: 27;height:49"/></li>
+                		<li style="margin-right: 3em"><img src="/templates/jmall/assets/images/myQRcode.png" style="width: 27;height:49"/></li>
                     <li>
                     	<img class="litter-avatar" src="${CPATH}${USER.avatar!TPATH+'/images/avatar11.jpg'}" style="width:7em;height:7em"/>
                     	<p style="color: #FFFFFF;margin-top: 1em"> ${USER.username!}</p>
                     </li>
-                    <li style="margin-left: 3em"><img  src="/templates/jmall/assets/images/myOrder.png" style="width: 27;height:49"/></li>
-                    <!-- <li ><a href="javascript:void(0)" onclick="modifyPassword()" class="icon fa-warning">修改密码</a></li>
-                    <li><a href="${CPATH}/user/userAddress" class="icon fa-plane">地址管理</a></li> -->
+                    <li style="margin-left: 3em" onclick="window.location.href='${CPATH}/user/userTransaction?goto=${CPATH}/user/userTransaction';"><img  src="/templates/jmall/assets/images/myOrder.png" style="width: 27;height:49"/></li>
                 </ul>
-               
-                <!-- <ul class="actions">
-                    <li style="color: #FFFFFF"> ${USER.username!}</li>
-                </ul> -->
             </div>
              <div style="width: 100%;padding: 0;position: relative;">
 				<li style="background: url(/templates/jmall/assets/images/userRim.png) 100% 100%;width：100%;height:31px;display: block;">
 				</li>
-				<div style="background: url(/templates/jmall/assets/images/userMoney.png) no-repeat;position: absolute;display: flex;flex-direction:column;text-align:center;width: 118px;height: 118px;top:-45px;left: 37%">
+				<div onclick="window.location.href='${CPATH}/user/userAmount?goto=${CPATH}/user/accountMoney';" style="background: url(/templates/jmall/assets/images/userMoney.png) no-repeat;position: absolute;display: flex;flex-direction:column;text-align:center;width: 118px;height: 118px;top:-45px;left: 37%">
 					<span style="color: #ffed27;margin-top: 23px;font-size: 12px">MEMBER POINTS</span>
-					<span style="color: #ffed27;font-size: 28px">999.99</span>
+					<span style="color: #ffed27;font-size: 28px">${accountMoney!}</span>
 					<span style="color: #ffed27">会员钱包</span>
 				</div>
 			</div>
@@ -57,12 +50,12 @@
                 </div>
                 <div class="box" style="text-align: center;">
                     <ul class="actions fit">
-                        <li ><a style="color: #3d4449;" href="${CPATH}/user/userAmount?goto=${CPATH}/user/userAmount" class="icon fa-jpy">账户余额<span class="mainRed">（${unpayed!}）</span></a></li>
-                        <li><a style="color: #3d4449;" href="${CPATH}/user/userRecovered?goto=${CPATH}/user/userRecovered" class="icon fa-truck">已提金额<span class="mainRed">（${unreceived!}）</span></a></li>
+                        <li ><a style="color: #3d4449;" href="${CPATH}/user/userAmount?goto=${CPATH}/user/accountMoney" class="icon fa-jpy">账户余额<span class="mainRed">（${accountMoney!}）</span></a></li>
+                        <li><a style="color: #3d4449;" href="${CPATH}/user/userRecovered?goto=${CPATH}/user/userRecovered" class="icon fa-truck">已提金额<span class="mainRed">（${extractedMoney!}）</span></a></li>
                     </ul>
                     <ul class="actions fit">
-                        <li><a style="color: #3d4449;" href="${CPATH}/user/userTeamNum?goto=${CPATH}/user/userTeamNum" class="icon fa-pencil-square-o">团队人数<span class="mainRed">（${uncomment!}）</span></a></li>
-                    		<li><a style="color: #3d4449;" href="${CPATH}/user/userTeamBuyAmount?goto=${CPATH}/user/userTeamBuyAmount" class="icon fa-pencil-square-o">团队消费总额<span class="mainRed">（${uncomment!}）</span></a></li>
+                        <li><a style="color: #3d4449;" href="${CPATH}/user/userTeamNum?goto=${CPATH}/user/userTeamNum" class="icon fa-pencil-square-o">团队人数<span class="mainRed">（${teamNum!}）</span></a></li>
+                    		<li><a style="color: #3d4449;" href="${CPATH}/user/userTeamBuyAmount?goto=${CPATH}/user/userTeamBuyAmount" class="icon fa-pencil-square-o">团队消费总额<span class="mainRed">（${teamBuyAmount!}）</span></a></li>
                     </ul>
                 </div>
             </div>
@@ -87,8 +80,8 @@
                 </div>
                 <div class="box" style="text-align: center;">
                     <ul class="actions fit">
-                        <li ><a style="color: #3d4449;" href="${CPATH}/user/userSetting" class="icon fa-jpy">基本信息<span class="mainRed">（${unpayed!}）</span></a></li>
-                        <li><a style="color: #3d4449;" href="${CPATH}/user/userAddress" class="icon fa-truck">地址管理<span class="mainRed">（${unreceived!}）</span></a></li>
+                        <li ><a style="color: #3d4449;" href="${CPATH}/user/userSetting" class="icon fa-jpy">基本信息</a></li>
+                        <li><a style="color: #3d4449;" href="${CPATH}/user/userAddress" class="icon fa-truck">地址管理</a></li>
                     </ul>
                 </div>
             </div>
@@ -116,13 +109,13 @@
 				</li>
 			</ul>
 			<ul class="icons" style="text-align: center;margin: 1em 0em 1em 0em;padding:1em -2em 1em -2em ">
-				<li style="width: 25%;padding:0;margin-left:-1em" >
+				<li style="width: 25%;padding:0;margin-left:-1em" onclick="window.location.href='${CPATH}/user/userUncomment';">
 					<img src="/templates/jmall/assets/images/userUncomment.png" style="width:45px;height:50px"/>
 				</li>
-				<li style="width: 25%;padding:0;margin-left:-1em" >
+				<li style="width: 25%;padding:0;margin-left:-1em" onclick="window.location.href='${CPATH}/user/shoppingCart';">
 					<img src="/templates/jmall/assets/images/userShoping.png" style="width:45px;height:50px"/>
 				</li>
-				<li style="width: 25%;padding:0;margin-left:-1em" >
+				<li style="width: 25%;padding:0;margin-left:-1em" onclick="window.location.href='${CPATH}/user/userUnreceived';">
 					<img src="/templates/jmall/assets/images/userUnreceived.png" style="width:45px;height:50px"/>
 				</li>
 				<li style="width: 25%;padding:0;margin-left:-1em" >
@@ -130,20 +123,22 @@
 				</li>
 			</ul>
 			<ul class="icons" style="text-align: center;margin: 1em 0em 1em 0em;padding:1em -2em 1em -2em ">
-				<li style="width: 25%;padding:0;margin-left:-1em" >
+				<li style="width: 25%;padding:0;margin-left:-1em" onclick="window.location.href='${CPATH}/user/userAddress';">
 					<img src="/templates/jmall/assets/images/userAddress.png" style="width:45px;height:50px"/>
 				</li>
 				<li style="width: 25%;padding:0;margin-left:-1em" >
 					<img src="/templates/jmall/assets/images/userQuestion.png" style="width:45px;height:50px"/>
 				</li>
-				<li style="width: 25%;padding:0;margin-left:-1em" >
+				<li style="width: 25%;padding:0;margin-left:-1em" onclick="window.location.href='${CPATH}/user/userSetting';">
 					<img src="/templates/jmall/assets/images/userSetup.png" style="width:45px;height:50px"/>
 				</li>
 				<li style="width: 25%;padding:0;margin-left:-1em" >
 					<img src="/templates/jmall/assets/images/userSetting.png" style="width:45px;height:50px"/>
 				</li>
 			</ul>
-			<div style="text-align: center;margin-top: 2em"><img src="/templates/jmall/assets/images/userBeing.png" style="width:177;height:41"/></div>
+			<div style="text-align: center;margin-top: 2em">
+				<img src="/templates/jmall/assets/images/userBeing.png" onclick="window.location.href='${CPATH}/user/userBeing';" style="width:177;height:41"/>
+			</div>
         </div>
     </div>
    

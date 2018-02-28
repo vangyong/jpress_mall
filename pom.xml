@@ -133,6 +133,38 @@
 			<systemPath>${basedir}/src/main/WEB_INF/lib/alipay-sdk-java20170307171631.jar</systemPath>
 		</dependency> -->
 		
+		
+		<!-- httpclient -->
+		<dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.5</version>
+        </dependency>
+		
+		<!-- xml解析 -->
+		<dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.16.14</version>
+        </dependency>
+		<dependency>
+            <groupId>com.squareup.retrofit2</groupId>
+            <artifactId>converter-simplexml</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+		<dependency>
+            <groupId>com.thoughtworks.xstream</groupId>
+            <artifactId>xstream</artifactId>
+            <version>1.4.9</version>
+        </dependency>
+        
+        <!-- 腾讯云短信 -->
+        <dependency>
+		  <groupId>com.github.qcloudsms</groupId>
+		  <artifactId>qcloudsms</artifactId>
+		  <version>1.0.2</version>
+		</dependency>
+		
     </dependencies>
 
     <build>

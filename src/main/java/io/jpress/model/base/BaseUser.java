@@ -495,5 +495,14 @@ public abstract class BaseUser<M extends BaseUser<M>> extends JModel<M> implemen
     public java.math.BigDecimal getTeamBuyAmount() {
         return get("team_buy_amount");
     }
+    
+
+	public void setAgentsLevel(java.math.BigInteger agentsLevel) {
+		set("agents_level", agentsLevel);
+	}
+
+	public java.math.BigInteger getAgentsLevel() {
+		return get("agents_level");
+	}
 
 }

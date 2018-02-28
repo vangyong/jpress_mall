@@ -56,6 +56,8 @@ public class Consts {
 	public static final String ROUTER_USER_CENTER = ROUTER_USER + "/center";
 	public static final String ROUTER_USER_LOGIN = ROUTER_USER + "/login";
 	public static final String ROUTER_USER_REGISTER = ROUTER_USER + "/register";
+	
+	public static final String ROUTER_VERIFYCODE = "/verifyCode";
 
 	public static final int ERROR_CODE_NOT_VALIDATE_CAPTHCHE = 1;
 	public static final int ERROR_CODE_USER_EMPTY = 2;
@@ -100,17 +102,19 @@ public class Consts {
 	public final static String INDEX_BANNER="index_banner";
 	public final static BigInteger INDEX_BANNER_ID=BigInteger.valueOf(1);
 	
-	
 	public static final String WECHAT_APPID = "wechat_appid";
 	public static final String WECHAT_APPSECRET = "wechat_appsecret";
 	public static final String WECHAT_SIGNATURE = "wechat_signature";
 	public static final String WECHAT_TIMESTAMP = "wechat_timestamp";
 	public static final String WECHAT_TOKEN = "wechat_timestamp";
 	public static final String WECHAT_NONCESTR = "wechat_nonceStr";
-	public static final String TSET = "/test";
-	public static final String TSET1 =TSET + "/test1";
-	public static final String TSET2 =TSET + "/test2";
-	public static final String TSET3 =TSET + "/test3";
-	public static final String TSET4 =TSET+ "/test4";
+
+	//企业付款到个人
+	public static final String WECHAT_PAY_MCHID = "wechat_pay_mchid";
+	public static final String WECHAT_PAY_SPBILL_CREATE_IP = "wechat_pay_spbill_create_ip";
+	
+	//腾讯云短信服务
+	public static final String TENCENT_SMS_APPID = "tencent_sms_APPID";
+	public static final String TENCENT_SMS_APPKEY = "tencent_sms_APPKEY";
 
 }

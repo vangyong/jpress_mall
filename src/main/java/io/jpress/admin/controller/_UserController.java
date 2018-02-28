@@ -22,7 +22,9 @@ import com.jfinal.plugin.activerecord.Page;
 import io.jpress.core.JBaseCRUDController;
 import io.jpress.core.interceptor.ActionCacheClearInterceptor;
 import io.jpress.interceptor.UCodeInterceptor;
+import io.jpress.model.Extract;
 import io.jpress.model.User;
+import io.jpress.model.query.ExtractQuery;
 import io.jpress.model.query.UserQuery;
 import io.jpress.router.RouterMapping;
 import io.jpress.router.RouterNotAllowConvert;
@@ -263,5 +265,19 @@ public class _UserController extends JBaseCRUDController<User> {
 			renderAjaxResultForError("请选择用户或者角色！");
 		}
 	}
+	
+	public void view() {
+	 	BigInteger id = getParaToBigInteger("id");
+		if (id != null) {
+			setAttr("user", UserQuery.me().findById(id));
+		}
+		String templateHtml = "admin_user_view.html";
+		if (TemplateManager.me().existsFile(templateHtml)) {
+			setAttr("include", TemplateManager.me().currentTemplatePath() + "/" + templateHtml);
+			return;
+		}
+		setAttr("include", "_view_include.html");
+	 }
+	
 
 }

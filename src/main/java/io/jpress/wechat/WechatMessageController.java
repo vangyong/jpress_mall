@@ -145,10 +145,10 @@ public class WechatMessageController extends MsgController {
                             if (setPid) {
                                 //跟新父亲（C）的团队人数
                                 if (pUser != null) {
-                                    if (Db.update("update jp_user set childNum = childNum + 1 where id = ?", pUser.getId()) <= 0) {
+                                    if (Db.update("update jp_user set child_num = child_num + 1 where id = ?", pUser.getId()) <= 0) {
                                         return false;
                                     }
-                                    if (Db.update("update jp_user set teamNum = teamNum + 1 where id = ?", pUser.getId()) <= 0) {
+                                    if (Db.update("update jp_user set team_num = team_num + 1 where id = ?", pUser.getId()) <= 0) {
                                         return false;
                                     }
                                 } else {
@@ -158,10 +158,10 @@ public class WechatMessageController extends MsgController {
                                 //更新父亲的父亲（B）的团队人数
                                 User ppUser = UserQuery.me().findById(pUser.getPid());
                                 if (ppUser != null) {
-                                    if (Db.update("update jp_user set childNum = childNum + 1 where id = ?", ppUser.getId()) <= 0) {
+                                    if (Db.update("update jp_user set child_num = child_num + 1 where id = ?", ppUser.getId()) <= 0) {
                                         return false;
                                     }
-                                    if (Db.update("update jp_user set teamNum = teamNum + 1 where id = ?", ppUser.getId()) <= 0) {
+                                    if (Db.update("update jp_user set team_num = team_num + 1 where id = ?", ppUser.getId()) <= 0) {
                                         return false;
                                     }
                                 } else {
@@ -171,10 +171,10 @@ public class WechatMessageController extends MsgController {
                                 //更新父亲的父亲的父亲（A）的团队人数
                                 User pppUser = UserQuery.me().findById(ppUser.getPid());
                                 if (pppUser != null) {
-                                    if (Db.update("update jp_user set childNum = childNum + 1 where id = ?", pppUser.getId()) <= 0) {
+                                    if (Db.update("update jp_user set child_num = child_num + 1 where id = ?", pppUser.getId()) <= 0) {
                                         return false;
                                     }
-                                    if (Db.update("update jp_user set teamNum = teamNum + 1 where id = ?", pppUser.getId()) <= 0) {
+                                    if (Db.update("update jp_user set team_num = team_num + 1 where id = ?", pppUser.getId()) <= 0) {
                                         return false;
                                     }
                                 }

@@ -53,4 +53,13 @@ public class CouponQuery extends JBaseQuery {
 	    return DAO.findFirst("select * from jp_coupon where code = ?" , code);
     }
 	
+	public Coupon findByUserIdAndUsedId(BigInteger userId, BigInteger couponUsedId) {
+        StringBuilder sqlBuilder = new StringBuilder("select c.*,cu.id as couponUsedId from coupon c,couponused cu "
+                + "where c.id = cu.coupon_id and cu.user_id = ? and cu.used = 0 and c.invalid = 0 "
+                + "and DATE(now()) <= c.last_date and cu.id = ?");
+        LinkedList<Object> params = new LinkedList<>();
+        params.add(userId);
+        params.add(couponUsedId);
+        return DAO.findFirst(sqlBuilder.toString(), params.toArray());
+    }
 }

@@ -288,4 +288,28 @@
            transactionalMode="off"
     />
 
+	<cache name="extract"
+	           maxEntriesLocalHeap="10000"
+	           maxEntriesLocalDisk="100000"
+	           eternal="false"
+	           overflowToDisk="true"
+	           diskSpoolBufferSizeMB="20"
+	           timeToIdleSeconds="300"
+	           timeToLiveSeconds="600"
+	           memoryStoreEvictionPolicy="LFU"
+	           transactionalMode="off"
+	    />
+	    
+	 <cache name="extractpay"
+	           maxEntriesLocalHeap="10000"
+	           maxEntriesLocalDisk="100000"
+	           eternal="false"
+	           overflowToDisk="true"
+	           diskSpoolBufferSizeMB="20"
+	           timeToIdleSeconds="300"
+	           timeToLiveSeconds="600"
+	           memoryStoreEvictionPolicy="LFU"
+	           transactionalMode="off"
+	    />   
+
 </ehcache>
