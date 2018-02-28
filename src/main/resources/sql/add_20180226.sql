@@ -1,12 +1,12 @@
---商户平台支付到个人配置
+-- 商户平台支付到个人配置
 insert into `jpress_mall`.`jp_option` ( `option_key`, `option_value`) values ( 'wechat_pay_mchid', '1337083401');
 insert into `jpress_mall`.`jp_option` ( `option_key`, `option_value`) values ( 'wechat_pay_spbill_create_ip', 'm.yuweiguoye.com');
---腾讯短信配置
+-- 腾讯短信配置
 insert into `jpress_mall`.`jp_option` ( `option_key`, `option_value`) values ( 'tencent_sms_APPID', '1400070735');
 insert into `jpress_mall`.`jp_option` ( `option_key`, `option_value`) values ( 'tencent_sms_APPKEY', '38b1e95302833109287dc76a4006363f');
 
 
---用户提现申请
+-- 用户提现申请
 DROP TABLE IF EXISTS `jp_extract`;
 CREATE TABLE `jp_extract` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',
@@ -24,7 +24,7 @@ CREATE TABLE `jp_extract` (
   KEY `status` (`status`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COMMENT='提现申请表';
 
---提现支付明细
+-- 提现支付明细
 DROP TABLE IF EXISTS `jp_extract_pay`;
 CREATE TABLE `jp_extract_pay` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',
@@ -36,7 +36,7 @@ CREATE TABLE `jp_extract_pay` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8mb4 COMMENT='提现支付明细';
 
---手机验证码
+-- 手机验证码
 DROP TABLE IF EXISTS `jp_verify_code`;
 CREATE TABLE `jp_verify_code` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',
