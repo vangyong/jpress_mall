@@ -2129,7 +2129,7 @@
 	}
 
 	body {
-		background: #ffffff;
+		/* background: #ffffff; */
 	}
 
 		body.is-loading *, body.is-loading *:before, body.is-loading *:after, body.is-resizing *, body.is-resizing *:before, body.is-resizing *:after {
@@ -2363,11 +2363,13 @@
 		margin: 0 0 2em 0;
 		padding: 0 0.75em 0.5em 0;
 	}
-
+	header.ModelOneMajor{
+		background-color: #9a9a9a;margin: 0 -2em 0 -2em;padding: 5px 0px 4px 5px
+	}
 	header.main > :last-child {
 		margin: 0 0 1em 0;
 	}
-
+	
 /* Form */
 
 	form {
@@ -2535,20 +2537,20 @@
 
 		input[type="checkbox"]:checked + label:before,
 		input[type="radio"]:checked + label:before {
-			background: #3d4449;
-			border-color: #3d4449;
-			color: #ffffff;
-			content: '\f00c';
+			background: #FFF;
+			color: #fe7a78;
+			font-size:0.8em;
+			content: '\f111';
 		}
 
 		input[type="checkbox"]:focus + label:before,
 		input[type="radio"]:focus + label:before {
-			border-color: #f56a6a;
-			box-shadow: 0 0 0 1px #f56a6a;
+			/* border-color: #f56a6a;
+			box-shadow: 0 0 0 1px #f56a6a; */ 
 		}
 
 	input[type="checkbox"] + label:before {
-		border-radius: 0.375em;
+		border-radius: 0.875em;
 	}
 
 	input[type="radio"] + label:before {
@@ -3114,6 +3116,16 @@
 			background-color: #f56a6a;
 			box-shadow: none;
 			color: #ffffff !important;
+		}
+		input[type="submit"].Modelspecial,
+		input[type="reset"].Modelspecial,
+		input[type="button"].Modelspecial,
+		button.Modelspecial,
+		.button.Modelspecial {
+			background-color: #f56a6a;
+			box-shadow: 1px 1px #9d9d9d;
+			color: #fff78b !important;
+			width:98px;
 		}
 
 			input[type="submit"].special:hover,

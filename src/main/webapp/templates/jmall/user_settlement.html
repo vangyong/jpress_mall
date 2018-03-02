@@ -221,12 +221,12 @@
 	
 </#macro>
 <@layout>
-<section>
+<section >
 	<div>
 		<input type="hidden" name="goto" value="${goto!}">
-		<header class="major">
-			<h4>填写订单</h4>
-		</header>
+		<header class="ModelOneMajor" style="background-color: #9a9a9a;margin: 0 -2em 15px -2em;padding: 5px 0px 4px 5px">
+	        <img src="/templates/jmall/assets/images/oderTag.png" style="width:87px;height:14px;"/>
+	    </header>
 		<@jp.userAddressPage pageSize="100">
 			<div class="row uniform">
 				<div class="12u$">
@@ -244,6 +244,9 @@
 		</@jp.userAddressPage>
 		<#if jp.shoppingCartPage??>
 			<@jp.shoppingCartPage pageSize="100">
+				<div style="margin: 5px -2em 5px -2em">
+					<img src="/templates/jmall/assets/images/orderRim.png" style="width: 100%;"/>
+				</div>
 				<div class="table-wrapper">
 					<table>
 						<tbody>
@@ -280,14 +283,18 @@
 						</tfoot>-->
 					</table>
 				</div>
-				<div class="box alt">
+				<div class="lineOrangeBode" style="height: 3px;width: 100%;background-color: #fd7879;margin-bottom: 10px"></div>
 					<div class="row uniform">
-						<div class="12u$">
+						<div class="12u$ align-right">
 							<p class="price">数量：${object.get('quantity')!}</p>
 							<p class="price" id="totalAmount_P" value="${object.get('price')!}">总金额：￥${object.get('price')!}</p>
-							<p class="price" id="coupon_P" onclick="couponList()" style="cursor:pointer">优惠券></p>
-							<p class="price" id="payAmount_P" value="${object.get('price')!}">实付款：￥${object.get('price')!}</p>
 						</div>
+					</div>
+				<div class="lineOrangeNor" style="height: 1px;width: 100%;background-color: #fd7879;margin-top: 10px"></div>
+				<div class="row uniform">
+					<div class="12u$ align-right">
+						<p class="price" id="coupon_P" onclick="couponList()" style="cursor:pointer">优惠券></p>
+						<p class="price" id="payAmount_P" value="${object.get('price')!}">实付款：￥${object.get('price')!}</p>
 					</div>
 				</div>
 			</@jp.shoppingCartPage>
@@ -332,7 +339,7 @@
 				</div>
 			</div>
 		</diV>
-		<div class="box alt">
+		<!-- <div class="box alt">
 			<div class="row uniform">
 				<div class="12u$">
 					<ul class="actions fit">
@@ -345,6 +352,17 @@
 						</#if>
 					</ul>
 				</div>
+			</div>
+		</div> -->
+	</div>
+	<div  style="position: fixed;bottom: 0px;height: 3.2em;width: 100%;margin: 0px -2em 0px -2em">
+		<div  style="display: flex;justify-content:space-between;align-items:center;">
+			<div  class="align-right" style="display: flex;flex-direction: column;text-align:right;width: 68%;padding-right:10px;background-color: #19e6d7;height: 3.2em;color: #ffee25">
+				<span>会员钱包余额</span>
+				<span style="font-weight: bold;font-size: 15px">$61.1</span>
+			</div>
+			<div style="display: flex;justify-content:space-between;align-items:center;width: 32%;background-color: #FF6647;height: 3.2em;text-align: center;">
+				<p  onclick="doSettlement()" style="color: #fef479;width: 100%;font-size: 16px">提交订单</p>
 			</div>
 		</div>
 	</div>

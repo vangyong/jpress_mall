@@ -79,15 +79,16 @@
 </#macro>
 <@layout>
 <section>
-	<header class="major">
-        <h4>购物车</h4>
+	<header class="ModelOneMajor" style="background-color: #9a9a9a;margin: 0 -2em 0 -2em;padding: 5px 0px 4px 5px">
+        <!-- <h4>购物车</h4> -->
+        <img src="/templates/jmall/assets/images/shopCartTag.png" style="width:69px;height:14px;"/>
     </header>
 	<@jp.shoppingCartPage pageSize="100">
-		<div class="table-wrapper">
+		<div class="table-wrapper" style="margin: 0 -2em 0 -2em;">
 			<form action="#" method="post">
 				<input type="hidden" name="goto" value="${goto!}">
 				<#if shoppingCarts?size gt 0>
-					<table>
+					<table >
 						<tbody>
 							<#list shoppingCarts as shoppingCart>
 								<tr>
@@ -129,14 +130,18 @@
 			</form>
 		</div>
 		<#if shoppingCarts?size gt 0>
-			<div class="box alt bottom">
-				<div class="row uniform">
-					<div class="12u$">
-						<ul class="actions fit">
-							<li><a href="javascript:void(0)" class="button fit" onclick="clearShoppingCart()">清空</a></li>
-							<li ><a href="javascript:void(0)" class="button fit" onclick="deleteShoppingCart()">删除</a></li>
-							<li><a href="javascript:void(0)" class="button special fit" onclick="userShoppingCartSettlement()">去结算</a></li>
-						</ul>
+			<div  style="position: fixed;bottom: 50px;height: 2.8em;width: 90%">
+				<div  style="display: flex;justify-content:space-between;align-items:center">
+					<!-- <li><a href="javascript:void(0)" class="button fit" onclick="clearShoppingCart()">清空</a></li>
+					<li ><a href="javascript:void(0)" class="button fit" onclick="deleteShoppingCart()">删除</a></li> -->
+					<div style="display: flex;align-items:center;margin-left: 5px">
+						<input class="shoppingCartChecked" type="checkbox" >
+						<label ></label>
+						<p style="margin-top:1.2em;color: #a7a7a7;margin-left: -10px">全选</p>
+					</div>
+					<div class="right" style="display: flex;justify-content:space-between;align-items:center;">
+						<span class="right" style="color: #f5696a;padding-right: 10px">合计：￥</span>
+						<div><a href="javascript:void(0)" class="button Modelspecial right" onclick="userShoppingCartSettlement()">去结算</a></div>
 					</div>
 				</div>
 			</div>
