@@ -2,6 +2,7 @@ package io.jpress.front.controller;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 
 import org.json.JSONException;
@@ -39,10 +40,13 @@ public class VerifyCodeController extends BaseFrontController {
 			public boolean run() throws SQLException {
 				boolean flag = verifyCode.saveOrUpdate();
 				if(flag) {
-					//调用短信接口发送短信
-					String content = "尊敬的客户你好,你获取的验证码为:"+verifyCode.getCode()+"【语味果业】";
+					//调用短信模版接口发送短信
 					try {
-						QcloudSmsUtil.sendSingle(telephone, content);
+						ArrayList<String> params = new ArrayList<String>();
+						params.add(verifyCode.getCode());
+						params.add("2");
+						QcloudSmsUtil.sendSingleTemp(90342,telephone,params);
+						
 					} catch (JSONException | HTTPException | IOException e) {
 						e.printStackTrace();
 						throw new SQLException();

@@ -52,9 +52,6 @@ public class QcloudSmsUtil {
     public static SmsSingleSenderResult sendSingleTemp(int tempId,String phoneNumber,ArrayList<String> params) throws JSONException, HTTPException, IOException{
     	  	//初始化单发
     		SmsSingleSender singleSender = new SmsSingleSender(TENCENT_SMS_APPID, TENCENT_SMS_APPKEY);
-    	    params.add("指定模板单发");
-    	    params.add("深圳");
-    	    params.add("小明");
     	    SmsSingleSenderResult singleSenderResult = singleSender.sendWithParam("86", phoneNumber, tempId, params, "", "", "");
     	    System.out.println(singleSenderResult);
     		return singleSenderResult;
