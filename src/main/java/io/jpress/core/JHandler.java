@@ -43,6 +43,10 @@ public class JHandler extends Handler {
 		request.setAttribute("SPATH", CPATH + "/static");
 		request.setAttribute("JPRESS_VERSION", Jpress.VERSION);
 
+		//增加域名
+		String WEBDOMAIN = Consts.WEB_DOMAIN;
+		request.setAttribute("WEBDOMAIN", WEBDOMAIN);
+		
 		// 程序还没有安装
 		if (!Jpress.isInstalled()) {
 			if (target.indexOf('.') != -1) {

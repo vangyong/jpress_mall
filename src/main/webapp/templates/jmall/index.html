@@ -1,6 +1,5 @@
 <#include "_inc/_layout.html"/>
 <#macro script>
-	layer.load();
 
 	function getQueryString(name) {
 	    var result = window.location.search.match(new RegExp("[\?\&]" + name + "=([^\&]+)", "i"));
@@ -11,9 +10,10 @@
 	}
 
 	window.onload=function(){ 
-		layer.closeAll('loading');
 		var cp_code = getQueryString("cp_code");
+		
 		if (cp_code != null && cp_code != '' &&　cp_code.length > 0) {
+			layer.load();
 			$.ajax({
 				type: "POST",
 				traditional: true,
@@ -33,13 +33,26 @@
 						  content: $('#coupon_div')
 						});
 					}
+					layer.closeAll('loading');
 				}
 			});
 		}
+		
 	} 
 	
 	function closeCouponDiv() {
 		layer.close(layer.index);
+	}
+	
+	function rightTopClick() {
+		layer.tips('暂时戳不动噢^_^', '#rightTopImg', {
+		  tips: [4, '#78BA32']
+		});
+	}
+	function leftTopClick() {
+		layer.tips('暂时戳不动噢^_^', '#leftTopImg', {
+		  tips: [3, '#78BA32']
+		});
 	}
 </#macro>
 <@layout>

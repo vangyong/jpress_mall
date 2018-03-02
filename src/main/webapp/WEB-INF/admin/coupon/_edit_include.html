@@ -1,0 +1,114 @@
+<!-- Content Header (Page header) -->
+<section class="content-header">
+	<h1>添加优惠券</h1>
+</section>
+<!-- Main content -->
+<section class="content">
+	<form action="${CPATH}/admin/coupon/save" method="post" id="form" enctype="multipart/form-data">
+	<input type="hidden" name="coupon.id" value="${(coupon.id)!}">
+	<div class="col-xs-12 ">
+		<div class="row">
+			<h4 class="jp-set-pad jp-set-title">全部信息</h4>
+			<ul class="list-unstyled">
+
+				<li class="jp-set-pad">
+					<div class="col-sm-3 jp-common-pad  jp-set-info">优惠券码</div>
+					<div class="col-sm-9 jp-common-pad ">
+						<div class="col-sm-6  ">
+							<input class="form-control input-md" type="text" name="coupon.code" value="${(coupon.code)!}" disabled="disabled">
+						</div>
+					</div>
+					<div class="clr"></div>
+				</li>
+
+				<li class="jp-set-pad">
+					<div class="col-sm-3 jp-common-pad  jp-set-info">优惠券名称 (必填)</div>
+					<div class="col-sm-9 jp-common-pad ">
+						<div class="col-sm-6  ">
+							<input class="form-control input-md" type="text" name="coupon.name" value="${(coupon.name)!}">
+						</div>
+					</div>
+					<div class="clr"></div>
+				</li>
+
+				<li class="jp-set-pad">
+					<div class="col-sm-3 jp-common-pad  jp-set-info">优惠券使用截止日期 (必填)</div>
+					<div class="col-sm-9 jp-common-pad ">
+						<div class="col-sm-6  ">
+							<input id="lastDate" placeholder="请选择日期" class="form-control input-md" type="text" name="coupon.last_date" value="${(coupon.lastDate)!}">
+						</div>
+					</div>
+					<div class="clr"></div>
+				</li>
+
+				<li class="jp-set-pad">
+					<div class="col-sm-3 jp-common-pad  jp-set-info">优惠券分类 (必填)</div>
+					<div class="col-sm-9 jp-common-pad ">
+						<div class="col-sm-6">
+						<select style="width: 160px" class="form-control input-sm" name="coupon.type" >
+							<option value="1" selected="selected">通用券</option>
+						</select>
+					</div>
+					</div>
+					<div class="clr"></div>
+				</li>
+
+				<li class="jp-set-pad">
+					<div class="col-sm-3 jp-common-pad  jp-set-info">总数量 (必填)</div>
+					<div class="col-sm-9 jp-common-pad ">
+						<div class="col-sm-6  ">
+							<input class="form-control input-md" type="text" name="coupon.total_num" value="${(coupon.totalNum)!}">
+						</div>
+					</div>
+					<div class="clr"></div>
+				</li>
+
+				<li class="jp-set-pad">
+					<div class="col-sm-3 jp-common-pad  jp-set-info">剩余数量 (必填)</div>
+					<div class="col-sm-9 jp-common-pad ">
+						<div class="col-sm-6  ">
+							<input class="form-control input-md" type="text" name="coupon.free_num" value="${(coupon.freeNum)!}">
+						</div>
+					</div>
+					<div class="clr"></div>
+				</li>
+
+				<li class="jp-set-pad">
+					<div class="col-sm-3 jp-common-pad  jp-set-info">优惠券金额 (必填)</div>
+					<div class="col-sm-9 jp-common-pad ">
+						<div class="col-sm-6  ">
+							<input class="form-control input-md" type="text" name="coupon.amount" value="${(coupon.amount)!}">
+						</div>
+					</div>
+					<div class="clr"></div>
+				</li>
+				
+				<li class="jp-set-pad">
+					<div class="col-sm-3 jp-common-pad  jp-set-info">使用规则</div>
+					<div class="col-sm-9 jp-common-pad ">
+						<div class="col-sm-7  ">
+							<div class="form-group">
+								<textarea class="form-control" rows="4" name="coupon.desc">${(coupon.desc)!}</textarea>
+							</div>
+						</div>
+					</div>
+					<div class="clr"></div>
+				</li>
+				
+				
+			</ul>
+			
+		</div>
+		
+	</div>
+	
+	<div class="row">
+		<div class="col-xs-12">
+			<button type="button" onclick="doSubmit()" class="btn btn-primary">保存更改</button>
+		</div>
+		</div>
+	</form>
+</section>
+
+
+

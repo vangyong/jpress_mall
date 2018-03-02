@@ -55,6 +55,9 @@ public class AdminMenuInitListener implements MessageListener {
 		//menuMnager.addMenuGroup(createAddonMenuGroup());
 		//menuMnager.addMenuGroup(createToolsMenuGroup());
 		menuMnager.addMenuGroup(createSettingMenuGroup());
+		
+		//新增优惠券菜单
+        menuMnager.addMenuGroup(createCouponMenuGroup());
 	}
 
 	public void initModuleMenuGroup(MenuManager menuMnager) {
@@ -208,4 +211,13 @@ public class AdminMenuInitListener implements MessageListener {
 //		return group;
 //	}
 
+
+    private MenuGroup createCouponMenuGroup() {
+        MenuGroup group = new MenuGroup("coupon", "fa fa-user", "优惠券");
+        {
+            group.addMenuItem(new MenuItem("list", "/admin/coupon", "所有优惠券"));
+            group.addMenuItem(new MenuItem("edit", "/admin/coupon/edit", "添加"));
+        }
+        return group;
+    }
 }

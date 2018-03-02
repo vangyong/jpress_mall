@@ -18,4 +18,10 @@ public class Coupon extends BaseCoupon<Coupon> {
     public java.math.BigInteger getCouponUsedId() {
         return get("couponUsedId");
     }
+    
+    @Override
+    public boolean saveOrUpdate() {
+        removeCache(getId());
+        return super.saveOrUpdate();
+    }
 }
