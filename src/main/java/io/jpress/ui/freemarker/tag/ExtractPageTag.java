@@ -37,7 +37,7 @@ public class ExtractPageTag extends JTag{
         orderBy=StringUtils.isBlank(orderBy) ? getParam("orderBy") : orderBy;
         Page<Extract> page=ExtractQuery.me().paginate(pageNumber, pagesize, userId, orderBy);
         setVariable("page", page);
-        setVariable("extract", page.getList());
+        setVariable("accountExtracts", page.getList());
 
         ExtractPaginateTag pagination=new ExtractPaginateTag(request, page);
         setVariable("pagination", pagination);
@@ -55,7 +55,7 @@ public class ExtractPageTag extends JTag{
 
         @Override
         protected String getUrl(int pageNumber) {
-            String url=JFinal.me().getContextPath()+"/user/userAddress";
+            String url=JFinal.me().getContextPath()+"/user/accountExtract";
             url+="?pageNumber="+pageNumber;
             if (StringUtils.isNotBlank(getAnchor())) {
                 url+="#"+getAnchor();

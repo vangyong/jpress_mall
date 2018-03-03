@@ -35,6 +35,10 @@ public class ExtractQuery extends JBaseQuery{
     public int deleteById(BigInteger id) {
         return DAO.doDelete("id = ?", id);
     }
+    
+    public int deleteByIds(String ids) {
+        return DAO.doDelete("id in ("+ids+")");
+    }
 
     public Page<Extract> paginate(int pageNumber, int pageSize, String keyword, String status) {
         String select = " SELECT t.* ";

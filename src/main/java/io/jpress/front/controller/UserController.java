@@ -30,6 +30,7 @@ import io.jpress.message.MessageKit;
 import io.jpress.model.*;
 import io.jpress.model.query.*;
 import io.jpress.router.RouterMapping;
+import io.jpress.ui.freemarker.tag.ExtractPageTag;
 import io.jpress.ui.freemarker.tag.ShoppingCartPageTag;
 import io.jpress.ui.freemarker.tag.TransactionPageTag;
 import io.jpress.ui.freemarker.tag.UserAddressPageTag;
@@ -44,7 +45,7 @@ import io.jpress.wechat.WechatUserInterceptor;
 
 @RouterMapping(url = Consts.ROUTER_USER)
 //@Before(UserInterceptor.class)
-//@Before(WechatUserInterceptor.class)
+@Before(WechatUserInterceptor.class)
 public class UserController extends BaseFrontController {
 
 	private void gotoUrl(){
@@ -613,11 +614,79 @@ public class UserController extends BaseFrontController {
 	
 	
 	//账户余额
-	public void accountMoney(){
+	public void accountDetail(){
 		BigInteger userId=getLoginedUser().getId();
 		setAttr("user", UserQuery.DAO.findById(userId));
-		render("account_money.html");
+		render("account_detail.html");
 	}
+	
+	
+	//钱包提现
+	public void accountExtract(){
+		int pageNumber=getParaToInt("pageNumber", 1);
+		BigInteger userId=getLoginedUser().getId();
+		setAttr(ExtractPageTag.TAG_NAME, new ExtractPageTag(getRequest(), pageNumber, userId, null));
+		render("account_extract.html");
+	}
+	
+	//新增钱包提现
+	public void addAccountExtract(){
+		BigInteger userId=getLoginedUser().getId();
+		User user = UserQuery.DAO.findById(userId);
+		if(user!=null){
+			renderAjaxResult("操作成功", 0, user);
+		}else{
+			renderAjaxResultForError("用户信息获取失败");
+		}
+	}
+	
+	public void doSaveAccountExtract(){
+		Extract extract=getModel(Extract.class);
+		if(StringUtils.isBlank(extract.getRealName())){
+			renderAjaxResultForError("真实姓名不能为空");
+			return;
+		}
+		if(StringUtils.isBlank(extract.getTelephone())){
+			renderAjaxResultForError("手机号码不能为空");
+			return;
+		}
+		if(extract.getExtractMoney()==null){
+			renderAjaxResultForError("提现金额不能为空");
+			return;
+		}
+		boolean flag = extract.saveOrUpdate();
+		if(flag){
+			renderAjaxResultForSuccess();
+		}else{
+			renderAjaxResultForError("操作失败");
+		}
+	}
+	
+	//删除钱包提现
+	public void doDeleteAccountExtract(){
+		String ids=getPara("ids");
+		if(StringUtils.isBlank(ids)){
+			renderAjaxResultForError("钱包提现id为空");
+			return;
+		}
+		ExtractQuery.me().deleteByIds(ids);
+		renderAjaxResultForSuccess();
+	}
+	
+	public void doGetAccountExtract(){
+		BigInteger id=getParaToBigInteger("id");
+		if(id==null){
+			renderAjaxResultForError("提现id不能为空");
+			return;
+		}
+		Extract accountExtract=ExtractQuery.me().findById(id);
+		if(accountExtract!=null){
+			renderAjaxResult("操作成功", 0, accountExtract);
+		}else{
+			renderAjaxResultForError("提现不存在");
+		}
+	}
+	
 	
 	//报名成为吃货达人
 	public void userBeing(){

@@ -1,0 +1,175 @@
+<#include "_inc/_layout.html"/>
+<#macro script>
+
+	function deleteAccountExtract(){
+		var accountExtracts=$(".accountExtractChecked:checked");
+		if(accountExtracts.length > 0){
+			layer.confirm('确定删除选中的提现申请', {
+				btn: ['确定','取消']
+			}, function(){
+				var accountExtractIds=new Array();
+				$.each(accountExtracts,function(n,accountExtract) {
+					accountExtractIds.push(accountExtract.value);
+				});
+				$.post('${CPATH}/user/doDeleteAccountExtract?ids='+accountExtractIds,function(data){
+					if(data.errorCode == 0){
+						location.reload();
+					}else if(data.errorCode == 2){
+						var goto=window.location.href;
+						var url="${CPATH}"+data.data+"?goto="+goto;
+						window.location.href=url;
+					}else{
+						layer.msg(data.message);
+					}
+				});
+			});
+		}else{
+			layer.msg('请选择收货地址');
+		}
+	}
+
+	function addAccountExtract(accountExtract){
+	    var userId='',realName='',telephone='',extactMoney=0;
+	    
+	    $.get('${CPATH}/user/addAccountExtract',function(data){
+				if(data.errorCode == 0){
+					var user = data.data;
+					userId=user.id;
+					realName=user.realname;
+					telephone=user.mobile;
+					
+					//打开新增窗口
+					layer.open({
+						type: 1,
+						skin: 'layui-layer-rim',
+						area: ['90%', 'auto'],
+						content: '<form id="accountExtractForm" action="${CPATH}/user/doSaveAccountExtract" method="post"><input type="hidden" name="extract.user_id" value="'+userId+'"><p><input type="text" name="extract.realname" value="'+realName+'" placeholder="请输入真实姓名" /></p><p><input type="text" name="extract.telephone" value="'+telephone+'" placeholder="请输入手机号码" /></p><p><input type="text" name="extract.extract_money" value="'+extactMoney+'" placeholder="提现金额（元）" /></p></form>',
+						btn: ['确定','取消'],
+						yes: function(index){
+							$("#accountExtractForm").ajaxSubmit({
+								type : "post",
+								dataType : "json",
+								success : function(data) {
+									if(data.errorCode == 0){
+										layer.close(index);
+										location.reload();
+									}else{
+										layer.msg(data.message);
+									}
+								},
+								error : function() {
+									layer.msg("信息提交错误");
+								}
+							});
+						}
+					});
+					
+				}else{
+					layer.msg(data.message);
+				}
+			});
+	}
+
+	function editAccountExtract(){
+		var accountExtract=$(".accountExtractChecked:checked");
+		if(accountExtract.length == 0){
+			layer.msg('请选择收货地址');
+		}else if(accountExtract.length == 1){
+			$.get('${CPATH}/user/doGetAccountExtract',{id:accountExtract.val()},function(data){
+				if(data.errorCode == 0){
+					addAccountExtract(data.data);
+				}else if(data.errorCode == 2){
+					var goto=window.location.href;
+					var url="${CPATH}"+data.data+"?goto="+goto;
+					window.location.href=url;
+				}else{
+					layer.msg(data.message);
+				}
+			});
+		}else{
+			layer.msg("只能选择一个收货地址");
+		}
+	}
+
+</#macro>
+<@layout>
+<section>
+	<header class="major">
+        <h4>钱包提现</h4>
+    </header>
+	<@jp.extractPage pageSize="100">
+		<div class="table-wrapper">
+			<form action="#" method="post">
+				<input type="hidden" name="goto" value="${goto!}">
+				<#if accountExtracts?size gt 0>
+					<table>
+						<tbody>
+							<#list accountExtracts as accountExtract>
+								<tr>
+									<td>
+										<#if "0"==accountExtract.status!>
+											<input class="accountExtractChecked" type="checkbox" id="accountExtract${accountExtract.id!}" value="${accountExtract.id!}">
+											<label for="accountExtract${accountExtract.id!}"></label>
+										</#if>
+									</td>
+									<td>
+										<P>${accountExtract.realName!}</P>
+									</td>
+									<td>
+										<P>${accountExtract.telephone!}</P>
+									</td>
+									<td>
+										<P>${accountExtract.extractMoney!}</P>
+									</td>
+									<td>
+										<#if "0"==accountExtract.status!>
+											<P>待审核	</P>
+										</#if>
+										<#if "1"==accountExtract.status!>
+											<P>审核通过</P>
+										</#if>
+										<#if "2"==accountExtract.status!>
+											<P>审核不通过</P>
+										</#if>
+										<#if "3"==accountExtract.status!>
+											<P>支付完成</P>
+										</#if>
+									</td>
+								</tr>
+							</#list>
+						</tbody>
+					</table>
+				<#else>
+					<p>暂时还没有提现记录...</p>
+				</#if>
+			</form>
+		</div>
+		<#if accountExtracts?size gt 0>
+			<div class="box alt bottom">
+				<div class="row uniform">
+					<div class="12u$">
+						<ul class="actions fit">
+							<li><a href="javascript:void(0)" class="button fit" onclick="deleteAccountExtract()">删除</a></li>
+							<li><a href="javascript:void(0)" onclick="addAccountExtract('')" class="button special fit">新增</a></li>
+							<!-- <li><a href="javascript:void(0)" onclick="editAccountExtract()" class="button special fit">修改</a></li> -->
+						</ul>
+					</div>
+				</div>
+			</div>
+		<#else>
+			<div class="box alt bottom">
+				<div class="row uniform">
+					<div class="12u$">
+						<ul class="actions fit">
+							<li></li>
+							<li><a href="javascript:void(0)" onclick="addAccountExtract('')" class="button special fit">新增</a></li>
+							<li></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</#if>
+	</@jp.extractPage>
+	<#include "_inc/_user_bottom_bar.html"/>
+</section>
+</@layout>
