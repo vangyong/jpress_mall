@@ -1,7 +1,5 @@
 <#include "_inc/_layout.html"/>
 <#macro script>
-alert(1111);
-	layer.load();
 
 	function getQueryString(name) {
 	    var result = window.location.search.match(new RegExp("[\?\&]" + name + "=([^\&]+)", "i"));
@@ -12,9 +10,10 @@ alert(1111);
 	}
 
 	window.onload=function(){ 
-		layer.closeAll('loading');
 		var cp_code = getQueryString("cp_code");
+		
 		if (cp_code != null && cp_code != '' &&　cp_code.length > 0) {
+			layer.load();
 			$.ajax({
 				type: "POST",
 				traditional: true,
@@ -34,13 +33,26 @@ alert(1111);
 						  content: $('#coupon_div')
 						});
 					}
+					layer.closeAll('loading');
 				}
 			});
 		}
+		
 	} 
 	
 	function closeCouponDiv() {
 		layer.close(layer.index);
+	}
+	
+	function rightTopClick() {
+		layer.tips('暂时戳不动噢^_^', '#rightTopImg', {
+		  tips: [4, '#78BA32']
+		});
+	}
+	function leftTopClick() {
+		layer.tips('暂时戳不动噢^_^', '#leftTopImg', {
+		  tips: [3, '#78BA32']
+		});
 	}
 </#macro>
 <@layout>
@@ -111,10 +123,10 @@ alert(1111);
     	<img src="/templates/jmall/assets/images/indexShoping.png" onclick="window.location.href='${CPATH}/user/shoppingCart';" style="width:46px;position: fixed;bottom: 0px;right: 0px;z-index: 98;"/>
     </div>
     
-   <div id="coupon_div" style="background: url(/templates/jmall/assets/images/userPacketBack.png);width: 327px;height:264px;margin: auto;text-align: center;display: none;" >
+    <div id="coupon_div" style="background: url(/templates/jmall/assets/images/userPacketBack.png);width: 327px;height:264px;margin: auto;text-align: center;display: none;" >
     	<img src="/templates/jmall/assets/images/userPacketTitle.png" style="width:159px;height:29px;margin-top: 15px"/>
     	<div style="background: url(/templates/jmall/assets/images/userPacketBlock.png);width: 271px;height:103px;margin-left: 28px;margin-top: 15px;display: flex;justify-content:space-between;">
-    		<span id="coupon_span" style="color:#ffaf66;font-size: 50px;font-weight: bolder;margin-left: 15%">900</span>
+    		<span id="coupon_span" style="color:#ffaf66;font-size: 50px;font-weight: bolder;margin-left: 15%"></span>
     		<img src="/templates/jmall/assets/images/userPacketRight.png" style="width:75px;height:48px;margin-right: 2%;margin-top: 8%"/>
     	</div>
     	<img src="/templates/jmall/assets/images/userPacketButton.png" style="width:151px;height:43px;margin-top:15px" onclick="closeCouponDiv()"/>

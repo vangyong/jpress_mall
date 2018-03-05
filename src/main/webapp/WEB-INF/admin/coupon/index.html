@@ -1,0 +1,77 @@
+<#include "../_inc/_layout.html"/> 
+<#macro script>
+function frozen(id){
+	$.get("${CPATH}/admin/coupon/frozen?ucode=${ucode}&id="+id, function(data){
+		if(data.errorCode > 0){
+			toastr.error(data.message,'操作失败');
+		}else{
+			location.reload();
+		}
+	});
+}
+
+function restore(id){
+	$.get("${CPATH}/admin/coupon/restore?ucode=${ucode}&id="+id, function(data){
+		if(data.errorCode > 0){
+			toastr.error(data.message,'操作失败');
+		}else{
+			location.reload();
+		}
+	});
+}
+
+
+var qrcode = new QRCode(document.getElementById("qrcode"), {
+	width : 200,
+	height : 200
+});
+
+function makeqrcode(code){
+	qrcode.makeCode("${WEBDOMAIN}/?cp_code=" + code);
+	layer.open({
+	  offset: 'auto',
+	  type: 1,
+	  title: false,
+	  closeBtn: 0,
+	  shadeClose: true,
+	  content: $('#qrcode')
+	});
+}
+
+function del(id){
+	if(confirm("确定删除吗？")){
+		$.get("${CPATH}/admin/user/delete?ucode=${ucode}&id="+id, function(data){
+			if(data.errorCode > 0){
+				toastr.error(data.message,'操作失败');
+			}else{
+				location.reload();
+			}
+		});
+	}
+}
+
+function batchAction(){
+	var roleSelect=$("#roleSelect").val();
+	$("#form").attr("action","${CPATH}/admin/user/batchRole?role="+roleSelect+"");
+	$("#form").ajaxSubmit({
+		type : "post",
+		dataType : "json",
+		success : function(result) {
+			if(result.errorCode > 0){
+				toastr.error(result.message,'操作失败');
+			}else{
+				location.reload();
+			}
+		},
+		error : function() {
+			alert("信息提交错误");
+		}
+	});
+}
+</#macro> 
+<@layout active_id=p child_active_id=c>
+<#include include/>
+</@layout>
+
+
+

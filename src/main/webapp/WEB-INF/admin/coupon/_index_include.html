@@ -1,0 +1,103 @@
+<section class="content-header">
+	<h1>
+		优惠券列表
+	</h1>
+</section>
+
+<!-- Main content -->
+<section class="content">
+	<div class="row content-row">
+		<ul class="jp-common-pad list-inline" style="float: left">
+			<li class="all">
+				<a class="current" href="#">
+					全部 <span class="count">（${couponCount!'0'}）</span>
+				</a>
+				|
+			</li>
+		</ul>
+
+	</div>
+
+	<div class="box ">
+		<!-- /.box-header -->
+		<div class="box-body jp-common-pad">
+		<form action="" method="POST" id="form">
+			<input type="hidden" name="ucode" value="${ucode}">
+			<table class="table table-striped">
+				<thead>
+					<tr>
+						<th style="width: 20px">
+							<label class="jp-common-pad ">
+								<input class="jp-common-pad " id="dataItem" value="0" onclick="checkAll(this)" title="全选" type="checkbox">
+							</label>
+						</th>
+						<th style="width: 15%">优惠券码</th>
+						<th>优惠券名称</th>
+						<th>优惠券使用截止日期</th>
+						<th>优惠券分类</th>
+						<th>总数量</th>
+						<th>剩余数量</th>
+						<th>优惠券金额</th>
+						<th>使用规则</th>
+						<th>创建时间</th>
+						<th>是否失效</th>
+					</tr>
+				</thead>
+				<tbody>
+					<#if page??> <#list page.getList() as bean>
+					<tr class="jp-onmouse">
+						<td>
+							<label class="jp-common-pad">
+								<input class="jp-common-pad" name="dataItem" type="checkbox" value="${bean.id}">
+							</label>
+						</td>
+						<td>
+						<strong><a href="${CPATH}/admin/coupon/edit?id=${bean.id}&c=${c!}&p=${p!}">${bean.code!}</a> <#if "frozen" == bean.status!> (冻结)</#if></strong>
+							<div class="jp-flash-comment">
+								<p class="row-actions jp-cancel-pad">
+									<span class="approve"> <a class="vim-a" href="${CPATH}/admin/coupon/edit?id=${bean.id}&c=${c!}&p=${p!}">编辑</a></span>
+									<#if 0==bean.invalid!> 
+									<span class="spam"> | <a class="vim-s vim-destructive" href="javascript:;" onclick="frozen('${bean.id}')">禁用</a></span> 
+									<#else> 
+									<span class="approve"> | <a class="vim-a" href="javascript:;" onclick="restore('${bean.id}')">启用</a></span> 
+									</#if>
+									<span class="approve"> | <a class="vim-a" href="javascript:;" onclick="makeqrcode('${bean.code}')">二维码</a></span>
+								</p>
+							</div>
+						</td>
+						<td>${bean.name!}</td>
+						<td>${bean.lastDate!}</td>
+						<td>
+							<#if 1==bean.type! >
+								通用券
+							</#if>
+						</td>
+						<td>${bean.totalNum!'0'}</td>
+						<td>${bean.freeNum!'0'}</td>
+						<td>${bean.amount!'0.00'}</td>
+						<td>${bean.desc!}</td>
+						<td>${bean.createdTime}</td>
+						<td>
+							<#if 1==bean.invalid! >
+								失效
+							<#elseif 0==bean.invalid!>
+								有效
+							</#if>
+						</td>
+					</tr>
+					</#list> </#if>
+				</tbody>
+			</table>
+		</form>
+		</div>
+		<!-- /.box-body -->
+	</div>
+	<!-- /.box -->
+
+	<div id="qrcode" style="width:200px; height:200px; display: none"></div>
+
+	<div class="cf">
+		<div class="pull-right"><#include "../_inc/_paginate_wrapper.html" /></div>
+	</div>
+	<!-- /.row -->
+</section>

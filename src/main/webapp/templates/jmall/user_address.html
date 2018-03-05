@@ -107,12 +107,37 @@
 
 </#macro>
 <@layout>
+<style>
+body{background-color: #f7f8f9}
+table tbody tr {border: solid 0px rgba(210, 215, 217, 0.75);border-bottom: solid 1px #fe797a;padding: 5px 0px 5px 0px;display: block;}
+table tbody tr{background-color: rgba(255,255,255,0)}
+</style>
 <section>
-	<header class="major">
-        <h4>收货地址</h4>
+	<header class="ModelOneMajor" style="background-color: #9a9a9a;margin: 0 -2em 0px -2em;padding: 5px 0px 4px 5px">
+        <img src="/templates/jmall/assets/images/addressTag.png" style="width:124px;height:14px;"/>
     </header>
+   <div style="margin: 0px -2em 0px -2em">
+		<img src="/templates/jmall/assets/images/orderRim.png" style="width: 100%;"/>
+	</div>
+	<p style="color: #fe797a;text-align: right;">默认收货地址</p>
+    <div  style="display: flex;align-items:center">
+    	<div style="width: 15%">
+			<input class="userAddressChecked" type="checkbox" >
+			<label></label>
+		</div>
+		<div>
+			<div style="display: flex;justify-content:space-between;">
+				<P style="font-size: 16px">阿猫</P>
+				<P style="font-size: 16px">13209485489</P>
+			</div>
+				<P style="font-size: 14px">成都市郫县犀浦晶华大道北段</P>
+		</div>
+    </div>
+    <div style="margin: 5px -2em 5px -2em">
+		<img src="/templates/jmall/assets/images/orderRim.png" style="width: 100%;"/>
+	</div>
 	<@jp.userAddressPage pageSize="100">
-		<div class="table-wrapper">
+		<div class="table-wrapper" style="margin: 0 -1em 15px -1em;">
 			<form action="#" method="post">
 				<input type="hidden" name="goto" value="${goto!}">
 				<#if userAddresss?size gt 0>
@@ -120,14 +145,16 @@
 						<tbody>
 							<#list userAddresss as userAddress>
 								<tr>
-									<td>
+									<td style="width: 15%">
 										<input class="userAddressChecked" type="checkbox" id="userAddress${userAddress.id!}" value="${userAddress.id!}">
 										<label for="userAddress${userAddress.id!}"></label>
 									</td>
 									<td>
-										<P>${userAddress.address!}</P>
-										<P>${userAddress.name!}</P>
-										<P>${userAddress.mobile!}</P>
+										<div style="display: flex;justify-content:space-between;">
+											<P style="font-size: 16px">${userAddress.name!}</P>
+											<P style="font-size: 16px">${userAddress.mobile!}</P>
+										</div>
+											<P style="font-size: 14px">${userAddress.address!}</P>
 									</td>
 								</tr>
 							</#list>

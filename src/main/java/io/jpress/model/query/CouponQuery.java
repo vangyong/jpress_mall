@@ -19,7 +19,12 @@ import java.math.BigInteger;
 import java.util.LinkedList;
 import java.util.List;
 
+import com.jfinal.plugin.activerecord.Page;
+import com.jfinal.plugin.ehcache.IDataLoader;
+
 import io.jpress.model.Coupon;
+import io.jpress.model.User;
+import io.jpress.utils.StringUtils;
 
 public class CouponQuery extends JBaseQuery {
 	public static final Coupon DAO = new Coupon();
@@ -61,5 +66,25 @@ public class CouponQuery extends JBaseQuery {
         params.add(userId);
         params.add(couponUsedId);
         return DAO.findFirst(sqlBuilder.toString(), params.toArray());
+    }
+	
+	public long findCount() {
+        return DAO.doFindCount();
+    }
+	
+	public Page<Coupon> paginate(int pageNumber, int pageSize , String orderby) {
+        String select = "select * ";
+        StringBuilder fromBuilder = new StringBuilder(" from coupon c ");
+        fromBuilder.append(" where 1=1 ");
+        return DAO.paginate(pageNumber, pageSize, select, fromBuilder.toString());
+    }
+	
+	public Coupon findById(final BigInteger couponId) {
+        return DAO.getCache(couponId, new IDataLoader() {
+            @Override
+            public Object load() {
+                return DAO.findById(couponId);
+            }
+        });
     }
 }

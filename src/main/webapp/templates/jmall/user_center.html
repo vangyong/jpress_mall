@@ -16,6 +16,16 @@
             layer.close(index);
         });
     }
+    function rightTopClick() {
+		layer.tips('暂时戳不动噢^_^', '#rightTopImg', {
+		  tips: [4, '#78BA32']
+		});
+	}
+	function leftTopClick() {
+		layer.tips('暂时戳不动噢^_^', '#leftTopImg', {
+		  tips: [3, '#78BA32']
+		});
+	}
 </#macro>
 <@layout>
 <section>
@@ -95,10 +105,10 @@
         </div> 
         <div style="padding-bottom: 3em;padding-top: 2.8em">
         	<ul class="icons" style="text-align: center;margin: 1em 0em 1em 0em;padding:1em -2em 1em -2em ">
-				<li style="width: 25%;padding:0;margin-left:-1em" >
+				<li style="width: 25%;padding:0;margin-left:-1em" onclick="window.location.href='${CPATH}/user/accountDetail';">
 					<img src="/templates/jmall/assets/images/userAmount.png" style="width:45px;height:50px"/>
 				</li>
-				<li style="width: 25%;padding:0;margin-left:-1em" >
+				<li style="width: 25%;padding:0;margin-left:-1em" onclick="window.location.href='${CPATH}/user/accountExtract';">
 					<img src="/templates/jmall/assets/images/userRecovered.png" style="width:45px;height:50px"/>
 				</li>
 				<li style="width: 25%;padding:0;margin-left:-1em" >

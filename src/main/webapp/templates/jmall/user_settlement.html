@@ -221,6 +221,10 @@
 	
 </#macro>
 <@layout>
+<style>
+table{margin:0px}
+table tbody tr{border: solid 0px rgba(210, 215, 217, 0.75);}
+</style>
 <section >
 	<div>
 		<input type="hidden" name="goto" value="${goto!}">
@@ -228,7 +232,7 @@
 	        <img src="/templates/jmall/assets/images/oderTag.png" style="width:87px;height:14px;"/>
 	    </header>
 		<@jp.userAddressPage pageSize="100">
-			<div class="row uniform">
+			<div class="row uniform" style="display: none;">
 				<div class="12u$">
 					<div class="select-wrapper">
 						<select id="userAddress" name="userAddress" >
@@ -238,6 +242,14 @@
 							</#list>
 						</select>
 						<!-- <a href="${CPATH}/user/userAddress" class="icon fa-plane">添加地址</a> -->
+					</div>
+				</div>
+			</div>
+			<div class="row uniform">
+				<div class="12u$">
+					<div style="display: flex;justify-content:center;align-items:center">
+						<img src="/templates/jmall/assets/images/addAddress_ico.png" style="width:25px;height:25px"/>
+						<span style="color: #ffc926;font-size: 22px;margin-left: 20px;font-weight: bold;">添加收货地址</span>
 					</div>
 				</div>
 			</div>
