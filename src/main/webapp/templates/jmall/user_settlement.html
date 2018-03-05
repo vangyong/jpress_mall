@@ -218,32 +218,88 @@
 		layer.close(layer.index);
 	}
 	
-	
+	function addUserAddress(userAddress){
+	    var id='',address='',name='',mobile='';
+		if(userAddress){
+			id=userAddress.id;
+			address=userAddress.address;
+			name=userAddress.name;
+			mobile=userAddress.mobile;
+		}
+		layer.open({
+			type: 1,
+			skin: 'layui-layer-rim',
+			area: ['90%', 'auto'],
+			content: '<form id="userAddressForm" action="${CPATH}/user/doSaveUserAddress" method="post"><input type="hidden" name="ucode" value="${ucode}"><input type="hidden" name="userAddress.id" value="'+id+'"><p><input type="text" name="userAddress.address" value="'+address+'" placeholder="请输入收货地址" /></p><p><input type="text" name="userAddress.name" value="'+name+'" placeholder="请输入收货人姓名" /></p><p><input type="text" name="userAddress.mobile" value="'+mobile+'" placeholder="请输入收货人手机号码" /></p></form>',
+			btn: ['确定','取消'],
+			yes: function(index){
+				$("#userAddressForm").ajaxSubmit({
+					type : "post",
+					dataType : "json",
+					success : function(data) {
+						if(data.errorCode == 0){
+							layer.close(index);
+							//location.reload();
+							var userAddress = data.data;
+							var op = "<option selected='selected' value='"+ userAddress.id +"'>" + userAddress.address+ "&nbsp;"+userAddress.name+"&nbsp;"+userAddress.mobile+"</p></option>";
+							$("#userAddress").prepend(op);//新增一个地址在第一位
+							$("#userAddress").attr("value",userAddress.id);//选中新增的地址
+						}else if(data.errorCode == 2){
+							layer.close(index);
+							var goto=window.location.href;
+							var url="${CPATH}"+data.data+"?goto="+goto;
+							window.location.href=url;
+						}else{
+							layer.msg(data.message);
+						}
+					},
+					error : function() {
+						layer.msg("信息提交错误");
+					}
+				});
+			}
+		});
+	}
 </#macro>
 <@layout>
-<section>
+<style>
+table{margin:0px}
+table tbody tr{border: solid 0px rgba(210, 215, 217, 0.75);}
+</style>
+<section >
 	<div>
 		<input type="hidden" name="goto" value="${goto!}">
-		<header class="major">
-			<h4>填写订单</h4>
-		</header>
+		<header class="ModelOneMajor" style="background-color: #9a9a9a;margin: 0 -2em 15px -2em;padding: 5px 0px 4px 5px">
+	        <img src="/templates/jmall/assets/images/oderTag.png" style="width:87px;height:14px;"/>
+	    </header>
 		<@jp.userAddressPage pageSize="100">
-			<div class="row uniform">
-				<div class="12u$">
-					<div class="select-wrapper">
-						<select id="userAddress" name="userAddress" >
-							<option value="">-请选择收货地址-</option>
-							<#list userAddresss as userAddress>
-								<option value="${userAddress.id!}">${userAddress.address!}&nbsp;${userAddress.name!}&nbsp;${userAddress.mobile!}</p></option>
-							</#list>
-						</select>
-						<!-- <a href="${CPATH}/user/userAddress" class="icon fa-plane">添加地址</a> -->
+				<div class="row uniform">
+					<div class="12u$">
+						<div class="select-wrapper">
+							<select id="userAddress" name="userAddress" >
+								<option value="">-请选择收货地址-</option>
+								<#list userAddresss as userAddress>
+									<option value="${userAddress.id!}">${userAddress.address!}&nbsp;${userAddress.name!}&nbsp;${userAddress.mobile!}</p></option>
+								</#list>
+							</select>
+							<!-- <a href="${CPATH}/user/userAddress" class="icon fa-plane">添加地址</a> -->
+						</div>
 					</div>
 				</div>
-			</div>
+				<div class="row uniform">
+					<div class="12u$">
+						<div style="display: flex;justify-content:center;align-items:center">
+							<img src="/templates/jmall/assets/images/addAddress_ico.png" style="width:25px;height:25px"/>
+							<span style="color: #ffc926;font-size: 22px;margin-left: 20px;font-weight: bold;" onclick="addUserAddress('')">添加收货地址</span>
+						</div>
+					</div>
+				</div>
 		</@jp.userAddressPage>
 		<#if jp.shoppingCartPage??>
 			<@jp.shoppingCartPage pageSize="100">
+				<div style="margin: 5px -2em 5px -2em">
+					<img src="/templates/jmall/assets/images/orderRim.png" style="width: 100%;"/>
+				</div>
 				<div class="table-wrapper">
 					<table>
 						<tbody>
@@ -280,14 +336,18 @@
 						</tfoot>-->
 					</table>
 				</div>
-				<div class="box alt">
+				<div class="lineOrangeBode" style="height: 3px;width: 100%;background-color: #fd7879;margin-bottom: 10px"></div>
 					<div class="row uniform">
-						<div class="12u$">
+						<div class="12u$ align-right">
 							<p class="price">数量：${object.get('quantity')!}</p>
 							<p class="price" id="totalAmount_P" value="${object.get('price')!}">总金额：￥${object.get('price')!}</p>
-							<p class="price" id="coupon_P" onclick="couponList()" style="cursor:pointer">优惠券></p>
-							<p class="price" id="payAmount_P" value="${object.get('price')!}">实付款：￥${object.get('price')!}</p>
 						</div>
+					</div>
+				<div class="lineOrangeNor" style="height: 1px;width: 100%;background-color: #fd7879;margin-top: 10px"></div>
+				<div class="row uniform">
+					<div class="12u$ align-right">
+						<p class="price" id="coupon_P" onclick="couponList()" style="cursor:pointer">优惠券></p>
+						<p class="price" id="payAmount_P" value="${object.get('price')!}">实付款：￥${object.get('price')!}</p>
 					</div>
 				</div>
 			</@jp.shoppingCartPage>
@@ -332,7 +392,7 @@
 				</div>
 			</div>
 		</diV>
-		<div class="box alt">
+		<!-- <div class="box alt">
 			<div class="row uniform">
 				<div class="12u$">
 					<ul class="actions fit">
@@ -345,6 +405,22 @@
 						</#if>
 					</ul>
 				</div>
+			</div>
+		</div> -->
+	</div>
+	<div  style="position: fixed;bottom: 0px;height: 3.2em;width: 100%;margin: 0px -2em 0px -2em">
+		<div  style="display: flex;justify-content:space-between;align-items:center;">
+			<div  class="align-right" style="display: flex;flex-direction: column;text-align:right;width: 68%;padding-right:10px;background-color: #19e6d7;height: 3.2em;color: #ffee25">
+				<span>会员钱包余额</span>
+				<span style="font-weight: bold;font-size: 15px">${amount!}</span>
+			</div>
+			<div style="display: flex;justify-content:space-between;align-items:center;width: 32%;background-color: #FF6647;height: 3.2em;text-align: center;">
+				<#if jp.shoppingCartPage??>
+					<p onclick="doShoppingCartSettlement()" style="color: #fef479;width: 100%;font-size: 16px">提交订单</p>
+				</#if>
+				<#if content??>
+					<p onclick="doSettlement()" style="color: #fef479;width: 100%;font-size: 16px">提交订单</p>
+				</#if>
 			</div>
 		</div>
 	</div>
