@@ -428,7 +428,8 @@ public class UserController extends BaseFrontController {
 			userAddress.setCreated(new Date());
 		}
 		if(userAddress.saveOrUpdate()){
-			renderAjaxResultForSuccess();
+//			renderAjaxResultForSuccess();
+			renderAjaxResult("success", 0, userAddress);
 		}else{
 			renderAjaxResultForError("操作失败");
 		}
@@ -457,7 +458,8 @@ public class UserController extends BaseFrontController {
 			return;
 		}
 		int pageNumber=getParaToInt("pageNumber", 1);
-		BigInteger userId=getLoginedUser().getId();
+		User currUser = getLoginedUser();
+        BigInteger userId=currUser.getId();
 		Object object=ShoppingCartQuery.me().getTotalFeeAndQuantity(ids, userId);
 		setAttr("object", object);
 		setAttr(UserAddressPageTag.TAG_NAME, new UserAddressPageTag(getRequest(), pageNumber, userId, null));
@@ -466,6 +468,7 @@ public class UserController extends BaseFrontController {
 		//查询当前用户的优惠券信息
         List<Coupon> couponList = CouponQuery.me().findListByUserId(1, 100, userId);
         setAttr("couponList", couponList);
+        setAttr("amount", currUser.getAmount());
         
 		render("user_settlement.html");
 	}
@@ -496,7 +499,8 @@ public class UserController extends BaseFrontController {
 		BigInteger specValueId=getParaToBigInteger("specValue.id");
 		Integer quantity=getParaToInt("quantity");
 		int pageNumber=getParaToInt("pageNumber", 1);
-		BigInteger userId=getLoginedUser().getId();
+		User currUser = getLoginedUser();
+		BigInteger userId=currUser.getId();
 		setAttr(UserAddressPageTag.TAG_NAME, new UserAddressPageTag(getRequest(), pageNumber, userId, null));
 		Content content=ContentQuery.me().find(contentId, specValueId);
 		setAttr("content", content);
@@ -505,6 +509,7 @@ public class UserController extends BaseFrontController {
 		//查询当前用户的优惠券信息
 		List<Coupon> couponList = CouponQuery.me().findListByUserId(1, 100, userId);
 		setAttr("couponList", couponList);
+		setAttr("amount", currUser.getAmount());
 		
 		render("user_settlement.html");
 	}

@@ -218,7 +218,48 @@
 		layer.close(layer.index);
 	}
 	
-	
+	function addUserAddress(userAddress){
+	    var id='',address='',name='',mobile='';
+		if(userAddress){
+			id=userAddress.id;
+			address=userAddress.address;
+			name=userAddress.name;
+			mobile=userAddress.mobile;
+		}
+		layer.open({
+			type: 1,
+			skin: 'layui-layer-rim',
+			area: ['90%', 'auto'],
+			content: '<form id="userAddressForm" action="${CPATH}/user/doSaveUserAddress" method="post"><input type="hidden" name="ucode" value="${ucode}"><input type="hidden" name="userAddress.id" value="'+id+'"><p><input type="text" name="userAddress.address" value="'+address+'" placeholder="请输入收货地址" /></p><p><input type="text" name="userAddress.name" value="'+name+'" placeholder="请输入收货人姓名" /></p><p><input type="text" name="userAddress.mobile" value="'+mobile+'" placeholder="请输入收货人手机号码" /></p></form>',
+			btn: ['确定','取消'],
+			yes: function(index){
+				$("#userAddressForm").ajaxSubmit({
+					type : "post",
+					dataType : "json",
+					success : function(data) {
+						if(data.errorCode == 0){
+							layer.close(index);
+							//location.reload();
+							var userAddress = data.data;
+							var op = "<option selected='selected' value='"+ userAddress.id +"'>" + userAddress.address+ "&nbsp;"+userAddress.name+"&nbsp;"+userAddress.mobile+"</p></option>";
+							$("#userAddress").prepend(op);//新增一个地址在第一位
+							$("#userAddress").attr("value",userAddress.id);//选中新增的地址
+						}else if(data.errorCode == 2){
+							layer.close(index);
+							var goto=window.location.href;
+							var url="${CPATH}"+data.data+"?goto="+goto;
+							window.location.href=url;
+						}else{
+							layer.msg(data.message);
+						}
+					},
+					error : function() {
+						layer.msg("信息提交错误");
+					}
+				});
+			}
+		});
+	}
 </#macro>
 <@layout>
 <style>
@@ -232,27 +273,27 @@ table tbody tr{border: solid 0px rgba(210, 215, 217, 0.75);}
 	        <img src="/templates/jmall/assets/images/oderTag.png" style="width:87px;height:14px;"/>
 	    </header>
 		<@jp.userAddressPage pageSize="100">
-			<div class="row uniform" style="display: none;">
-				<div class="12u$">
-					<div class="select-wrapper">
-						<select id="userAddress" name="userAddress" >
-							<option value="">-请选择收货地址-</option>
-							<#list userAddresss as userAddress>
-								<option value="${userAddress.id!}">${userAddress.address!}&nbsp;${userAddress.name!}&nbsp;${userAddress.mobile!}</p></option>
-							</#list>
-						</select>
-						<!-- <a href="${CPATH}/user/userAddress" class="icon fa-plane">添加地址</a> -->
+				<div class="row uniform">
+					<div class="12u$">
+						<div class="select-wrapper">
+							<select id="userAddress" name="userAddress" >
+								<option value="">-请选择收货地址-</option>
+								<#list userAddresss as userAddress>
+									<option value="${userAddress.id!}">${userAddress.address!}&nbsp;${userAddress.name!}&nbsp;${userAddress.mobile!}</p></option>
+								</#list>
+							</select>
+							<!-- <a href="${CPATH}/user/userAddress" class="icon fa-plane">添加地址</a> -->
+						</div>
 					</div>
 				</div>
-			</div>
-			<div class="row uniform">
-				<div class="12u$">
-					<div style="display: flex;justify-content:center;align-items:center">
-						<img src="/templates/jmall/assets/images/addAddress_ico.png" style="width:25px;height:25px"/>
-						<span style="color: #ffc926;font-size: 22px;margin-left: 20px;font-weight: bold;">添加收货地址</span>
+				<div class="row uniform">
+					<div class="12u$">
+						<div style="display: flex;justify-content:center;align-items:center">
+							<img src="/templates/jmall/assets/images/addAddress_ico.png" style="width:25px;height:25px"/>
+							<span style="color: #ffc926;font-size: 22px;margin-left: 20px;font-weight: bold;" onclick="addUserAddress('')">添加收货地址</span>
+						</div>
 					</div>
 				</div>
-			</div>
 		</@jp.userAddressPage>
 		<#if jp.shoppingCartPage??>
 			<@jp.shoppingCartPage pageSize="100">
@@ -371,10 +412,15 @@ table tbody tr{border: solid 0px rgba(210, 215, 217, 0.75);}
 		<div  style="display: flex;justify-content:space-between;align-items:center;">
 			<div  class="align-right" style="display: flex;flex-direction: column;text-align:right;width: 68%;padding-right:10px;background-color: #19e6d7;height: 3.2em;color: #ffee25">
 				<span>会员钱包余额</span>
-				<span style="font-weight: bold;font-size: 15px">$61.1</span>
+				<span style="font-weight: bold;font-size: 15px">${amount!}</span>
 			</div>
 			<div style="display: flex;justify-content:space-between;align-items:center;width: 32%;background-color: #FF6647;height: 3.2em;text-align: center;">
-				<p  onclick="doSettlement()" style="color: #fef479;width: 100%;font-size: 16px">提交订单</p>
+				<#if jp.shoppingCartPage??>
+					<p onclick="doShoppingCartSettlement()" style="color: #fef479;width: 100%;font-size: 16px">提交订单</p>
+				</#if>
+				<#if content??>
+					<p onclick="doSettlement()" style="color: #fef479;width: 100%;font-size: 16px">提交订单</p>
+				</#if>
 			</div>
 		</div>
 	</div>
