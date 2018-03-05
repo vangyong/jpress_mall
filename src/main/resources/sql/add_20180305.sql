@@ -1,0 +1,1 @@
+insert into `jpress_mall`.`jp_option` ( `option_key`, `option_value`) values ( 'wechat_pay_mchsecret', 'yuweiguoye2018opentmallbanzhangA');

@@ -580,20 +580,8 @@ public class UserController extends BaseFrontController {
 			return;
 		}
 		
-		if (StringUtils.isNotBlank(user.getEmail())) {
-			User dbUser = UserQuery.me().findUserByEmailAndFlag(user.getEmail(), User.FLAG_ADMIN);
-			if (dbUser != null && user.getId().compareTo(dbUser.getId()) != 0) {
-				renderAjaxResultForError("邮件地址已经存在，不能修改为该邮箱。");
-				return;
-			}
-		}
-		if (StringUtils.isNotBlank(user.getMobile())) {
-			User dbUser = UserQuery.me().findUserByMobileAndFlag(user.getMobile(), User.FLAG_ADMIN);
-			if (dbUser != null && user.getId().compareTo(dbUser.getId()) != 0) {
-				renderAjaxResultForError("手机号码地址已经存在，不能修修改为该手机号码。");
-				return;
-			}
-		}
+		
+	
 		boolean saved = Db.tx(new IAtom() {
 			@Override
 			public boolean run() throws SQLException {
@@ -621,12 +609,19 @@ public class UserController extends BaseFrontController {
 	}
 	
 	
-	//钱包提现
+	//钱包提现(如果用户真实姓名和手机号未完善，跳转到用户基本设置)
 	public void accountExtract(){
 		int pageNumber=getParaToInt("pageNumber", 1);
 		BigInteger userId=getLoginedUser().getId();
-		setAttr(ExtractPageTag.TAG_NAME, new ExtractPageTag(getRequest(), pageNumber, userId, null));
-		render("account_extract.html");
+		User user = UserQuery.me().findById(userId);
+		if(user!=null && user.getRealname()!=null) {
+			setAttr(ExtractPageTag.TAG_NAME, new ExtractPageTag(getRequest(), pageNumber, userId, null));
+			render("account_extract.html");
+		}else {
+			setAttr("user", user);
+			setAttr("msg", "请先完善基本信息");
+			redirect("/user/userSetting");
+		}
 	}
 	
 	//新增钱包提现

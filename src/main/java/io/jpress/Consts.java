@@ -111,6 +111,7 @@ public class Consts {
 
 	//企业付款到个人
 	public static final String WECHAT_PAY_MCHID = "wechat_pay_mchid";
+	public static final String WECHAT_MCH_SECRET = "wechat_pay_mchsecret";
 	public static final String WECHAT_PAY_SPBILL_CREATE_IP = "wechat_pay_spbill_create_ip";
 	
 	//腾讯云短信服务

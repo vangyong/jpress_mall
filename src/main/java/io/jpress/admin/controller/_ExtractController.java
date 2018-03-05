@@ -43,15 +43,14 @@ public class _ExtractController extends JBaseCRUDController<Extract> {
 	private static final String TRANSFERS_PAY_QUERY = "https://api.mch.weixin.qq.com/mmpaymkttransfers/gettransferinfo"; // 企业付款查询
 
 //	private static final String APP_ID = OptionQuery.me().findValue(Consts.WECHAT_APPID);
-//	
-//	private static final String APP_SECRET = OptionQuery.me().findValue(Consts.WECHAT_APPSECRET);
-//
 //	private static final String MCH_ID = OptionQuery.me().findValue(Consts.WECHAT_PAY_MCHID);
+//	private static final String MCH_SECRET = OptionQuery.me().findValue(Consts.WECHAT_MCHSECRET);
 	
 	//先测试
 	private static final String APP_ID = "wxd0b33231fc543b7b";
-	private static final String APP_SECRET = "34c9ec2d60cbdea41ebf163abd2a9617";
 	private static final String MCH_ID = "1337083401";
+	private static final String MCH_SECRET = "yuweiguoye2018opentmallbanzhangA";
+	
 
 	@Override
 	public void index() {
@@ -160,7 +159,7 @@ public class _ExtractController extends JBaseCRUDController<Extract> {
 						parm.put("amount", amount); //转账金额
 						parm.put("desc", "奖励提现"); //企业付款描述信息
 						parm.put("spbill_create_ip", OptionQuery.me().findValue(Consts.WECHAT_PAY_SPBILL_CREATE_IP)); //Ip地址
-						parm.put("sign", PayUtil.getSign(parm, APP_SECRET));
+						parm.put("sign", PayUtil.getSign(parm, MCH_SECRET));
 						String restxml = HttpUtil.posts(TRANSFERS_PAY, XmlUtil.xmlFormat(parm, false));
 						restmap = XmlUtil.xmlParse(restxml);
 					} catch (Exception e) {
