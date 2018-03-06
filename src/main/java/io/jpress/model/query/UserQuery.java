@@ -68,10 +68,16 @@ public class UserQuery extends JBaseQuery {
 		return null;
 	}
 
-	public Page<User> paginate(int pageNumber, int pageSize , String flag, String orderby) {
+	public Page<User> paginate(int pageNumber, int pageSize ,String keyword, String flag, String orderby) {
 		String select = "select * ";
 		StringBuilder fromBuilder = new StringBuilder(" from user u ");
 		fromBuilder.append(" where 1=1 ");
+		if(StringUtils.isNotBlank(keyword)){
+            fromBuilder.append(" AND ( ");
+            fromBuilder.append(" u.username like " +"%'" + keyword + "'%");
+            fromBuilder.append(" OR u.realname like " +"%'" + keyword + "'%");
+            fromBuilder.append(" ) ");
+        }
 		if(StringUtils.isNotBlank(flag)){
 			fromBuilder.append(" and u.flag = "+"'"+flag+"'");
 		}

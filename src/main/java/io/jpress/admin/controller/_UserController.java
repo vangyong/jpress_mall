@@ -44,10 +44,11 @@ import java.util.Map;
 public class _UserController extends JBaseCRUDController<User> {
 
 	public void index() {
+		String keyword=getPara("k", "").trim();
 		setAttr("userCount", UserQuery.me().findCount(User.FLAG_ADMIN));
 		setAttr("adminCount", UserQuery.me().findAdminCount(User.ROLE_ADMINISTRATOR, User.FLAG_ADMIN));
 
-		Page<User> page = UserQuery.me().paginate(getPageNumber(), getPageSize(), User.FLAG_ADMIN, null);
+		Page<User> page = UserQuery.me().paginate(getPageNumber(), getPageSize(),keyword,User.FLAG_ADMIN, null);
 		setAttr("page", page);
 
 		String templateHtml = "admin_user_index.html";
@@ -278,6 +279,22 @@ public class _UserController extends JBaseCRUDController<User> {
 		}
 		setAttr("include", "_view_include.html");
 	 }
+	
+	
+	public void member() {
+		String keyword=getPara("k", "").trim();
+		setAttr("userCount", UserQuery.me().findCount(User.FLAG_FRONT));
+		Page<User> page = UserQuery.me().paginate(getPageNumber(), getPageSize(),keyword, User.FLAG_FRONT, null);
+		setAttr("page", page);
+
+		String templateHtml = "admin_user_member.html";
+		if (TemplateManager.me().existsFile(templateHtml)) {
+			setAttr("include", TemplateManager.me().currentTemplatePath() + "/" + templateHtml);
+			return;
+		}
+		setAttr("include", "_member_include.html");
+	}
+
 	
 
 }
