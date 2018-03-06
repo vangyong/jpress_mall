@@ -42,14 +42,14 @@ public class _ExtractController extends JBaseCRUDController<Extract> {
 
 	private static final String TRANSFERS_PAY_QUERY = "https://api.mch.weixin.qq.com/mmpaymkttransfers/gettransferinfo"; // 企业付款查询
 
-//	private static final String APP_ID = OptionQuery.me().findValue(Consts.WECHAT_APPID);
-//	private static final String MCH_ID = OptionQuery.me().findValue(Consts.WECHAT_PAY_MCHID);
-//	private static final String MCH_SECRET = OptionQuery.me().findValue(Consts.WECHAT_MCHSECRET);
+	private static final String APP_ID = OptionQuery.me().findValue(Consts.WECHAT_APPID);
+	private static final String MCH_ID = OptionQuery.me().findValue(Consts.WECHAT_PAY_MCHID);
+	private static final String MCH_SECRET = OptionQuery.me().findValue(Consts.WECHAT_MCH_SECRET);
 	
 	//先测试
-	private static final String APP_ID = "wxd0b33231fc543b7b";
-	private static final String MCH_ID = "1337083401";
-	private static final String MCH_SECRET = "yuweiguoye2018opentmallbanzhangA";
+//	private static final String APP_ID = "wxd0b33231fc543b7b";
+//	private static final String MCH_ID = "1337083401";
+//	private static final String MCH_SECRET = "yuweiguoye2018opentmallbanzhangA";
 	
 
 	@Override
