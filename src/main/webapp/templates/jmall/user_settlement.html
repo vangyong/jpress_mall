@@ -353,6 +353,9 @@ table tbody tr{border: solid 0px rgba(210, 215, 217, 0.75);}
 			</@jp.shoppingCartPage>
 		</#if>
 		<#if content??>
+			<div style="margin: 5px -2em 5px -2em">
+				<img src="/templates/jmall/assets/images/orderRim.png" style="width: 100%;"/>
+			</div>
 			<div class="table-wrapper">
 				<table>
 					<tbody>
@@ -374,16 +377,20 @@ table tbody tr{border: solid 0px rgba(210, 215, 217, 0.75);}
 					</tbody>
 				</table>
 			</div>
-			<diV class="box alt">
-				<div class="row uniform">
-					<div class="12u$">
-						<p class="price">数量：${quantity!}</p>
-						<p class="price" id="totalAmount_P" value="${(content.price!)*(quantity!)}">总金额：￥${(content.price!)*(quantity!)}</p>
-						<p class="price" id="coupon_P" onclick="couponList()" style="cursor:pointer">优惠券></p>
-						<p class="price" id="payAmount_P" value="${(content.price!)*(quantity!)}">实付款：￥${(content.price!)*(quantity!)}</p>
-					</div>
+			<div class="lineOrangeBode" style="height: 3px;width: 100%;background-color: #fd7879;margin-bottom: 10px"></div>
+			<div class="row uniform">
+				<div class="12u$ align-right">
+					<p class="price">数量：${quantity!}</p>
+					<p class="price" id="totalAmount_P" value="${(content.price!)*(quantity!)}">总金额：￥${(content.price!)*(quantity!)}</p>
 				</div>
-			</diV>
+			</div>
+			<div class="lineOrangeNor" style="height: 1px;width: 100%;background-color: #fd7879;margin-top: 10px"></div>
+			<div class="row uniform">
+				<div class="12u$ align-right">
+					<p class="price" id="coupon_P" onclick="couponList()" style="cursor:pointer">优惠券></p>
+					<p class="price" id="payAmount_P" value="${(content.price!)*(quantity!)}">实付款：￥${(content.price!)*(quantity!)}</p>
+				</div>
+			</div>
 		</#if>
 		<diV class="box alt">
 			<div class="row uniform">
