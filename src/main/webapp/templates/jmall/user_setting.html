@@ -52,7 +52,8 @@ function doSubmit(){
 		return;
 	}
 	
-	var flag = checkVerifyCode();
+	//TODO 暂时屏蔽,jianb.jiang var flag = checkVerifyCode();
+	var flag = true;
 	if(flag){
 		$("#form").ajaxSubmit({
 		type : "post", 

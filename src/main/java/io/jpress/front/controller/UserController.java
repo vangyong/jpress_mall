@@ -716,4 +716,10 @@ public class UserController extends BaseFrontController {
 		}
 	}
 
+	//个人中心-奖金明细
+    public void userAmount(){
+        gotoUrl();
+        
+        render("user_amount.html");
+    }
 }
