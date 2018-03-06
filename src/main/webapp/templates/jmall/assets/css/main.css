@@ -3127,7 +3127,13 @@
 			color: #fff78b !important;
 			width:98px;
 		}
-
+		input[type="submit"].middle,
+		input[type="reset"].middle,
+		input[type="button"].middle,
+		button.middle,
+		.button.middle {
+			width:98px;
+		}
 			input[type="submit"].special:hover,
 			input[type="reset"].special:hover,
 			input[type="button"].special:hover,
