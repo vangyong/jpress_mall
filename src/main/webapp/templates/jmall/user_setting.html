@@ -74,38 +74,50 @@ function doSubmit(){
  
 </#macro>
 <@layout>
+<style>
+body{}
+.setting ul li{list-style:none;margin-top: 20px;padding-left: 1px}
+ul li input{border: 0px;background-color: #f7f9f8}
+input[type="text"], input[type="number"], input[type="password"], input[type="email"], input[type="tel"], input[type="search"], input[type="url"], select, textarea{border-radius:0em;border:solid 1px rgba(210, 215, 217, 0.75)}
+.settingButton{width: 90%;background-color: #f56a6a;color: #ffffff !important;margin-top:20px}
+.GetVerify{
+    position: absolute;
+    right: 0px;
+    top: 2px;box-shadow:inset 0 0 0 0px #f56a6a;border-radius:0px;border-left:1px solid rgba(210, 215, 217, 0.75); 
+}
+</style>
 <section>
 	<header class="major">
         <h4>个人信息</h4>
     </header>
     
-	<form action="${CPATH}/user/doSaveUserSetting" method="post" id="form">
+	<form class="setting" action="${CPATH}/user/doSaveUserSetting" method="post" id="form" style="margin: 0 -2em 0px -2em;">
 	<input type="hidden" name="user.id" value="${(user.id)!}">
 	<div class="col-xs-12 ">
-		<div class="row">
-			<ul class="list-unstyled">
+		<div class="row" style="margin-top: 20px">
+			<ul style="width: 100%">
 				<li class="jp-set-pad">
 					<div class="col-sm-9">
-						<div class="col-sm-3">真实姓名</div>
+						<div class="col-sm-3" style="margin-bottom: 10px;margin-left: 10px">真实姓名</div>
 						<div class="col-sm-6">
-							<input class="form-control input-md" type="text" id="realname" name="user.realname" value="${(user.realname)!}" >
+							<input class="form-control input-md"  type="text" id="realname" name="user.realname" value="${(user.realname)!}" >
 						</div>
 					</div>
 				</li>
 				
 				<li class="jp-set-pad">
 					<div class="col-sm-9">
-						<div class="col-sm-3">手机号码</div>
-						<div class="col-sm-6">
+						<div class="col-sm-3" style="margin-bottom: 10px;margin-left: 10px">手机号码</div>
+						<div class="col-sm-6" style="position: relative;">
 							<input class="form-control input-md" type="text" id="mobile" name="user.mobile" value="${(user.mobile)!}" >
-							<button type="button" onclick="getVerifyCode()" class="btn btn-primary">获取验证码</button>
+							<button class="GetVerify" type="button" onclick="getVerifyCode()" >获取验证码</button>
 						</div>
 					</div>
 				</li>
 				
 				<li class="jp-set-pad">
 					<div class="col-sm-9">
-						<div class="col-sm-3">验证码</div>
+						<div class="col-sm-3" style="margin-bottom: 10px;margin-left: 10px">验证码</div>
 						<div class="col-sm-6">
 							<input class="form-control input-md" type="text" id="verifyCode" name="verifyCode" >
 						</div>
@@ -116,10 +128,8 @@ function doSubmit(){
 		
 	</div>
 	
-	<div class="row">
-		<div class="col-xs-12">
-			<button type="button" onclick="doSubmit()" class="btn btn-primary">保存更改</button>
-		</div>
+	<div class="align-center" >
+			<button type="button" onclick="doSubmit()" class="settingButton">保存更改</button>
 	</div>
 	
 	
