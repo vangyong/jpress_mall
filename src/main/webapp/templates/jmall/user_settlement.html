@@ -269,8 +269,9 @@ table tbody tr{border: solid 0px rgba(210, 215, 217, 0.75);}
 <section >
 	<div>
 		<input type="hidden" name="goto" value="${goto!}">
-		<header class="ModelOneMajor" style="background-color: #9a9a9a;margin: 0 -2em 15px -2em;padding: 5px 0px 4px 5px">
-	        <img src="/templates/jmall/assets/images/oderTag.png" style="width:87px;height:14px;"/>
+		<header class="ModelOneMajor" style="background-color: #9a9a9a;margin: 0 -2em 15px -2em;padding: 5px 0px 4px 5px;display: flex;align-items:center;">
+	         <i class="fa fa-angle-left fa-2x" aria-hidden="true" style="color: #FFF;"></i>
+       		 <span style="color: #FFF;font-size: 15px;margin-left: 10px">确认订单</span>
 	    </header>
 		<@jp.userAddressPage pageSize="100">
 				<div class="row uniform">
