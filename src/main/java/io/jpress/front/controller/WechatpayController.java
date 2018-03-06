@@ -507,6 +507,20 @@ public class WechatpayController extends BaseFrontController {
                     transaction.setAmountFee(amountFee);
                     transaction.setCashFee(cashFee);
                     
+                    //4、如果使用了余额支付，需要记录余额支出
+                    if (amountFee.compareTo(BigDecimal.valueOf(0)) > 0) {
+                        Bonus bonusUser = new Bonus();
+                        bonusUser.setBonusType(5L);//订单消费
+                        bonusUser.setAmount(amountFee.negate());//负数
+                        bonusUser.setBonusTime(new Date());
+                        bonusUser.setBonusCycle(1L);//奖金计算周期类型（1 按订单结算也就是实时结算;2 按月结算）
+                        bonusUser.setTransactionId(transaction.getId());
+                        bonusUser.setUserId(userId);
+                        if (!bonusUser.save()) {
+                            return false;
+                        }
+                    }
+                    
                     //判断页面计算的支付金额是否与后台计算的支付金额相匹配
                     if(payAmount.compareTo(transaction.getAmountFee().add(transaction.getCashFee())) != 0) {
                         log.error("订单[{"+ transaction.getOrderNo() +"}]支付金额不匹配");
@@ -682,6 +696,20 @@ public class WechatpayController extends BaseFrontController {
                     transaction.setCouponFee(couponFee);
                     transaction.setAmountFee(amountFee);
                     transaction.setCashFee(cashFee);
+                    
+                    //4、如果使用了余额支付，需要记录余额支出
+                    if (amountFee.compareTo(BigDecimal.valueOf(0)) > 0) {
+                        Bonus bonusUser = new Bonus();
+                        bonusUser.setBonusType(5L);//订单消费
+                        bonusUser.setAmount(amountFee.negate());//负数
+                        bonusUser.setBonusTime(new Date());
+                        bonusUser.setBonusCycle(1L);//奖金计算周期类型（1 按订单结算也就是实时结算;2 按月结算）
+                        bonusUser.setTransactionId(transaction.getId());
+                        bonusUser.setUserId(userId);
+                        if (!bonusUser.save()) {
+                            return false;
+                        }
+                    }
                     
                     //判断页面计算的支付金额是否与后台计算的支付金额相匹配
                     if(payAmount.compareTo(transaction.getAmountFee().add(transaction.getCashFee())) != 0) {

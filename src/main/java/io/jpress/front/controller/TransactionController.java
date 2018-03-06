@@ -465,13 +465,36 @@ public class TransactionController extends BaseFrontController {
     //删除订单
     @Before(UCodeInterceptor.class)
     public void delete(){
-        BigInteger id=getParaToBigInteger("id");
+        final BigInteger id=getParaToBigInteger("id");
         if (id==null) {
             renderAjaxResultForError("订单id不能为空");
             return;
         }
-        TransactionQuery.me().deleteById(id);
-        TransactionItemQuery.me().deleteByTransactionId(id);
+        final Transaction transaction = TransactionQuery.me().findById(id);
+        if (!"".equals(transaction.getStatus())) {
+            renderAjaxResultForError("当前状态的订单不允许删除");
+            return;
+        }
+        final BigInteger userId = getLoginedUser().getId();
+        boolean saved=Db.tx(new IAtom() {
+            @Override
+            public boolean run() throws SQLException {
+                transaction.deleteById(id);
+                TransactionItemQuery.me().deleteByTransactionId(id);
+                
+                Bonus bonus = BonusQuery.me().findByTransactionId(id);
+                //退还余额
+                if (Db.update("update jp_user set amount = amount - ? where id = ?", bonus.getAmount(), userId) <= 0) {
+                    return false;
+                }
+                //删除余额支付记录
+                BonusQuery.me().deleteByTransactionId(id);
+                return true;
+            }
+        });
+        if (saved) {
+            
+        }
         renderAjaxResultForSuccess();
     }
 
