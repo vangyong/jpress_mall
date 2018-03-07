@@ -1,5 +1,6 @@
 package io.jpress.wechat.utils;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -44,7 +45,7 @@ public class HttpUtil {
 	
 	static{
 		try {
-			InputStream inputStream = Class.forName(HttpUtil.class.getName()).getResourceAsStream("apiclient_cert.p12");
+			InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("apiclient_cert.p12");
 			KeyStore keystore = KeyStore.getInstance("PKCS12");
 			char[] keyPassword = OptionQuery.me().findValue(Consts.WECHAT_PAY_MCHID).toCharArray(); //证书密码
 			keystore.load(inputStream, keyPassword);
