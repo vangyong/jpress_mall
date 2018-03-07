@@ -610,6 +610,7 @@ public class UserController extends BaseFrontController {
 	public void accountDetail(){
 		BigInteger userId=getLoginedUser().getId();
 		setAttr("user", UserQuery.DAO.findById(userId));
+		
 		render("account_detail.html");
 	}
 	
@@ -716,10 +717,4 @@ public class UserController extends BaseFrontController {
 		}
 	}
 
-	//个人中心-奖金明细
-    public void userAmount(){
-        gotoUrl();
-        
-        render("user_amount.html");
-    }
 }

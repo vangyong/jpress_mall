@@ -200,4 +200,38 @@ public class UserQuery extends JBaseQuery {
 		}
 	}
 
+	/**
+	 * <b>Description.:查找用户的余额明细</b><br>
+	 * <b>Author:jianb.jiang</b>
+	 * <br><b>Date:</b> 2018年3月6日 下午9:56:14
+	 * @param page
+	 * @param pagesize
+	 * @param gender
+	 * @param role
+	 * @param status
+	 * @param orderBy
+	 * @return
+	 */
+    public List<User> findAmountList(int page, int pagesize, BigInteger userId, String orderBy) {
+        StringBuilder sqlBuilder = new StringBuilder("select * from user u ");
+        LinkedList<Object> params = new LinkedList<Object>();
+
+        boolean needWhere = true;
+        needWhere = appendIfNotEmpty(sqlBuilder, "u.gender", gender, params, needWhere);
+        needWhere = appendIfNotEmpty(sqlBuilder, "u.role", role, params, needWhere);
+        needWhere = appendIfNotEmpty(sqlBuilder, "u.status", status, params, needWhere);
+
+        buildOrderBy(orderBy, sqlBuilder);
+
+        sqlBuilder.append(" LIMIT ?, ?");
+        params.add(page - 1);
+        params.add(pagesize);
+
+        if (params.isEmpty()) {
+            return DAO.find(sqlBuilder.toString());
+        } else {
+            return DAO.find(sqlBuilder.toString(), params.toArray());
+        }
+
+    }
 }

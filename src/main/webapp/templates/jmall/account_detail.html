@@ -1,57 +1,10 @@
 <#include "_inc/_layout.html"/>
 <#macro script>
-	function clearUserAddress(){
-		layer.confirm('确定清空收货地址吗', {
-			btn: ['确定','取消']
-		}, function(){
-			$.post('${CPATH}/user/doClearUserAddress',{ucode:'${ucode!}'},function(data){
-				if(data.errorCode == 0){
-					location.reload();
-				}else if(data.errorCode == 2){
-					var goto=window.location.href;
-					var url="${CPATH}"+data.data+"?goto="+goto;
-					window.location.href=url;
-				}else{
-					layer.msg(data.message);
-				}
-			});
-		});
-	}
-
+	
 </#macro>
 <@layout>
+</style>
 <section>
-	<header class="major">
-        <h4>钱包明细</h4>
-    </header>
-	<@jp.extractPage pageSize="100">
-		<div class="table-wrapper">
-			<form action="#" method="post">
-				<input type="hidden" name="goto" value="${goto!}">
-				<#if extract?size gt 0>
-					<table>
-						<tbody>
-							<#list extract as userAddress>
-								<tr>
-									<td>
-										<input class="userAddressChecked" type="checkbox" id="userAddress${userAddress.id!}" value="${userAddress.id!}">
-										<label for="userAddress${userAddress.id!}"></label>
-									</td>
-									<td>
-										<P>${userAddress.address!}</P>
-										<P>${userAddress.name!}</P>
-										<P>${userAddress.mobile!}</P>
-									</td>
-								</tr>
-							</#list>
-						</tbody>
-					</table>
-				<#else>
-					<p>收货地址空空的...</p>
-				</#if>
-			</form>
-		</div>
-	</@jp.extractPage>
-	<#include "_inc/_user_bottom_bar.html"/>
+	零钱明细...test
 </section>
 </@layout>

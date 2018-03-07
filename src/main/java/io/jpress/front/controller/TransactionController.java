@@ -471,7 +471,7 @@ public class TransactionController extends BaseFrontController {
             return;
         }
         final Transaction transaction = TransactionQuery.me().findById(id);
-        if (!"".equals(transaction.getStatus())) {
+        if (!"1".equals(transaction.getStatus())) {
             renderAjaxResultForError("当前状态的订单不允许删除");
             return;
         }

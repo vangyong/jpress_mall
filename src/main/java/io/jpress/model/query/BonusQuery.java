@@ -31,4 +31,15 @@ public class BonusQuery extends JBaseQuery {
         sql.append(" ORDER BY t.bonus_time DESC ");
         return DAO.findFirst(sql.toString());
     }
+    
+    public Bonus findByUserId(BigInteger userId){
+        StringBuilder sql = new StringBuilder();
+        sql.append(" SELECT t.* ");
+        sql.append(" FROM bonus t ");
+        sql.append(" WHERE 1=1 ");
+        sql.append(" AND t.user_id = "+userId);
+        sql.append(" ORDER BY t.bonus_time DESC ");
+        return DAO.findFirst(sql.toString());
+    }
+    
 }
