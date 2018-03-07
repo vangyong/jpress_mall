@@ -5,6 +5,25 @@
 <@layout>
 </style>
 <section>
-	零钱明细...test
+<@jp.userAmountPage pageSize="100">
+					<table>
+						<tbody>
+		<#list accountDetailList as accountDetail>
+								<tr>
+									<td>
+										${accountDetail.amountName!}
+									</td>
+									<td>
+										${accountDetail.amount!}
+									</td>
+									<td>
+										${accountDetail.amountTime!}
+									</td>
+								</tr>
+							</#list>
+						</tbody>
+					</table>
+</@jp.userAmountPage>					
+	<#include "_inc/_user_bottom_bar.html"/>
 </section>
 </@layout>

@@ -35,6 +35,7 @@ import io.jpress.ui.freemarker.tag.ExtractPageTag;
 import io.jpress.ui.freemarker.tag.ShoppingCartPageTag;
 import io.jpress.ui.freemarker.tag.TransactionPageTag;
 import io.jpress.ui.freemarker.tag.UserAddressPageTag;
+import io.jpress.ui.freemarker.tag.UserAmountPageTag;
 import io.jpress.utils.CookieUtils;
 import io.jpress.utils.EncryptUtils;
 import io.jpress.utils.StringUtils;
@@ -609,12 +610,14 @@ public class UserController extends BaseFrontController {
 	
 	//账户余额
 	public void accountDetail(){
-        BigInteger userId=getLoginedUser().getId();
+        /*BigInteger userId=getLoginedUser().getId();
 		List<Record> accountDetailList = UserQuery.me().findAmountList(getPageNumber(), getPageSize(), userId);
         if (accountDetailList != null && accountDetailList.size() == 0) {
             setAttr("accountDetailList", accountDetailList);
-        }
-        
+        }*/
+	    int pageNumber=getParaToInt("pageNumber", 1);
+        BigInteger userId=getLoginedUser().getId();
+	    setAttr(UserAmountPageTag.TAG_NAME, new UserAmountPageTag(getRequest(), pageNumber, userId, null));
 		render("account_detail.html");
 	}
 	

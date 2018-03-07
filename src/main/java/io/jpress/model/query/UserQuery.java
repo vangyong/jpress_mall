@@ -223,14 +223,14 @@ public class UserQuery extends JBaseQuery {
             "    when b.bonus_type=4 then '团队管理达标奖励' " +
             "    when b.bonus_type=5 then '购买商品付款' END as amountName, " +
             "    b.bonus_time as amountTime, " +
-            "    b.amount as amout " +
+            "    b.amount as amount " +
             " from jp_bonus b  " +
             "where b.user_id = ? " +
             "union  " +
             "select  " +
             "    '提现支付' as amountName, " +
             "    ep.payed_time as amountTime, " +
-            "    e.payed_money as amout " +
+            "    e.payed_money as amount " +
             "from jp_extract e,jp_extract_pay ep " +
             "where e.id = ep.extract_id " +
             "and e.`status` = 3 and e.user_id = ? " +
