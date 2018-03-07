@@ -20,6 +20,7 @@ import com.jfinal.aop.Clear;
 import com.jfinal.core.ActionKey;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.IAtom;
+import com.jfinal.plugin.activerecord.Record;
 
 import io.jpress.Consts;
 import io.jpress.core.BaseFrontController;
@@ -608,9 +609,12 @@ public class UserController extends BaseFrontController {
 	
 	//账户余额
 	public void accountDetail(){
-		BigInteger userId=getLoginedUser().getId();
-		setAttr("user", UserQuery.DAO.findById(userId));
-		
+        BigInteger userId=getLoginedUser().getId();
+		List<Record> accountDetailList = UserQuery.me().findAmountList(getPageNumber(), getPageSize(), userId);
+        if (accountDetailList != null && accountDetailList.size() == 0) {
+            setAttr("accountDetailList", accountDetailList);
+        }
+        
 		render("account_detail.html");
 	}
 	

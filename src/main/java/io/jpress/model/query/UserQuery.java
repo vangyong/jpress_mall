@@ -15,7 +15,9 @@
  */
 package io.jpress.model.query;
 
+import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Page;
+import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.ehcache.IDataLoader;
 import io.jpress.model.Metadata;
 import io.jpress.model.User;
@@ -212,25 +214,40 @@ public class UserQuery extends JBaseQuery {
 	 * @param orderBy
 	 * @return
 	 */
-    public List<User> findAmountList(int page, int pagesize, BigInteger userId, String orderBy) {
-        StringBuilder sqlBuilder = new StringBuilder("select * from user u ");
+    public List<Record> findAmountList(int page, int pagesize, BigInteger userId) {
+        StringBuilder sqlBuilder = new StringBuilder("select * from ( " +
+            "select  " +
+            " case when b.bonus_type=1 then '个人直接推广奖励' " +
+            "    when b.bonus_type=2 then '个人间接推广奖励' " +
+            "    when b.bonus_type=3 then '团队消费达标奖励' " +
+            "    when b.bonus_type=4 then '团队管理达标奖励' " +
+            "    when b.bonus_type=5 then '购买商品付款' END as amountName, " +
+            "    b.bonus_time as amountTime, " +
+            "    b.amount as amout " +
+            " from jp_bonus b  " +
+            "where b.user_id = ? " +
+            "union  " +
+            "select  " +
+            "    '提现支付' as amountName, " +
+            "    ep.payed_time as amountTime, " +
+            "    e.payed_money as amout " +
+            "from jp_extract e,jp_extract_pay ep " +
+            "where e.id = ep.extract_id " +
+            "and e.`status` = 3 and e.user_id = ? " +
+            ") a  " +
+            "order by a.amountTime desc");
         LinkedList<Object> params = new LinkedList<Object>();
 
-        boolean needWhere = true;
-        needWhere = appendIfNotEmpty(sqlBuilder, "u.gender", gender, params, needWhere);
-        needWhere = appendIfNotEmpty(sqlBuilder, "u.role", role, params, needWhere);
-        needWhere = appendIfNotEmpty(sqlBuilder, "u.status", status, params, needWhere);
-
-        buildOrderBy(orderBy, sqlBuilder);
-
         sqlBuilder.append(" LIMIT ?, ?");
+        params.add(userId);
+        params.add(userId);
         params.add(page - 1);
         params.add(pagesize);
 
         if (params.isEmpty()) {
-            return DAO.find(sqlBuilder.toString());
+            return Db.find(sqlBuilder.toString());
         } else {
-            return DAO.find(sqlBuilder.toString(), params.toArray());
+            return Db.find(sqlBuilder.toString(), params.toArray());
         }
 
     }
