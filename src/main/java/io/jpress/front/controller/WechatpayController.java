@@ -159,7 +159,7 @@ public class WechatpayController extends BaseFrontController {
         return JsonUtils.toJson(packageParams);
     }
     
-    @Clear({UserInterceptor.class})
+    @Clear({WechatUserInterceptor.class})
     public void pay() {
         try {
             // 支付结果通用通知文档: https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_7
