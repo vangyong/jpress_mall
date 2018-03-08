@@ -334,6 +334,7 @@ public class UserController extends BaseFrontController {
 		int pageNumber=getParaToInt("pageNumber", 1);
 		BigInteger userId=getLoginedUser().getId();
 		setAttr(ShoppingCartPageTag.TAG_NAME, new ShoppingCartPageTag(getRequest(), pageNumber, null, userId, null));
+		setAttr(Consts.ATTR_GLOBAL_WEB_TITLE, "购物车");
 		render("user_shopping_cart.html");
 	}
 
@@ -386,6 +387,7 @@ public class UserController extends BaseFrontController {
 		int pageNumber=getParaToInt("pageNumber", 1);
 		BigInteger userId=getLoginedUser().getId();
 		setAttr(UserAddressPageTag.TAG_NAME, new UserAddressPageTag(getRequest(), pageNumber, userId, null));
+		setAttr(Consts.ATTR_GLOBAL_WEB_TITLE, "收货地址");
 		render("user_address.html");
 	}
 
@@ -472,6 +474,7 @@ public class UserController extends BaseFrontController {
         setAttr("couponList", couponList);
         setAttr("amount", currUser.getAmount());
         
+        setAttr(Consts.ATTR_GLOBAL_WEB_TITLE, "订单确认");
 		render("user_settlement.html");
 	}
 
@@ -513,6 +516,7 @@ public class UserController extends BaseFrontController {
 		setAttr("couponList", couponList);
 		setAttr("amount", currUser.getAmount());
 		
+		setAttr(Consts.ATTR_GLOBAL_WEB_TITLE, "订单确认");
 		render("user_settlement.html");
 	}
 
@@ -522,6 +526,7 @@ public class UserController extends BaseFrontController {
 		int pageNumber=getParaToInt("pageNumber", 1);
 		BigInteger userId=getLoginedUser().getId();
 		setAttr("title","待支付订单");
+		setAttr(Consts.ATTR_GLOBAL_WEB_TITLE, "待支付订单");
 		setAttr(TransactionPageTag.TAG_NAME, new TransactionPageTag(getRequest(), pageNumber, Transaction.STATUS_1, userId, null));
 		render("user_transaction.html");
 	}
@@ -532,6 +537,7 @@ public class UserController extends BaseFrontController {
 		int pageNumber=getParaToInt("pageNumber", 1);
 		BigInteger userId=getLoginedUser().getId();
 		setAttr("title","待收货订单");
+        setAttr(Consts.ATTR_GLOBAL_WEB_TITLE, "待收货订单");
 		setAttr(TransactionPageTag.TAG_NAME, new TransactionPageTag(getRequest(), pageNumber, Transaction.STATUS_3, userId, null));
 		render("user_transaction.html");
 	}
@@ -542,6 +548,7 @@ public class UserController extends BaseFrontController {
 		int pageNumber=getParaToInt("pageNumber", 1);
 		BigInteger userId=getLoginedUser().getId();
 		setAttr("title","待评价订单");
+        setAttr(Consts.ATTR_GLOBAL_WEB_TITLE, "待评价订单");
 		setAttr(TransactionPageTag.TAG_NAME, new TransactionPageTag(getRequest(), pageNumber, Transaction.STATUS_4, userId, null));
 		render("user_transaction.html");
 	}
@@ -551,7 +558,8 @@ public class UserController extends BaseFrontController {
 		//gotoUrl();
 		int pageNumber=getParaToInt("pageNumber", 1);
 		BigInteger userId=getLoginedUser().getId();
-		setAttr("title","所有订单");
+		setAttr("title","全部订单");
+        setAttr(Consts.ATTR_GLOBAL_WEB_TITLE, "全部订单");
 		setAttr(TransactionPageTag.TAG_NAME, new TransactionPageTag(getRequest(), pageNumber, null, userId, null));
 		render("user_transaction.html");
 	}
@@ -564,6 +572,7 @@ public class UserController extends BaseFrontController {
 		List<TransactionItem> transactionItemList=TransactionItemQuery.me().findList(transaction.getId());
 		setAttr("transaction",transaction);
 		setAttr("transactionItemList",transactionItemList);
+		setAttr(Consts.ATTR_GLOBAL_WEB_TITLE, "订单详情");
 		render("user_transaction_item.html");
 	}
 
@@ -572,6 +581,7 @@ public class UserController extends BaseFrontController {
 	public void userSetting(){
 		BigInteger userId=getLoginedUser().getId();
 		setAttr("user", UserQuery.me().findById(userId));
+		setAttr(Consts.ATTR_GLOBAL_WEB_TITLE, "个人信息设置");
 		render("user_setting.html");
 	}
 	
@@ -618,6 +628,7 @@ public class UserController extends BaseFrontController {
 	    int pageNumber=getParaToInt("pageNumber", 1);
         BigInteger userId=getLoginedUser().getId();
 	    setAttr(UserAmountPageTag.TAG_NAME, new UserAmountPageTag(getRequest(), pageNumber, userId, null));
+	    setAttr(Consts.ATTR_GLOBAL_WEB_TITLE, "余额明细");
 		render("account_detail.html");
 	}
 	
@@ -629,10 +640,12 @@ public class UserController extends BaseFrontController {
 		User user = UserQuery.me().findById(userId);
 		if(user!=null && user.getRealname()!=null) {
 			setAttr(ExtractPageTag.TAG_NAME, new ExtractPageTag(getRequest(), pageNumber, userId, null));
+			setAttr(Consts.ATTR_GLOBAL_WEB_TITLE, "钱包提现");
 			render("account_extract.html");
 		}else {
 			setAttr("user", user);
 			setAttr("msg", "请先完善基本信息");
+			setAttr(Consts.ATTR_GLOBAL_WEB_TITLE, "基本信息完善");
 			redirect("/user/userSetting");
 		}
 	}
@@ -700,6 +713,7 @@ public class UserController extends BaseFrontController {
 	public void userBeing(){
 		BigInteger userId=getLoginedUser().getId();
 		setAttr("user", UserQuery.me().findById(userId));
+		setAttr(Consts.ATTR_GLOBAL_WEB_TITLE, "达人协议");
 		render("user_being.html");
 	}
 	

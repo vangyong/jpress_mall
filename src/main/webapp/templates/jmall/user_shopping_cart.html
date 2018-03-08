@@ -79,11 +79,11 @@
 </#macro>
 <@layout>
 <section>
-	<header class="ModelOneMajor" style="background-color: #9a9a9a;margin: 0 -2em 0 -2em;padding: 5px 0px 4px 5px;display: flex;align-items:center;">
-        <!-- <h4>购物车</h4> -->
+	<!-- <header class="ModelOneMajor" style="background-color: #9a9a9a;margin: 0 -2em 0 -2em;padding: 5px 0px 4px 5px;display: flex;align-items:center;">
+        <h4>购物车</h4>
        <i class="fa fa-angle-left fa-2x" aria-hidden="true" style="color: #FFF;"></i>
         <span style="color: #FFF;font-size: 15px;margin-left: 10px">购物车</span>
-    </header>
+    </header> -->
 	<@jp.shoppingCartPage pageSize="100">
 		<div class="table-wrapper" style="margin: 0 -2em 0 -2em;">
 			<form action="#" method="post">
@@ -126,7 +126,7 @@
 						</tfoot>-->
 					</table>
 				<#else>
-					<p>购物车空空的...</p>
+					<p style="margin-top: 20px;text-align: center;">购物车空空的...</p>
 				</#if>
 			</form>
 		</div>

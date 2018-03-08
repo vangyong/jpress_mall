@@ -269,12 +269,12 @@ table tbody tr{border: solid 0px rgba(210, 215, 217, 0.75);}
 <section >
 	<div>
 		<input type="hidden" name="goto" value="${goto!}">
-		<header class="ModelOneMajor" style="background-color: #9a9a9a;margin: 0 -2em 15px -2em;padding: 5px 0px 4px 5px;display: flex;align-items:center;">
+		<!-- <header class="ModelOneMajor" style="background-color: #9a9a9a;margin: 0 -2em 15px -2em;padding: 5px 0px 4px 5px;display: flex;align-items:center;">
 	         <i class="fa fa-angle-left fa-2x" aria-hidden="true" style="color: #FFF;"></i>
        		 <span style="color: #FFF;font-size: 15px;margin-left: 10px">确认订单</span>
-	    </header>
+	    </header> -->
 		<@jp.userAddressPage pageSize="100">
-				<div class="row uniform">
+				<div class="row uniform" style="padding: 5px 0px 4px 5px;">
 					<div class="12u$">
 						<div class="select-wrapper">
 							<select id="userAddress" name="userAddress" >
@@ -446,7 +446,7 @@ table tbody tr{border: solid 0px rgba(210, 215, 217, 0.75);}
 						</div>
 				</div>
 				<#list couponList as coupon>
-					<div style="display: flex;flex-direction:row;align-items:center">
+					<div style="display: flex;flex-direction:row;align-items:center;">
 						<div id="${coupon.couponUsedId!}" onclick="chooseCoupon(this)" value="${coupon.amount!}">
 							<input class="couponChecked" type="radio" id="${coupon.couponUsedId!}">
 							<label for="coupon${coupon.id!}"></label>

@@ -96,7 +96,7 @@ public class WechatpayController extends BaseFrontController {
             
             String jsonStr = wechartPrePay(openId, transaction.getOrderNo(), transaction.getCashFee());
             
-            System.out.println(jsonStr);
+            log.info(jsonStr);
             renderAjaxResult("操作成功", 0, jsonStr);
         } catch (Exception e) {
             log.error("系统异常:",e);
@@ -124,13 +124,13 @@ public class WechatpayController extends BaseFrontController {
         params.put("nonce_str", Long.toString(System.currentTimeMillis() / 1000));
         params.put("notify_url", notifyUrl);
         params.put("openid", openId);
-        System.out.println("微信统一下单输入参数：" + params);
+        log.info("微信统一下单输入参数：" + params);
         
         String sign = PaymentKit.createSign(params, paternerKey);
         params.put("sign", sign);
         String xmlResult = PaymentApi.pushOrder(params);
         
-        System.out.println("微信统一下单返回参数：" + xmlResult);
+        log.info("微信统一下单返回参数：" + xmlResult);
         Map<String, String> result = PaymentKit.xmlToMap(xmlResult);
         
         String returnCode = result.get("return_code");
@@ -164,7 +164,7 @@ public class WechatpayController extends BaseFrontController {
         try {
             // 支付结果通用通知文档: https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_7
             String xmlMsg = HttpKit.readData(getRequest());
-            System.out.println("支付通知=" + xmlMsg);
+            log.info("支付通知=" + xmlMsg);
             Map<String, String> params = PaymentKit.xmlToMap(xmlMsg);
 
             //-----------test-----------------------
@@ -543,7 +543,7 @@ public class WechatpayController extends BaseFrontController {
                     String openId = new ApiResult(userJson).getStr("openid");
                     jsonStr = wechartPrePay(openId, orderNo, transaction.getCashFee());
                 }
-                System.out.println(jsonStr);
+                log.info(jsonStr);
                 renderAjaxResult("操作成功", 0, jsonStr);
             }else{
                 log.error("保存订单数据失败了!!");
@@ -732,7 +732,7 @@ public class WechatpayController extends BaseFrontController {
                     String openId = new ApiResult(userJson).getStr("openid");
                     jsonStr = wechartPrePay(openId, orderNo, transaction.getCashFee());
                 }
-                System.out.println(jsonStr);
+                log.info(jsonStr);
                 renderAjaxResult("操作成功", 0, jsonStr);
             }else{
                 log.error("保存订单数据失败了!!");

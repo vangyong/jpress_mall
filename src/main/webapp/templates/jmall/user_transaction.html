@@ -133,9 +133,9 @@
 </#macro>
 <@layout>
 <section>
-    <header class="major">
+    <!-- <header class="major">
         <h4>${title!}</h4>
-    </header>
+    </header> -->
     <input type="hidden" name="goto" value="${goto!}">
     <@jp.transactionPage pageSize="10">
         <#if transactions?size gt 0>
@@ -185,7 +185,7 @@
                 </div>
             </div>
         <#else>
-            <p>${title!}空空的...</p>
+            <p style="margin-top: 20px;text-align: center;">${title!}空空的...</p>
         </#if>
     </@jp.transactionPage>
     <div id="alipayDiv"></div>
