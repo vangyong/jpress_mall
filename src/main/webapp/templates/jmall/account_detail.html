@@ -13,17 +13,25 @@ p{margin: 0px;padding: 0px}
 <section>
  <@jp.userAmountPage pageSize="100"> 
 					<div>
-		 <#list accountDetailList as accountDetail> 
+					<#if accountDetailList?size gt 0>
+		 				<#list accountDetailList as accountDetail> 
 		 				<div class="accountDeta">
 								<div>
 									<p>${accountDetail.amountName!}</p>
 									<p>${accountDetail.amountTime!}</p>
 								</div>
 								<div>
+									<#if accountDetail.amount gt 0>
+									<p style="color: #00FF00;font-size: 22px;font-weight: bold">+${accountDetail.amount!}</p>
+									<#else>
 									<p>${accountDetail.amount!}</p>
+									</#if>
 								</div>
 						</div>
-							 </#list>  
+						 </#list>  
+					<#else>
+						<p style="margin-top: 20px;text-align: center;">余额明细空空的...</p>
+					</#if>
 					</div>
  </@jp.userAmountPage>	 			
 	<#include "_inc/_user_bottom_bar.html"/>
