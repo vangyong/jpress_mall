@@ -48,10 +48,12 @@
              <div style="width: 100%;padding: 0;position: relative;">
 				<li style="background: url(/templates/jmall/assets/images/userRim.png) 100% 100%;width：100%;height:31px;display: block;">
 				</li>
-				<div onclick="window.location.href='${CPATH}/user/accountDetail?goto=${CPATH}/user/accountMoney';" style="background: url(/templates/jmall/assets/images/userMoney.png) no-repeat;position: absolute;display: flex;flex-direction:column;text-align:center;width: 118px;height: 118px;top:-45px;left: 37%">
-					<span style="color: #ffed27;margin-top: 23px;font-size: 12px">MEMBER POINTS</span>
-					<span style="color: #ffed27;font-size: 28px">${accountMoney!}</span>
-					<span style="color: #ffed27">会员钱包</span>
+				<div style="position: absolute;width: 100%;top:-45px;text-align: center;">
+					<div onclick="window.location.href='${CPATH}/user/accountDetail?goto=${CPATH}/user/accountMoney';" style="background: url(/templates/jmall/assets/images/userMoney.png) no-repeat;display: flex;flex-direction:column;text-align:center;margin:auto;width: 118px;height: 118px;">
+						<span style="color: #ffed27;margin-top: 23px;font-size: 12px">MEMBER POINTS</span>
+						<span style="color: #ffed27;font-size: 28px">${accountMoney!}</span>
+						<span style="color: #ffed27">会员钱包</span>
+					</div>
 				</div>
 			</div>
             <!-- <div class="12u$">

@@ -3897,7 +3897,7 @@
 
 				#sidebar .toggle:before {
 					color: #7f888f;
-					margin-left: -0.0625em;
+					margin-left: -0.7em;
 					margin-top: -0.25em;
 					font-size: 1.1rem;
 					z-index: 1;
@@ -3912,7 +3912,7 @@
 					left: 0em;
 					position: absolute;
 					top: 1em;
-					width: 5em;
+					width: 3em;
 				}
 
 		}
