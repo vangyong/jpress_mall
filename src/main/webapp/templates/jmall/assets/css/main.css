@@ -3793,11 +3793,11 @@
 				content: '\f0c9';
 				font-size: 2rem;
 				height: inherit;
-				left: 0.25em;
+				left: 0.04em;
 				line-height: inherit;
 				position: absolute;
 				text-indent: 0;
-				top: 0.6em;
+				top: 0.4em;
 				width: inherit;
 			}
 
@@ -3908,11 +3908,11 @@
 					border-top-right-radius:0.375em;
 					border-bottom-right-radius:0.375em;
 					content: '';
-					height: 3.5em;
+					height: 2.2em;
 					left: 0em;
 					position: absolute;
-					top: 1em;
-					width: 3em;
+					top: 0.65em;
+					width: 2.2em;
 				}
 
 		}
