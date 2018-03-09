@@ -3,27 +3,29 @@
 	
 </#macro>
 <@layout>
+<style>
+p{margin: 0px;padding: 0px}
+.accountDeta{display: flex;justify-content:space-between;border-bottom: 1px solid #bdbbb7;margin: 0em -2em 0em -2em;padding: 10px 20px 10px 20px;align-items:center}
+.accountDeta div:first-child p:first-child{font-size: 16px;font-weight: bold;}
+.accountDeta div:first-child p:last-child{font-size: 14px;color:#898989;}
+.accountDeta div:last-child{color: #fe7a78;font-size: 22px;font-weight: bold}
 </style>
 <section>
-<@jp.userAmountPage pageSize="100">
-					<table>
-						<tbody>
-		<#list accountDetailList as accountDetail>
-								<tr>
-									<td>
-										${accountDetail.amountName!}
-									</td>
-									<td>
-										${accountDetail.amount!}
-									</td>
-									<td>
-										${accountDetail.amountTime!}
-									</td>
-								</tr>
-							</#list>
-						</tbody>
-					</table>
-</@jp.userAmountPage>					
+ <@jp.userAmountPage pageSize="100"> 
+					<div>
+		 <#list accountDetailList as accountDetail> 
+		 				<div class="accountDeta">
+								<div>
+									<p>${accountDetail.amountName!}</p>
+									<p>${accountDetail.amountTime!}</p>
+								</div>
+								<div>
+									<p>${accountDetail.amount!}</p>
+								</div>
+						</div>
+							 </#list>  
+					</div>
+ </@jp.userAmountPage>	 			
 	<#include "_inc/_user_bottom_bar.html"/>
 </section>
 </@layout>
