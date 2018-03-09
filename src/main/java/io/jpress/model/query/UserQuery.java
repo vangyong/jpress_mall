@@ -71,8 +71,8 @@ public class UserQuery extends JBaseQuery {
 	}
 
 	public Page<User> paginate(int pageNumber, int pageSize ,String keyword, String flag, String orderby) {
-		String select = "select * ";
-		StringBuilder fromBuilder = new StringBuilder(" from user u ");
+		String select = "select u.*,p.username as pname ";
+		StringBuilder fromBuilder = new StringBuilder(" from user u left join user p on u.pid=p.id ");
 		fromBuilder.append(" where 1=1 ");
 		if(StringUtils.isNotBlank(keyword)){
             fromBuilder.append(" AND ( ");

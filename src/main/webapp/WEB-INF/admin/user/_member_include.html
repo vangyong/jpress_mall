@@ -41,6 +41,7 @@
 						<th>手机号码</th>
 						<th>电子邮件</th>
 						<th>会员级别</th>
+						<th>上级用户</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -56,9 +57,8 @@
 							<td>${bean.realname!}</td>
 							<td>${bean.mobile!}</td>
 							<td>${bean.email!}</td>
-							<td>
-								${bean.agents_level!}
-							</td>
+							<td>${bean.agents_level!}</td>
+							<td>${bean.pname!}</td>
 						</tr>
 					</#list> 
 					</#if>

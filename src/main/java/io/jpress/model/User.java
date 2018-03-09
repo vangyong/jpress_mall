@@ -110,5 +110,13 @@ public class User extends BaseUser<User> {
 			return null;
 		}
 	}
+	
+	public void setPname(java.lang.String pname) {
+        set("pname", pname);
+    }
+
+    public java.lang.String getPname() {
+        return get("pname");
+    }
 
 }
