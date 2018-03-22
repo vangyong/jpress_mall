@@ -183,6 +183,7 @@ public class WechatUserInterceptor implements Interceptor {
 		controller.redirect(url);
 
 	}
+
 	
 
 }
