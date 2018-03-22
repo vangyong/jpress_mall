@@ -19,6 +19,7 @@ import com.jfinal.weixin.sdk.api.ApiConfig;
 import com.jfinal.weixin.sdk.api.ApiResult;
 import com.jfinal.weixin.sdk.api.MenuApi;
 import com.jfinal.weixin.sdk.api.UserApi;
+import com.jfinal.weixin.sdk.kit.ParaMap;
 
 import io.jpress.model.query.OptionQuery;
 import io.jpress.utils.HttpUtils;
@@ -41,6 +42,21 @@ public class WechatApi {
 	public static ApiResult getUserInfo(String openId){
 		return  UserApi.getUserInfo(openId);
 	}
+	
+	public static ApiResult getUserInfo(String openId, String accessToken) {
+
+	    ParaMap pm = ParaMap.create("access_token", accessToken).put("openid", openId).put("lang", "zh_CN");
+	    String jsonResult = null;
+	    try {
+	        jsonResult = HttpUtils.get("https://api.weixin.qq.com/sns/userinfo", pm.getData());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+	    if (jsonResult == null)
+            return null;
+
+        return new ApiResult(jsonResult);
+    }
 	
 	public static ApiResult getOpenId(String appId, String appSecret, String code) {
 

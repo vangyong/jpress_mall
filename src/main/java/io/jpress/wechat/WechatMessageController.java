@@ -18,7 +18,9 @@ package io.jpress.wechat;
 import java.math.BigInteger;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.jfinal.aop.Before;
 import com.jfinal.core.Controller;
@@ -97,8 +99,15 @@ public class WechatMessageController extends MsgController {
 			ApiResult result = WechatApi.getOpenId(appId, appSecret, code);
 			if (result != null && StringUtils.isNotBlank(result.getStr("openid"))) {
 			    final String openid = result.getStr("openid");
-			    final ApiResult userInfo = WechatApi.getUserInfo(openid);
-			    if (userInfo != null) {
+			    ApiResult userInfo = WechatApi.getUserInfo(openid); // 获取已关注的用户信息
+			    final Map<String, Object> userInfoMap = new HashMap<>();
+			    copyUserInfoToMap(userInfo,userInfoMap);
+			    if (userInfo.getInt("subscribe") == 0) { //表示用户未关注公众号
+			        final String accessToken = result.getStr("access_token");
+			        ApiResult userInfoUnsubscribe = WechatApi.getUserInfo(openid,accessToken);// 获取未关注的用户信息
+			        copyUserInfoToMap(userInfoUnsubscribe,userInfoMap);
+			    }
+			    if (!userInfoMap.isEmpty()) {
 			        final BigInteger pid = getPidByUrl(gotoUrl);//解析地址中的pid
 			        
 			        final Controller ctr = this;
@@ -128,11 +137,11 @@ public class WechatMessageController extends MsgController {
                             }
                             
                             //更新用户的信息
-                            currUser.setUsername(userInfo.getStr("nickname"));
-                            currUser.setNickname(userInfo.getStr("nickname"));
-                            Integer sex = userInfo.getInt("sex") == null ? 0 : userInfo.getInt("sex");
+                            currUser.setUsername((String)userInfoMap.get("nickname"));
+                            currUser.setNickname((String)userInfoMap.get("nickname"));
+                            Integer sex = (Integer)userInfoMap.get("sex") == null ? 0 : (Integer)userInfoMap.get("sex");
                             currUser.setGender(sex == 1 ? "男" : sex == 2 ? "女" : "未知");
-                            currUser.setAvatar(userInfo.getStr("headimgurl"));
+                            currUser.setAvatar((String)userInfoMap.get("headimgurl"));
                             currUser.setFlag(User.FLAG_FRONT);
                             currUser.setCreateSource(User.SOURCE_WECHAT);
                             currUser.setOpenid(openid);
@@ -199,7 +208,21 @@ public class WechatMessageController extends MsgController {
 		redirect(gotoUrl);
 	}
 	
-	private BigInteger getPidByUrl(String gotoUrl){
+	private void copyUserInfoToMap(ApiResult userInfo, Map<String, Object> userInfoMap) {
+	    userInfoMap.put("subscribe", userInfo.getInt("subscribe"));
+	    userInfoMap.put("openid", userInfo.getStr("openid"));
+	    userInfoMap.put("nickname", userInfo.getStr("nickname"));
+	    userInfoMap.put("sex", userInfo.getInt("sex"));
+	    userInfoMap.put("language", userInfo.getStr("language"));
+	    userInfoMap.put("city", userInfo.getStr("city"));
+	    userInfoMap.put("province", userInfo.getStr("province"));
+	    userInfoMap.put("country", userInfo.getStr("country"));
+	    userInfoMap.put("headimgurl", userInfo.getStr("headimgurl"));
+        userInfoMap.put("unionid", userInfo.getStr("unionid"));
+        userInfoMap.put("remark", userInfo.getStr("remark"));
+    }
+
+    private BigInteger getPidByUrl(String gotoUrl){
 	    String pidStr = "";
         BigInteger pid = new BigInteger("0");
         
@@ -209,15 +232,20 @@ public class WechatMessageController extends MsgController {
             uidUrl = urlArr[1] + "&";
         }
         
-        if (uidUrl.contains(UID)) {
-                if(gotoUrl.contains("&")) {
-                 pidStr = gotoUrl.substring(gotoUrl.indexOf(UID) + 4,gotoUrl.indexOf("&"));
-            }else {
-                pidStr = gotoUrl.substring(gotoUrl.indexOf(UID)+4);
-            }
-            try {
-                pid = StringUtils.isNotBlank(pidStr) ? new BigInteger(pidStr) : new BigInteger("0");
-            } catch (Exception e) {
+        String[] uidUrlArr = uidUrl.substring(uidUrl.lastIndexOf(UID) > 0 ? uidUrl.lastIndexOf(UID) : 0).split("&");
+        for (String url : uidUrlArr) {
+            if (url.contains(UID)) {
+                
+                if(url.contains("&")) {
+                    pidStr = url.substring(url.lastIndexOf(UID) + 4,url.indexOf("&"));
+                }else {
+                    pidStr = url.substring(url.lastIndexOf(UID)+4);
+                }
+                try {
+                    pid = StringUtils.isNotBlank(pidStr) ? new BigInteger(pidStr) : new BigInteger("0");
+                    break;
+                } catch (Exception e) {
+                }
             }
         }
         return pid;
