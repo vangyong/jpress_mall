@@ -55,12 +55,31 @@ public class WechatUserInterceptor implements Interceptor {
 		Controller controller = inv.getController();
 		HttpServletRequest request = controller.getRequest();
 		
+		// 获取用户将要去的路径
+        String queryString = request.getQueryString();
+        // 被拦截前的请求URL
+        String toUrl = request.getRequestURI();
+        if (StringUtils.isNotBlank(queryString)) {
+            String newQueryString =queryString;
+            if(queryString.contains("?")) {
+                newQueryString = queryString.replace("?","&");
+            }
+            toUrl =  toUrl.concat("?").concat(newQueryString);
+        }
+        toUrl = toUrl.replaceAll(request.getContextPath(), "");
+        //当前url
+        String currUrl = request.getScheme() + "://" + 
+                (request.getServerName().startsWith("1") ? request.getServerName()+":"+request.getServerPort() : request.getServerName()) + 
+                request.getContextPath() + toUrl;
+        toUrl = StringUtils.urlEncode(toUrl);
+		
+		
 		//1、获取AccessToken  
 		String accessToken = AuthJsApiUtils.getAccessToken(OptionQuery.me().findValue(Consts.WECHAT_APPID),  OptionQuery.me().findValue(Consts.WECHAT_APPSECRET));
 		//2、获取Ticket 
 		String jsapi_ticket = AuthJsApiUtils.getTicket(accessToken);
 		
-		Map<String, Object> newSignature = AuthJsApiUtils.sign(appid, jsapi_ticket, request.getRequestURL().toString());
+		Map<String, Object> newSignature = AuthJsApiUtils.sign(appid, jsapi_ticket, currUrl);
 		
 		String signature = String.valueOf(newSignature.get("signature"));
 		String timestamp = String.valueOf(newSignature.get("timestamp"));
@@ -155,24 +174,12 @@ public class WechatUserInterceptor implements Interceptor {
 		request.setAttribute("timestamp", timestamp);
 		request.setAttribute("nonceStr", nonceStr);
 		String userJson = inv.getController().getSessionAttr(Consts.SESSION_WECHAT_USER);
+		
 		if (StringUtils.isNotBlank(userJson)) {
 			inv.invoke();
 			return;
 		}
 		
-		// 获取用户将要去的路径
-		String queryString = request.getQueryString();
-		// 被拦截前的请求URL
-		String toUrl = request.getRequestURI();
-		if (StringUtils.isNotBlank(queryString)) {
-			String newQueryString =queryString;
-			if(queryString.contains("?")) {
-				newQueryString = queryString.replace("?","&");
-			}
- 			toUrl =  toUrl.concat("?").concat(newQueryString);
-		}
-		toUrl = toUrl.replaceAll(request.getContextPath(), "");
-		toUrl = StringUtils.urlEncode(toUrl);
 		String redirectUrl = request.getScheme() + "://" + 
 		        (request.getServerName().startsWith("1") ? request.getServerName()+":"+request.getServerPort() : request.getServerName()) + 
 		        request.getContextPath() +
