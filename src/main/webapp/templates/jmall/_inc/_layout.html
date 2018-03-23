@@ -18,18 +18,20 @@ for(var i =0;i<cookies.length;i++){
 
 var old_url = window.location.href;
 var new_url;
-if(old_url.indexOf("?") != -1){
-	if((old_url.indexOf("?uid")!=-1)){
-		new_url = old_url.substr(0,old_url.indexOf("?"))+'&uid='+userId;
-	}else if(old_url.indexOf("&uid") !=-1){
+if(old_url.indexOf("?") !=-1){ //url中存在问号
+	if((old_url.indexOf("uid")!=-1)){//url中存在uid参数
 		var re=eval('/(uid=)([^&]*)/gi');  
 	    new_url = old_url.replace(re,'uid='+userId);  
 	}else{
 		new_url = old_url+'&uid='+userId;
 	}
-}else{
-	new_url = old_url+'&uid='+userId;
+}else{ //url中不存在问号
+	new_url = old_url+'?uid='+userId;
 }
+
+new_url = new_url.replace('&amp;','&');
+new_url = new_url.split('&from=')[0];
+console.log("new_url:"+new_url);
 /* 
 //修改链接，以供分享
 if (!!(window.history && history.pushState)){
@@ -41,14 +43,14 @@ if (!!(window.history && history.pushState)){
 	} */
 	
 	var url = location.href.split('#').toString();	
-	console.log('url:'+url);
+	//console.log('url:'+url);
 	
 	var wxShare = {
 			shareData: {
-				title: '语味果业',
-				desc: '健康生活从这里开始……',
-				link: new_url,
-				imgUrl:'${OPTION("web_domain")!}'+'/attachment/logo/sharelogo.png'
+				title:'语味果业',
+				desc:'健康生活从这里开始……',
+				link:new_url,
+				img_url:'${OPTION("web_domain")!}/attachment/logo/sharelogo.png'
 			}
 		}
 	

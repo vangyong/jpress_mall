@@ -101,8 +101,10 @@ public class WechatMessageController extends MsgController {
 			    final String openid = result.getStr("openid");
 			    ApiResult userInfo = WechatApi.getUserInfo(openid); // 获取已关注的用户信息
 			    final Map<String, Object> userInfoMap = new HashMap<>();
-			    copyUserInfoToMap(userInfo,userInfoMap);
-			    if (userInfo.getInt("subscribe") == 0) { //表示用户未关注公众号
+			    if (userInfo != null) {
+			        copyUserInfoToMap(userInfo,userInfoMap);
+			    } 
+			    if (userInfo == null || userInfo.getInt("subscribe") == null || userInfo.getInt("subscribe") == 0) { //表示用户未关注公众号
 			        final String accessToken = result.getStr("access_token");
 			        ApiResult userInfoUnsubscribe = WechatApi.getUserInfo(openid,accessToken);// 获取未关注的用户信息
 			        copyUserInfoToMap(userInfoUnsubscribe,userInfoMap);
