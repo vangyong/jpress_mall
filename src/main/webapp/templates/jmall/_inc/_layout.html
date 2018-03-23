@@ -1,7 +1,8 @@
 <#macro script_import>
 <!-- 微信js接口 -->
 <!-- <script src="https://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script> -->
-<script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script>
+<!-- <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script> -->
+<script src="${CPATH}/static/wechat/jweixin-1.2.0.js"></script>
 
 <script>
 var userId=null;
@@ -15,7 +16,7 @@ for(var i =0;i<cookies.length;i++){
 		}
 }
 
-/* var old_url = window.location.href;
+var old_url = window.location.href;
 var new_url;
 if(old_url.indexOf("?") != -1){
 	if((old_url.indexOf("?uid")!=-1)){
@@ -29,6 +30,7 @@ if(old_url.indexOf("?") != -1){
 }else{
 	new_url = old_url+'&uid='+userId;
 }
+/* 
 //修改链接，以供分享
 if (!!(window.history && history.pushState)){
 	  // 支持History API
@@ -45,13 +47,13 @@ if (!!(window.history && history.pushState)){
 			shareData: {
 				title: '语味果业',
 				desc: '健康生活从这里开始……',
-				link: window.location.href+'?uid='+userId,
+				link: new_url,
 				imgUrl:'${OPTION("web_domain")!}'+'/attachment/logo/sharelogo.png'
 			}
 		}
 	
 wx.config({
-   // debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+    //debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
     appId: '${OPTION("wechat_appid")!}', // 必填，公众号的唯一标识
     timestamp:'${timestamp!}', // 必填，生成签名的时间戳
     nonceStr: '${nonceStr!}', // 必填，生成签名的随机串
@@ -106,7 +108,7 @@ wx.ready(function(){
             //alert(JSON.stringify(res));
         }
 	});
-		
+	
 });
  
 
