@@ -482,25 +482,25 @@ public class WechatpayController extends BaseFrontController {
                     }
                     
                     //2、再扣减用户的余额
-                    if (cashFee.compareTo(BigDecimal.valueOf(0)) > 0) {
-                        User currUser = UserQuery.DAO.findById(transaction.getUserId());
-                        BigDecimal userAmount = currUser.getAmount();
-                        if (Db.update("update jp_user set amount = amount - ? where id = ? and (amount - ?) >= 0", cashFee, userId, cashFee) <= 0) {
-                            log.info("用户账户余额不足以支付整个订单...");
-                            //获取用户账户余额
-                            amountFee = userAmount;//账户余额小于抵扣优化券后的商品金额时，余额支付金额就为账户余额
-                            if(Db.update("update jp_user set amount = amount - ? where id = ? and (amount - ?) >= 0", amountFee, userId, amountFee) <= 0){
-                                log.error("用户[{"+ userId +"}]账户余额扣减失败..");
-                                return false;
-                            }
-                            cashFee = cashFee.subtract(amountFee);//扣减账户余额
-                        } else {
-                            //账户余额足以支付整个订单
-                            amountFee = cashFee;//账户余额大于等于抵扣优化券后的商品金额时，余额支付金额就为抵扣优化券后的商品金额
-                            cashFee = BigDecimal.valueOf(0);//即不需要现金支付，现金支付金额为0
-                            transaction.setStatus(Transaction.STATUS_2); //无需现金支付的时候订单状态为已支付
-                        }
-                    }
+//                    if (cashFee.compareTo(BigDecimal.valueOf(0)) > 0) {
+//                        User currUser = UserQuery.DAO.findById(transaction.getUserId());
+//                        BigDecimal userAmount = currUser.getAmount();
+//                        if (Db.update("update jp_user set amount = amount - ? where id = ? and (amount - ?) >= 0", cashFee, userId, cashFee) <= 0) {
+//                            log.info("用户账户余额不足以支付整个订单...");
+//                            //获取用户账户余额
+//                            amountFee = userAmount;//账户余额小于抵扣优化券后的商品金额时，余额支付金额就为账户余额
+//                            if(Db.update("update jp_user set amount = amount - ? where id = ? and (amount - ?) >= 0", amountFee, userId, amountFee) <= 0){
+//                                log.error("用户[{"+ userId +"}]账户余额扣减失败..");
+//                                return false;
+//                            }
+//                            cashFee = cashFee.subtract(amountFee);//扣减账户余额
+//                        } else {
+//                            //账户余额足以支付整个订单
+//                            amountFee = cashFee;//账户余额大于等于抵扣优化券后的商品金额时，余额支付金额就为抵扣优化券后的商品金额
+//                            cashFee = BigDecimal.valueOf(0);//即不需要现金支付，现金支付金额为0
+//                            transaction.setStatus(Transaction.STATUS_2); //无需现金支付的时候订单状态为已支付
+//                        }
+//                    }
                     
                     //3、修改订单的cash_fee、amount_fee、coupon_fee
                     transaction.setCouponFee(couponFee);
@@ -672,25 +672,25 @@ public class WechatpayController extends BaseFrontController {
                     }
                     
                     //2、再扣减用户的余额
-                    if (cashFee.compareTo(BigDecimal.valueOf(0)) > 0) {
-                        User currUser = UserQuery.DAO.findById(transaction.getUserId());
-                        BigDecimal userAmount = currUser.getAmount();
-                        if (Db.update("update jp_user set amount = amount - ? where id = ? and (amount - ?) >= 0", cashFee, userId, cashFee) <= 0) {
-                            log.info("用户账户余额不足以支付整个订单...");
-                            //获取用户账户余额
-                            amountFee = userAmount;//账户余额小于抵扣优化券后的商品金额时，余额支付金额就为账户余额
-                            if(Db.update("update jp_user set amount = amount - ? where id = ? and (amount - ?) >= 0", amountFee, userId, amountFee) <= 0){
-                                log.error("用户[{"+ userId +"}]账户余额扣减失败..");
-                                return false;
-                            }
-                            cashFee = cashFee.subtract(amountFee);//扣减账户余额
-                        } else {
-                            //账户余额足以支付整个订单
-                            amountFee = cashFee;//账户余额大于等于抵扣优化券后的商品金额时，余额支付金额就为抵扣优化券后的商品金额
-                            cashFee = BigDecimal.valueOf(0);//即不需要现金支付，现金支付金额为0
-                            transaction.setStatus(Transaction.STATUS_2); //无需现金支付的时候订单状态为已支付
-                        }
-                    }
+//                    if (cashFee.compareTo(BigDecimal.valueOf(0)) > 0) {
+//                        User currUser = UserQuery.DAO.findById(transaction.getUserId());
+//                        BigDecimal userAmount = currUser.getAmount();
+//                        if (Db.update("update jp_user set amount = amount - ? where id = ? and (amount - ?) >= 0", cashFee, userId, cashFee) <= 0) {
+//                            log.info("用户账户余额不足以支付整个订单...");
+//                            //获取用户账户余额
+//                            amountFee = userAmount;//账户余额小于抵扣优化券后的商品金额时，余额支付金额就为账户余额
+//                            if(Db.update("update jp_user set amount = amount - ? where id = ? and (amount - ?) >= 0", amountFee, userId, amountFee) <= 0){
+//                                log.error("用户[{"+ userId +"}]账户余额扣减失败..");
+//                                return false;
+//                            }
+//                            cashFee = cashFee.subtract(amountFee);//扣减账户余额
+//                        } else {
+//                            //账户余额足以支付整个订单
+//                            amountFee = cashFee;//账户余额大于等于抵扣优化券后的商品金额时，余额支付金额就为抵扣优化券后的商品金额
+//                            cashFee = BigDecimal.valueOf(0);//即不需要现金支付，现金支付金额为0
+//                            transaction.setStatus(Transaction.STATUS_2); //无需现金支付的时候订单状态为已支付
+//                        }
+//                    }
                     
                     //3、修改订单的cash_fee、amount_fee、coupon_fee
                     transaction.setCouponFee(couponFee);
