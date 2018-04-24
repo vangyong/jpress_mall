@@ -7,6 +7,7 @@ import com.alipay.api.internal.util.AlipaySignature;
 import com.alipay.api.request.AlipayTradeWapPayRequest;
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Clear;
+import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.IAtom;
 import io.jpress.Consts;
@@ -35,7 +36,9 @@ import java.util.*;
 //@Before(UserInterceptor.class)
 @Before(WechatUserInterceptor.class)
 public class TransactionController extends BaseFrontController {
-
+    
+    private static final Log log = Log.getLog(TransactionController.class);
+    
     //购物车结算支付宝支付
     @Before(UCodeInterceptor.class)
     public void shoppingCartAlipay(){
@@ -479,13 +482,26 @@ public class TransactionController extends BaseFrontController {
         boolean saved=Db.tx(new IAtom() {
             @Override
             public boolean run() throws SQLException {
+                List<TransactionItem> items = TransactionItemQuery.me().findList(id);
+                for (TransactionItem item : items) {
+                    //回退库存
+                    if(Db.update("update jp_content_spec_item set stock = stock + ? where content_id = ? and spec_value_id = ?", 
+                            item.getQuantity(), item.getContentId(), item.getSpecValueId()) <= 0) {
+                        log.error("订单["+id+"]的订单项["+item.getId()+"]进行库存回退失败..");
+                        return false;
+                    }
+                }
+                
                 transaction.deleteById(id);
                 TransactionItemQuery.me().deleteByTransactionId(id);
                 
                 Bonus bonus = BonusQuery.me().findByTransactionId(id);
-                //退还余额
-                if (Db.update("update jp_user set amount = amount - ? where id = ?", bonus.getAmount(), userId) <= 0) {
-                    return false;
+                if (bonus != null && bonus.getBonusType() == 5L) {
+                    //退还余额
+                    if (Db.update("update jp_user set amount = amount - ? where id = ?", bonus.getAmount(), userId) <= 0) {
+                        log.error("删除订单["+id+"]退还余额失败..");
+                        return false;
+                    }
                 }
                 //删除余额支付记录
                 BonusQuery.me().deleteByTransactionId(id);

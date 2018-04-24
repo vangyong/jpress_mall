@@ -92,10 +92,10 @@
 
 				<#if spec??>
 					<div class="box">
-						<h5>选择${spec.title!}</h5>
-						<div class="row">
-							<input type="hidden" readonly="readonly" id="specValueId" name="specValue.id" >
-							<#if specValueList??>
+						<h5 style="display: none">选择${spec.title!}</h5>
+						<div class="row" style="display: none">
+							<input type="hidden" readonly="readonly" id="specValueId" name="specValue.id" value="${specValueList[0].id!}"><!-- 默认取第一个规格的值 -->
+							<#if specValueList?size gt 0>
 								<#list specValueList as specValue>
 									<div>
 										<input type="radio" id="demo-priority-specValue${specValue.id!}" name="specValueRadio" onclick="showContentSpecItem(${specValue.id!},${specValue.getContentSpecItem(content.id!).price!},${specValue.getContentSpecItem(content.id!).stock!})">

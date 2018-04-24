@@ -2,7 +2,12 @@
 <#macro script>
 	$(".quantity").TouchSpin({min: 1}).focus(function(){$(this).blur();}).on("change", function() {
 		layer.load(2);
+		var shoppingCartId = this.id;
+		var shoppingCarQuantity = this.value;
 		$.get('${CPATH}/user/doChangeShoppingCartQuantity',{id:this.id,quantity:this.value},function(data){
+			$("#shoppingCart"+shoppingCartId).attr('quantity',shoppingCarQuantity);
+			setTotalAmount();//重新计算总金额
+			
 			layer.closeAll('loading');
 			if(data.errorCode == 0){
 				return;
@@ -75,7 +80,56 @@
 			layer.msg('请选中商品');
 		}
 	}
+	
+	$('#chooseAllDiv').click(function(){  
+        if($('#chooseAllInput').get(0).checked){  
+			$('#chooseAllInput').removeAttr("checked",false);
+            $('input[name="chooseInput"]').each(function(){  
+                //此处如果用attr，会出现第三次失效的情况  
+                $(this).removeAttr("checked",false);
+            });  
+            setTotalAmount();//重新计算总金额
+        }else{  
+        	$('#chooseAllInput').prop("checked",true);  
+            $('input[name="chooseInput"]').each(function(){  
+                $(this).prop("checked",true);  
+            }); 
+            
+            setTotalAmount();//重新计算总金额
+        }  
+              
+    }); 
 
+	function setTotalAmount() {
+		var totalAmount = 0.00;
+            var shoppingCarts=$(".shoppingCartChecked:checked");
+			if(shoppingCarts.length > 0){
+				var shoppingCartIds=new Array();
+				$.each(shoppingCarts,function() {
+					totalAmount = accAdd(totalAmount,accMultiply($(this).attr('quantity'),$(this).attr('price')));
+				});
+			}
+			if (totalAmount < 0) {
+				totalAmount = 0.00;
+			}
+            $('#totalSpan').html('合计：￥' + totalAmount);
+	}
+	//加减法
+	function accAdd(arg1,arg2){   
+	     var r1,r2,m;   
+	     try{r1=arg1.toString().split(".")[1].length}catch(e){r1=0}   
+	     try{r2=arg2.toString().split(".")[1].length}catch(e){r2=0}   
+	     m=Math.pow(10,Math.max(r1,r2))   
+	     return (arg1*m+arg2*m)/m   
+	}
+	
+	//乘除法
+	function accMultiply(arg1,arg2){   
+	    var m=0,s1=arg1.toString(),s2=arg2.toString();   
+	    try{m+=s1.split(".")[1].length}catch(e){}   
+	    try{m+=s2.split(".")[1].length}catch(e){}   
+	    return Number(s1.replace(".",""))*Number(s2.replace(".",""))/Math.pow(10,m);   
+	} 
 </#macro>
 <@layout>
 <section>
@@ -94,7 +148,7 @@
 							<#list shoppingCarts as shoppingCart>
 								<tr>
 									<td style="width: 10%;">
-										<input class="shoppingCartChecked" type="checkbox" id="shoppingCart${shoppingCart.id!}" value="${shoppingCart.id!}">
+										<input class="shoppingCartChecked" type="checkbox" id="shoppingCart${shoppingCart.id!}" value="${shoppingCart.id!}" name="chooseInput" price="${shoppingCart.price!}" quantity="${shoppingCart.quantity!}">
 										<label for="shoppingCart${shoppingCart.id!}"></label>
 									</td>
 									<td style="width: 40%;">
@@ -135,13 +189,13 @@
 				<div  style="display: flex;justify-content:space-between;align-items:center">
 					<!-- <li><a href="javascript:void(0)" class="button fit" onclick="clearShoppingCart()">清空</a></li>
 					<li ><a href="javascript:void(0)" class="button fit" onclick="deleteShoppingCart()">删除</a></li> -->
-					<div style="display: flex;align-items:center;margin-left: 5px">
-						<input class="shoppingCartChecked" type="checkbox" >
+					<div style="display: flex;align-items:center;margin-left: 5px" id="chooseAllDiv">
+						<input class="shoppingCartChecked" type="checkbox" id="chooseAllInput" price="0" quantity="0">
 						<label ></label>
 						<p style="margin-top:1.2em;color: #a7a7a7;margin-left: -10px">全选</p>
 					</div>
 					<div class="right" style="display: flex;justify-content:space-between;align-items:center;">
-						<span class="right" style="color: #f5696a;padding-right: 10px">合计：￥</span>
+						<span class="right" style="color: #f5696a;padding-right: 10px" id="totalSpan">合计：￥</span>
 						<div><a href="javascript:void(0)" class="button Modelspecial right" onclick="userShoppingCartSettlement()">去结算</a></div>
 					</div>
 				</div>

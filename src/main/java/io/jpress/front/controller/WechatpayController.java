@@ -26,7 +26,6 @@ import com.jfinal.weixin.sdk.utils.JsonUtils;
 import io.jpress.Consts;
 import io.jpress.core.BaseFrontController;
 import io.jpress.interceptor.UCodeInterceptor;
-import io.jpress.interceptor.UserInterceptor;
 import io.jpress.model.Bonus;
 import io.jpress.model.Content;
 import io.jpress.model.ContentSpecItem;
@@ -453,12 +452,19 @@ public class WechatpayController extends BaseFrontController {
                                 log.error("订单[{"+ transaction.getOrderNo() +"}]的订单项保存失败..");
                                 return false;
                             }
+                            
+                            //进行库存扣减
+                            if(Db.update("update jp_content_spec_item set stock = stock - ? where content_id = ? and spec_value_id = ? and (stock - ?) >= 0", 
+                                    shoppingCart.getQuantity(), shoppingCart.getContentId(), shoppingCart.getSpecValueId(), shoppingCart.getQuantity()) <= 0) {
+                                log.error("库存扣减失败..");
+                                return false;
+                            }
                         }
                     }
-
+                    
                     ShoppingCartQuery.me().deleteByIds(shoppingCartIdSb.substring(0, shoppingCartIdSb.length()-1));
                     
-                  //1、先抵扣优惠券金额
+                    //1、先抵扣优惠券金额
                     if (couponUsedId != null && couponUsedId.compareTo(BigInteger.valueOf(0)) > 0) {
                         Coupon coupon = CouponQuery.me().findByUserIdAndUsedId(userId,couponUsedId);
                         if(coupon != null) {
@@ -622,6 +628,13 @@ public class WechatpayController extends BaseFrontController {
                     BigDecimal couponFee = BigDecimal.valueOf(0);//默认优惠券支付金额为0。【支付扣减优先级为1】
                     BigDecimal amountFee = BigDecimal.valueOf(0);//默认余额支付金额为0。【支付扣减优先级为2】
                     BigDecimal cashFee = totalFee;//默认情况下商品总金额就为用户现金支付金额。【支付扣减优先级为3】
+                    
+                    //进行库存扣减
+                    if(Db.update("update jp_content_spec_item set stock = stock - ? where content_id = ? and spec_value_id = ? and (stock - ?) >= 0", 
+                            quantity, content.getId(), specValueId, quantity) <= 0) {
+                        log.error("库存扣减失败..");
+                        return false;
+                    }
                     
                     transaction.setRemark(remark);
                     transaction.setUserId(userId);
