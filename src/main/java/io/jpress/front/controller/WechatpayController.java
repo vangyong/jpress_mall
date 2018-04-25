@@ -34,18 +34,17 @@ import io.jpress.model.ShoppingCart;
 import io.jpress.model.Transaction;
 import io.jpress.model.TransactionItem;
 import io.jpress.model.User;
-import io.jpress.model.UserAddress;
 import io.jpress.model.query.ContentQuery;
 import io.jpress.model.query.ContentSpecItemQuery;
 import io.jpress.model.query.CouponQuery;
 import io.jpress.model.query.OptionQuery;
 import io.jpress.model.query.ShoppingCartQuery;
 import io.jpress.model.query.TransactionQuery;
-import io.jpress.model.query.UserAddressQuery;
 import io.jpress.model.query.UserQuery;
 import io.jpress.router.RouterMapping;
 import io.jpress.utils.DateUtils;
 import io.jpress.utils.RandomUtils;
+import io.jpress.utils.StringUtils;
 import io.jpress.wechat.WechatUserInterceptor;
 
 /**
@@ -362,12 +361,15 @@ public class WechatpayController extends BaseFrontController {
     public void shoppingCartWechatpay(){
         try {
             final String remark=getPara("remark");
-            final BigInteger userAddressId=getParaToBigInteger("userAddressId");
+            final String userAddressAddress=getPara("userAddressAddress");
+            final String userAddressMobile=getPara("userAddressMobile");
+            final String userAddressName=getPara("userAddressName");
             final BigInteger[] shoppingCartIds=getParaValuesToBigInteger("shoppingCartIds");
             final BigDecimal payAmount=getParaToBigDecimal("payAmount");
             final BigInteger couponUsedId=getParaToBigInteger("couponUsedId");
-            if (userAddressId==null) {
-                renderAjaxResultForError("收货地址不能为空");
+            
+            if (StringUtils.isBlank(userAddressName) || StringUtils.isBlank(userAddressMobile) || StringUtils.isBlank(userAddressAddress)) {
+                renderAjaxResultForError("收货人、电话及收货地址都不能为空");
                 return;
             }
             if (shoppingCartIds==null) {
@@ -377,11 +379,11 @@ public class WechatpayController extends BaseFrontController {
 
             final BigInteger userId=getLoginedUser().getId();
 
-            final UserAddress userAddress=UserAddressQuery.me().findById(userAddressId);
-            if (userAddress==null) {
-                renderAjaxResultForError("收货地址不存在");
-                return;
-            }
+//            final UserAddress userAddress=UserAddressQuery.me().findById(userAddressId);
+//            if (userAddress==null) {
+//                renderAjaxResultForError("收货地址不存在");
+//                return;
+//            }
 
             final StringBuilder shoppingCartIdSb=new StringBuilder();
             for (BigInteger shoppingCartId:shoppingCartIds) {
@@ -424,7 +426,7 @@ public class WechatpayController extends BaseFrontController {
                     
                     transaction.setRemark(remark);
                     transaction.setUserId(userId);
-                    transaction.setUserAddress(userAddress.getAddress()+" "+userAddress.getName()+" "+userAddress.getMobile());
+                    transaction.setUserAddress(userAddressAddress+" "+userAddressName+" "+userAddressMobile);
                     transaction.setOrderNo(orderNo);
                     transaction.setTotleFee(totalFee);
                     transaction.setPayType(Transaction.PAY_TYPE_WECHATPAY);
@@ -566,15 +568,17 @@ public class WechatpayController extends BaseFrontController {
     public void contentWechatpay(){
         try {
             final String remark=getPara("remark");
-            final BigInteger userAddressId=getParaToBigInteger("userAddressId");
+            final String userAddressAddress=getPara("userAddressAddress");
+            final String userAddressMobile=getPara("userAddressMobile");
+            final String userAddressName=getPara("userAddressName");
             final BigInteger contentId=getParaToBigInteger("contentId");
             final BigInteger specValueId=getParaToBigInteger("specValueId");
             final Integer quantity=getParaToInt("quantity");
             final BigDecimal payAmount=getParaToBigDecimal("payAmount");
             final BigInteger couponUsedId=getParaToBigInteger("couponUsedId");
 
-            if (userAddressId==null) {
-                renderAjaxResultForError("收货地址不能为空");
+            if (StringUtils.isBlank(userAddressName) || StringUtils.isBlank(userAddressMobile) || StringUtils.isBlank(userAddressAddress)) {
+                renderAjaxResultForError("收货人、电话及收货地址都不能为空");
                 return;
             }
             if (contentId==null) {
@@ -592,11 +596,11 @@ public class WechatpayController extends BaseFrontController {
 
             final BigInteger userId=getLoginedUser().getId();
 
-            final UserAddress userAddress=UserAddressQuery.me().findById(userAddressId);
-            if (userAddress==null) {
-                renderAjaxResultForError("收货地址不存在");
-                return;
-            }
+//            final UserAddress userAddress=UserAddressQuery.me().findById(userAddressId);
+//            if (userAddress==null) {
+//                renderAjaxResultForError("收货地址不存在");
+//                return;
+//            }
 
             final Content content=ContentQuery.me().findById(contentId);
             if(content==null){
@@ -638,7 +642,7 @@ public class WechatpayController extends BaseFrontController {
                     
                     transaction.setRemark(remark);
                     transaction.setUserId(userId);
-                    transaction.setUserAddress(userAddress.getAddress()+" "+userAddress.getName()+" "+userAddress.getMobile());
+                    transaction.setUserAddress(userAddressAddress+" "+userAddressName+" "+userAddressMobile);
                     transaction.setOrderNo(orderNo);
                     transaction.setTotleFee(totalFee);
                     transaction.setPayType(Transaction.PAY_TYPE_WECHATPAY);

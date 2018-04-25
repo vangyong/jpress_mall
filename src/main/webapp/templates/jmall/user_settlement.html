@@ -1,5 +1,19 @@
 <#include "_inc/_layout.html"/>
 <#macro script>
+	$(document).ready(function(){
+		 var localUserAddress = localStorage.getItem('m.yuweiguoye.com.userAddress');
+         var userAddress = JSON.parse(localUserAddress);
+         if (userAddress != null && userAddress!=undefined) {
+	         $("#userAddressName").html(userAddress.userAddressName);
+			 $("#userAddressMobile").html(userAddress.userAddressMobile);
+			 $("#userAddressAddress").html(userAddress.userAddressAddress);
+         	 $("#addressInfoDiv").show();
+			 $("#addAddressButton").hide();
+         } else {
+         	$("#addAddressButton").show();
+         	$("#addressInfoDiv").hide();
+         }
+     });
 	//微信支付--jiangjb
 	var wechatPayData = '';
 	function onBridgeReady(){
@@ -25,7 +39,9 @@
 	function doShoppingCartSettlement(){
 		var remark=$("#remark").val();
 		var shoppingCarts=$("input[name='shoppingCart.id']");
-		var userAddressId=$("#userAddress option:selected").val();
+		var userAddressName=$("#userAddressName").html();
+		var userAddressMobile=$("#userAddressMobile").html();
+		var userAddressAddress=$("#userAddressAddress").html();
 		var payAmount =  $('#payAmount').val();
 		var couponUsedId =  $('#couponUsedId').val();
 		var shoppingCartIds=new Array();
@@ -37,7 +53,7 @@
 			layer.msg('结算的商品为空');
 			return;
 		}
-		if(!userAddressId){
+		if(!userAddressName && !userAddressMobile && !userAddressAddress){
 			layer.msg('请选择收货地址');
 			return;
 		}
@@ -50,7 +66,9 @@
 			data: {
 				ucode:'${ucode!}',
 				remark:remark,
-				userAddressId:userAddressId,
+				userAddressName:userAddressName,
+				userAddressMobile:userAddressMobile,
+				userAddressAddress:userAddressAddress,
 				shoppingCartIds:shoppingCartIds,
 				payAmount:payAmount,
 				couponUsedId:couponUsedId
@@ -104,8 +122,11 @@
 		var payAmount =  $('#payAmount').val();
 		var couponUsedId =  $('#couponUsedId').val();
 		
-		var userAddressId=$("#userAddress option:selected").val();
-		if(!userAddressId){
+		var userAddressName=$("#userAddressName").html();
+		var userAddressMobile=$("#userAddressMobile").html();
+		var userAddressAddress=$("#userAddressAddress").html();
+		
+		if(!userAddressName && !userAddressMobile && !userAddressAddress){
 			layer.msg('请选择收货地址');
 			return;
 		}
@@ -118,7 +139,9 @@
 			data: {
 				ucode:'${ucode!}',
 				remark:remark,
-				userAddressId:userAddressId,
+				userAddressName:userAddressName,
+				userAddressMobile:userAddressMobile,
+				userAddressAddress:userAddressAddress,
 				contentId:contentId,
 				specValueId:specValueId,
 				quantity:quantity,
@@ -218,48 +241,51 @@
 		layer.close(layer.index);
 	}
 	
-	function addUserAddress(userAddress){
-	    var id='',address='',name='',mobile='';
-		if(userAddress){
-			id=userAddress.id;
-			address=userAddress.address;
-			name=userAddress.name;
-			mobile=userAddress.mobile;
-		}
-		layer.open({
-			type: 1,
-			skin: 'layui-layer-rim',
-			area: ['90%', 'auto'],
-			content: '<form id="userAddressForm" action="${CPATH}/user/doSaveUserAddress" method="post"><input type="hidden" name="ucode" value="${ucode}"><input type="hidden" name="userAddress.id" value="'+id+'"><p><input type="text" name="userAddress.address" value="'+address+'" placeholder="请输入收货地址" /></p><p><input type="text" name="userAddress.name" value="'+name+'" placeholder="请输入收货人姓名" /></p><p><input type="text" name="userAddress.mobile" value="'+mobile+'" placeholder="请输入收货人手机号码" /></p></form>',
-			btn: ['确定','取消'],
-			yes: function(index){
-				$("#userAddressForm").ajaxSubmit({
-					type : "post",
-					dataType : "json",
-					success : function(data) {
-						if(data.errorCode == 0){
-							layer.close(index);
-							//location.reload();
-							var userAddress = data.data;
-							var op = "<option selected='selected' value='"+ userAddress.id +"'>" + userAddress.address+ "&nbsp;"+userAddress.name+"&nbsp;"+userAddress.mobile+"</p></option>";
-							$("#userAddress").prepend(op);//新增一个地址在第一位
-							$("#userAddress").attr("value",userAddress.id);//选中新增的地址
-						}else if(data.errorCode == 2){
-							layer.close(index);
-							var goto=window.location.href;
-							var url="${CPATH}"+data.data+"?goto="+goto;
-							window.location.href=url;
-						}else{
-							layer.msg(data.message);
-						}
-					},
-					error : function() {
-						layer.msg("信息提交错误");
-					}
-				});
-			}
-		});
+	//调用微信共享地址界面
+	function getWxAddr() {
+		wx.openAddress({
+	        trigger: function (res) {
+	          layer.load(2);
+	        },
+	        success: function (res) {
+	          	layer.closeAll('loading');
+	          	var userName = res.userName; // 收货人姓名
+				var telNumber = res.telNumber; // 收货人手机号码
+				var postalCode = res.postalCode; // 邮编
+				var provinceName = res.provinceName; // 国标收货地址第一级地址（省）
+				var cityName = res.cityName; // 国标收货地址第二级地址（市）
+				var countryName = res.countryName; // 国标收货地址第三级地址（国家）
+				var detailInfo = res.detailInfo; // 详细收货地址信息
+				var nationalCode = res.nationalCode; // 收货地址国家码
+				var userAddress = {
+					userAddressName:userName,
+					userAddressMobile:telNumber,
+					userAddressAddress:provinceName+cityName+countryName+' '+detailInfo
+				};
+				
+				//修改页面地址的展示
+				if (userAddress != null && userAddress!=undefined) {
+			         $("#userAddressName").html(userAddress.userAddressName);
+					 $("#userAddressMobile").html(userAddress.userAddressMobile);
+					 $("#userAddressAddress").html(userAddress.userAddressAddress);
+		         	 $("#addressInfoDiv").show();
+					 $("#addAddressButton").hide();
+		         } else {
+		         	$("#addAddressButton").show();
+		         	$("#addressInfoDiv").hide();
+		         }
+			 
+				localStorage.setItem('m.yuweiguoye.com.userAddress', JSON.stringify(userAddress));
+	        },
+	        cancel: function (res) {
+	          //alert('用户取消拉出地址');
+	        },
+	        fail: function (res) {
+	          layer.msg(JSON.stringify(res));
+	        }
+	      });
 	}
+
 </#macro>
 <@layout>
 <style>
@@ -269,33 +295,23 @@ table tbody tr{border: solid 0px rgba(210, 215, 217, 0.75);}
 <section >
 	<div>
 		<input type="hidden" name="goto" value="${goto!}">
-		<!-- <header class="ModelOneMajor" style="background-color: #9a9a9a;margin: 0 -2em 15px -2em;padding: 5px 0px 4px 5px;display: flex;align-items:center;">
-	         <i class="fa fa-angle-left fa-2x" aria-hidden="true" style="color: #FFF;"></i>
-       		 <span style="color: #FFF;font-size: 15px;margin-left: 10px">确认订单</span>
-	    </header> -->
-		<@jp.userAddressPage pageSize="100">
-				<div class="row uniform" style="padding: 5px 0px 4px 5px;">
-					<div class="12u$">
-						<div class="select-wrapper">
-							<select id="userAddress" name="userAddress" >
-								<option value="">-请选择收货地址-</option>
-								<#list userAddresss as userAddress>
-									<option value="${userAddress.id!}">${userAddress.address!}&nbsp;${userAddress.name!}&nbsp;${userAddress.mobile!}</p></option>
-								</#list>
-							</select>
-							<!-- <a href="${CPATH}/user/userAddress" class="icon fa-plane">添加地址</a> -->
-						</div>
+		<div onclick="getWxAddr()">
+			<div id="addressInfoDiv" class="row uniform" style="padding: 5px 0px 4px 5px;" style="display: none">
+				<div class="12u$">
+					收货人:<div id="userAddressName"></div>
+					<div id="userAddressMobile"></div>
+					<div id="userAddressAddress"></div>
+				</div>
+			</div>
+			<div id="addAddressButton" class="row uniform" style="display: none">
+				<div class="12u$">
+					<div style="display: flex;justify-content:center;align-items:center">
+						<img src="/templates/jmall/assets/images/addAddress_ico.png" style="width:25px;height:25px"/>
+						<span style="color: #ffc926;font-size: 22px;margin-left: 20px;font-weight: bold;">添加收货地址</span>
 					</div>
 				</div>
-				<div class="row uniform">
-					<div class="12u$">
-						<div style="display: flex;justify-content:center;align-items:center">
-							<img src="/templates/jmall/assets/images/addAddress_ico.png" style="width:25px;height:25px"/>
-							<span style="color: #ffc926;font-size: 22px;margin-left: 20px;font-weight: bold;" onclick="addUserAddress('')">添加收货地址</span>
-						</div>
-					</div>
-				</div>
-		</@jp.userAddressPage>
+			</div>
+		</div>
 		<#if jp.shoppingCartPage??>
 			<@jp.shoppingCartPage pageSize="100">
 				<div style="margin: 5px -2em 5px -2em">

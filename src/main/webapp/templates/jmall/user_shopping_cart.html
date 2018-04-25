@@ -148,7 +148,7 @@
 							<#list shoppingCarts as shoppingCart>
 								<tr>
 									<td style="width: 10%;">
-										<input class="shoppingCartChecked" type="checkbox" id="shoppingCart${shoppingCart.id!}" value="${shoppingCart.id!}" name="chooseInput" price="${shoppingCart.price!}" quantity="${shoppingCart.quantity!}">
+										<input class="shoppingCartChecked" type="checkbox" id="shoppingCart${shoppingCart.id!}" value="${shoppingCart.id!}" name="chooseInput" price="${shoppingCart.price!}" quantity="${shoppingCart.quantity!}" onchange="setTotalAmount()">
 										<label for="shoppingCart${shoppingCart.id!}"></label>
 									</td>
 									<td style="width: 40%;">
