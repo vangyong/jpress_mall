@@ -27,7 +27,9 @@ import io.jpress.core.addon.HookInvoker;
 import io.jpress.core.cache.ActionCache;
 import io.jpress.model.Coupon;
 import io.jpress.model.CouponUsed;
+import io.jpress.model.Metadata;
 import io.jpress.model.query.CouponQuery;
+import io.jpress.model.query.MetaDataQuery;
 import io.jpress.model.query.OptionQuery;
 import io.jpress.router.RouterMapping;
 import io.jpress.ui.freemarker.tag.IndexPageTag;
@@ -36,6 +38,8 @@ import io.jpress.wechat.WechatUserInterceptor;
 
 import java.math.BigInteger;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.List;
 
 @RouterMapping(url = "/")
 @Before(WechatUserInterceptor.class)
@@ -44,7 +48,7 @@ public class IndexController extends BaseFrontController {
 	@ActionCache
 	public void index() {
 		try {
-			/* 新版的首页没有banner了,jianb.jiang,20180212
+			 //新版的首页没有banner了,jianb.jiang,20180212
 			//获取首页banner图
 			List<Metadata> bannersList = MetaDataQuery.me().findListByTypeAndId(Consts.INDEX_BANNER, Consts.INDEX_BANNER_ID);
 			HashMap<String, String> bannersMap = new HashMap<String, String>();
@@ -71,7 +75,7 @@ public class IndexController extends BaseFrontController {
 			}
 			setAttr("index_banners_img", index_banners_img);
 			setAttr("index_banners_url", index_banners_url);
-			setAttr("index_banners_remark", index_banners_remark);*/
+			setAttr("index_banners_remark", index_banners_remark);
 
 			Render render = onRenderBefore();
 			if (render != null) {
