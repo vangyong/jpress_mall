@@ -3,16 +3,7 @@
 	$(document).ready(function(){
 		 var localUserAddress = localStorage.getItem('m.yuweiguoye.com.userAddress');
          var userAddress = JSON.parse(localUserAddress);
-         if (userAddress != null && userAddress!=undefined) {
-	         $("#userAddressName").html(userAddress.userAddressName);
-			 $("#userAddressMobile").html(userAddress.userAddressMobile);
-			 $("#userAddressAddress").html(userAddress.userAddressAddress);
-         	 $("#addressInfoDiv").show();
-			 $("#addAddressButton").hide();
-         } else {
-         	$("#addAddressButton").show();
-         	$("#addressInfoDiv").hide();
-         }
+         changeAddress(userAddress);
      });
 	//微信支付--jiangjb
 	var wechatPayData = '';
@@ -263,29 +254,40 @@
 					userAddressAddress:provinceName+cityName+countryName+' '+detailInfo
 				};
 				
-				//修改页面地址的展示
-				if (userAddress != null && userAddress!=undefined) {
-			         $("#userAddressName").html(userAddress.userAddressName);
-					 $("#userAddressMobile").html(userAddress.userAddressMobile);
-					 $("#userAddressAddress").html(userAddress.userAddressAddress);
-		         	 $("#addressInfoDiv").show();
-					 $("#addAddressButton").hide();
-		         } else {
-		         	$("#addAddressButton").show();
-		         	$("#addressInfoDiv").hide();
-		         }
-			 
+				changeAddress(userAddress);
+				
 				localStorage.setItem('m.yuweiguoye.com.userAddress', JSON.stringify(userAddress));
 	        },
 	        cancel: function (res) {
 	          //alert('用户取消拉出地址');
 	        },
 	        fail: function (res) {
-	          layer.msg(JSON.stringify(res));
+	           layer.msg(JSON.stringify(res));
+	           var userAddress = {
+					userAddressName:'默认收货人',
+					userAddressMobile:'13333333333',
+					userAddressAddress:'默认收货地址'
+				};
+				
+				changeAddress(userAddress);
+				localStorage.setItem('m.yuweiguoye.com.userAddress', JSON.stringify(userAddress));
 	        }
 	      });
 	}
 
+	function changeAddress(userAddress) {
+		//修改页面地址的展示
+		if (userAddress != null && userAddress!=undefined) {
+	         $("#userAddressName").html(userAddress.userAddressName);
+			 $("#userAddressMobile").html(userAddress.userAddressMobile);
+			 $("#userAddressAddress").html(userAddress.userAddressAddress);
+         	 $("#addressInfoDiv").show();
+			 $("#addAddressButton").hide();
+         } else {
+         	$("#addAddressButton").show();
+         	$("#addressInfoDiv").hide();
+         }
+	}
 </#macro>
 <@layout>
 <style>
