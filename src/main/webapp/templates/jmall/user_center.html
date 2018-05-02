@@ -28,11 +28,16 @@
 	}
 </#macro>
 <@layout>
+<style>
+#sidebar .toggle{
+	top:0px
+}
+</style>
 <section>
- <#include "_inc/_user_top_bar.html"/>
+
     <div class="box alt bottom" style="padding: 0 0 0 0;background: url(/templates/jmall/assets/images/indexBack.png) 100% 100%;margin:0 -2em 0 -2em;">
         <div class="row uniform" style="padding:0 0 1em 0">
-            <div class="12u$" style="text-align: center;background: url(/templates/jmall/assets/images/userBack.png) 100% 100%;padding-bottom: 4em;padding-top: 7em">
+            <div class="12u$" style="text-align: center;padding:0px 0px 0px 0.1em;background: url(/templates/jmall/assets/images/userBack.png) 100% 100%;padding-bottom: 4em;padding-top: 5em">
                 <!-- <ul class="actions">
                     <li><img class="litter-avatar" src="${CPATH}${USER.avatar!TPATH+'/images/avatar.jpg'}"/></li>
                 </ul> -->

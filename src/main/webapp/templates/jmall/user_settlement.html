@@ -293,19 +293,36 @@
 <style>
 table{margin:0px}
 table tbody tr{border: solid 0px rgba(210, 215, 217, 0.75);}
+#sidebar .toggle{
+	top:2.5em
+}
 </style>
 <section >
 	<div>
 		<input type="hidden" name="goto" value="${goto!}">
 		<div onclick="getWxAddr()">
-			<div id="addressInfoDiv" class="row uniform" style="padding: 5px 0px 4px 5px;" style="display: none">
-				<div class="12u$">
-					收货人:<div id="userAddressName"></div>
-					<div id="userAddressMobile"></div>
-					<div id="userAddressAddress"></div>
+			<div id="addressInfoDiv" class="row uniform" style="padding: 15px 0px 4px 5px;" style="display: none">
+				<div class="12u$" style="padding-left: 0px">
+					<div style="display: flex;flex-direction: row;justify-content: space-between;align-items: center;">
+						<div style="width:100%">
+							<div style="display: flex;flex-direction: row;justify-content: space-between;">
+								<div style="display: flex;flex-direction: row;align-items: center;">
+									<img src="/templates/jmall/assets/images/location.png" style="width:15px;height:15px;margin-right: 5px"/>
+									收货人：
+									<div id="userAddressName"></div>
+								</div>
+								<div id="userAddressMobile" style="margin-right: 10px"></div>
+							</div>
+							<div style="display: flex;flex-direction: row;margin-left: 20px">
+								收货地址：
+								<div id="userAddressAddress"></div>
+							</div>
+						</div>
+						<div>></div>
+					</div>
 				</div>
 			</div>
-			<div id="addAddressButton" class="row uniform" style="display: none">
+			<div id="addAddressButton" class="row uniform" style="display: none;padding-top:15px">
 				<div class="12u$">
 					<div style="display: flex;justify-content:center;align-items:center">
 						<img src="/templates/jmall/assets/images/addAddress_ico.png" style="width:25px;height:25px"/>
@@ -396,7 +413,27 @@ table tbody tr{border: solid 0px rgba(210, 215, 217, 0.75);}
 					</tbody>
 				</table>
 			</div>
-			<div class="lineOrangeBode" style="height: 3px;width: 100%;background-color: #fd7879;margin-bottom: 10px"></div>
+			<div style="margin: 0em -2em;">
+				<div style="padding: 10px 1em;display: flex;flex-direction: row;justify-content: space-between;align-items: center;border-bottom: 1px solid #e6e6e6;border-top: 1px solid #e6e6e6;" >
+					<span>数量：</span>
+					<span class="price">${quantity!}</span>
+				</div>
+				<div id="totalAmount_P" value="${(content.price!)*(quantity!)}" style="border-bottom: 10px solid #f5f6f6;padding: 10px 1em;display: flex;flex-direction: row;justify-content: space-between;align-items: center;">
+					<span>总金额：</span>
+					<span class="price" >￥${(content.price!)*(quantity!)}</span>
+				</div>
+			</div>
+			<div style="margin: 0em -2em;">
+				<div  id="coupon_P" onclick="couponList()" style="margin-bottom:20px;border-bottom: 10px solid #f5f6f6;padding: 10px 1em;display: flex;flex-direction: row;justify-content: space-between;align-items: center;">
+					<span>优惠券：</span>
+					<span>
+						<span style="color: #019ef3;font-size: 14px;padding-right: 5px">减价五折</span>>
+					</span>
+					
+				</div>
+			</div>
+			
+<!-- 			<div class="lineOrangeBode" style="height: 3px;width: 100%;background-color: #fd7879;margin-bottom: 10px"></div>
 			<div class="row uniform">
 				<div class="12u$ align-right">
 					<p class="price">数量：${quantity!}</p>
@@ -409,7 +446,7 @@ table tbody tr{border: solid 0px rgba(210, 215, 217, 0.75);}
 					<p class="price" id="coupon_P" onclick="couponList()" style="cursor:pointer">优惠券></p>
 					<p class="price" id="payAmount_P" value="${(content.price!)*(quantity!)}">实付款：￥${(content.price!)*(quantity!)}</p>
 				</div>
-			</div>
+			</div> -->
 		</#if>
 		<diV class="box alt">
 			<div class="row uniform">
@@ -435,17 +472,18 @@ table tbody tr{border: solid 0px rgba(210, 215, 217, 0.75);}
 		</div> -->
 	</div>
 	<div  style="position: fixed;bottom: 0px;height: 3.2em;width: 100%;margin: 0px -2em 0px -2em">
-		<div  style="display: flex;justify-content:space-between;align-items:center;">
-			<div  class="align-right" style="display: flex;flex-direction: column;text-align:right;width: 68%;padding-right:10px;background-color: #19e6d7;height: 3.2em;color: #ffee25">
-				<span>会员钱包余额</span>
-				<span style="font-weight: bold;font-size: 15px">${amount!}</span>
+		<div  style="display: flex;justify-content:flex-end;align-items:center;border-top:1px solid #c5c5c5">
+			<div  class="align-right" style="margin-right: 20px">
+				<!-- <span>会员钱包余额</span> style="display: flex;flex-direction: column;text-align:right;width: 68%;padding-right:10px;background-color: #19e6d7;height: 3.2em;color: #ffee25"
+				<span style="font-weight: bold;font-size: 15px">${amount!}</span> -->
+				合计：<span style="color:#f56a6a;font-size: 16px">￥323424</span>
 			</div>
 			<div style="display: flex;justify-content:space-between;align-items:center;width: 32%;background-color: #FF6647;height: 3.2em;text-align: center;">
 				<#if jp.shoppingCartPage??>
-					<p onclick="doShoppingCartSettlement()" style="color: #fef479;width: 100%;font-size: 16px">提交订单</p>
+					<p onclick="doShoppingCartSettlement()" style="color: #FFF;width: 100%;font-size: 16px">提交订单</p>
 				</#if>
 				<#if content??>
-					<p onclick="doSettlement()" style="color: #fef479;width: 100%;font-size: 16px">提交订单</p>
+					<p onclick="doSettlement()" style="color: #FFF;width: 100%;font-size: 16px">提交订单</p>
 				</#if>
 			</div>
 		</div>
