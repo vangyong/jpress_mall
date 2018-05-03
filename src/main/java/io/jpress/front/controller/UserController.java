@@ -473,8 +473,8 @@ public class UserController extends BaseFrontController {
 		
 		//查询当前用户的优惠券信息
         List<Coupon> couponList = CouponQuery.me().findListByUserId(1, 100, userId);
+        setAttr("couponList", couponList);
         if (couponList != null && !couponList.isEmpty()) {
-            setAttr("couponList", couponList);
             setAttr("couponDefault", couponList.get(0));
         } else {
             Coupon couponDefault = new Coupon();
@@ -524,8 +524,8 @@ public class UserController extends BaseFrontController {
 		
 		//查询当前用户的优惠券信息
 		List<Coupon> couponList = CouponQuery.me().findListByUserId(1, 100, userId);
+		setAttr("couponList", couponList);
 		if (couponList != null && !couponList.isEmpty()) {
-		    setAttr("couponList", couponList);
 		    setAttr("couponDefault", couponList.get(0));
 		} else {
             Coupon couponDefault = new Coupon();
