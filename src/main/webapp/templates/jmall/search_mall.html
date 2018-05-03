@@ -1,7 +1,12 @@
 <#include "_inc/_layout.html"/>
 <@layout>
+<style>
+#sidebar .toggle{
+	top:0px
+}
+</style>
 <section>
-	<div class="posts">
+	<div class="posts" style="margin-top: 10px;margin-bottom: 10px">
 		<@jp.searchResultPage pageSize="9" >
 			<#if page.getList()?size gt 0>
 				<#list page.getList() as bean>

@@ -211,19 +211,20 @@
 	//选择优惠券
 	function chooseCoupon(obj) {
 		var couponAmount = obj.attributes["value"].nodeValue;
+		var couponName = obj.attributes["couponName"].nodeValue;
 		var totalAmount = $('#totalAmount_P').attr("value");
 		var payAmount = $('#payAmount_P').attr("value");
 		if (couponAmount <= 0) {
 			couponAmount = 0.00;
-			$('#coupon_P').html('优惠券>');
+			$('#coupon_P').html('不使用优惠券');
 		} else {
-			$('#coupon_P').html('优惠券：￥-' + couponAmount + ' >');
+			$('#coupon_P').html(couponName + '   ￥-' + couponAmount);
 		}
 		payAmount = accAdd(totalAmount,-couponAmount);
 		if (payAmount < 0) {
 			payAmount = 0.00;
 		}
-		$('#payAmount_P').html('实付款：￥' + payAmount);
+		$('#payAmount_P').html('￥' + payAmount);
 		$('#payAmount_P').attr("value",payAmount);
 		
 		$('#payAmount').attr("value",payAmount);
@@ -294,7 +295,7 @@
 table{margin:0px}
 table tbody tr{border: solid 0px rgba(210, 215, 217, 0.75);}
 #sidebar .toggle{
-	top:2.5em
+	top:0px
 }
 </style>
 <section >
@@ -304,7 +305,7 @@ table tbody tr{border: solid 0px rgba(210, 215, 217, 0.75);}
 			<div id="addressInfoDiv" class="row uniform" style="padding: 15px 0px 4px 5px;" style="display: none">
 				<div class="12u$" style="padding-left: 0px">
 					<div style="display: flex;flex-direction: row;justify-content: space-between;align-items: center;">
-						<div style="width:100%">
+						<div style="width:100%;margin-left: 15px">
 							<div style="display: flex;flex-direction: row;justify-content: space-between;">
 								<div style="display: flex;flex-direction: row;align-items: center;">
 									<img src="/templates/jmall/assets/images/location.png" style="width:15px;height:15px;margin-right: 5px"/>
@@ -372,7 +373,26 @@ table tbody tr{border: solid 0px rgba(210, 215, 217, 0.75);}
 						</tfoot>-->
 					</table>
 				</div>
-				<div class="lineOrangeBode" style="height: 3px;width: 100%;background-color: #fd7879;margin-bottom: 10px"></div>
+				<div style="margin: 0em -2em;">
+					<div style="padding: 10px 1em;display: flex;flex-direction: row;justify-content: space-between;align-items: center;border-bottom: 1px solid #e6e6e6;border-top: 1px solid #e6e6e6;" >
+						<span>数量：</span>
+						<span class="price">${object.get('quantity')!}</span>
+					</div>
+					<div id="totalAmount_P" value="${object.get('price')!}" style="border-bottom: 10px solid #f5f6f6;padding: 10px 1em;display: flex;flex-direction: row;justify-content: space-between;align-items: center;">
+						<span>总金额：</span>
+						<span class="price" >￥${object.get('price')}</span>
+					</div>
+				</div>
+				<div style="margin: 0em -2em;">
+					<div onclick="couponList()" style="margin-bottom:20px;border-bottom: 10px solid #f5f6f6;padding: 10px 1em;display: flex;flex-direction: row;justify-content: space-between;align-items: center;">
+						<span>优惠券：</span>
+						<span>
+							<span id="coupon_P" style="color: #019ef3;font-size: 12px;padding-right: 5px">优惠券</span>>
+						</span>
+						
+					</div>
+				</div>
+				<!-- <div class="lineOrangeBode" style="height: 3px;width: 100%;background-color: #fd7879;margin-bottom: 10px"></div>
 					<div class="row uniform">
 						<div class="12u$ align-right">
 							<p class="price">数量：${object.get('quantity')!}</p>
@@ -385,7 +405,7 @@ table tbody tr{border: solid 0px rgba(210, 215, 217, 0.75);}
 						<p class="price" id="coupon_P" onclick="couponList()" style="cursor:pointer">优惠券></p>
 						<p class="price" id="payAmount_P" value="${object.get('price')!}">实付款：￥${object.get('price')!}</p>
 					</div>
-				</div>
+				</div> -->
 			</@jp.shoppingCartPage>
 		</#if>
 		<#if content??>
@@ -424,10 +444,10 @@ table tbody tr{border: solid 0px rgba(210, 215, 217, 0.75);}
 				</div>
 			</div>
 			<div style="margin: 0em -2em;">
-				<div  id="coupon_P" onclick="couponList()" style="margin-bottom:20px;border-bottom: 10px solid #f5f6f6;padding: 10px 1em;display: flex;flex-direction: row;justify-content: space-between;align-items: center;">
+				<div onclick="couponList()" style="margin-bottom:20px;border-bottom: 10px solid #f5f6f6;padding: 10px 1em;display: flex;flex-direction: row;justify-content: space-between;align-items: center;">
 					<span>优惠券：</span>
 					<span>
-						<span style="color: #019ef3;font-size: 14px;padding-right: 5px">减价五折</span>>
+						<span id="coupon_P" style="color: #019ef3;font-size: 12px;padding-right: 5px">优惠券</span>>
 					</span>
 					
 				</div>
@@ -476,7 +496,12 @@ table tbody tr{border: solid 0px rgba(210, 215, 217, 0.75);}
 			<div  class="align-right" style="margin-right: 20px">
 				<!-- <span>会员钱包余额</span> style="display: flex;flex-direction: column;text-align:right;width: 68%;padding-right:10px;background-color: #19e6d7;height: 3.2em;color: #ffee25"
 				<span style="font-weight: bold;font-size: 15px">${amount!}</span> -->
-				合计：<span style="color:#f56a6a;font-size: 16px">￥323424</span>
+				<#if jp.shoppingCartPage??>
+					合计：<span id="payAmount_P" style="color:#f56a6a;font-size: 16px">￥${object.get('price')!}</span>
+				</#if>
+				<#if content??>
+					合计：<span id="payAmount_P" style="color:#f56a6a;font-size: 16px">￥${(content.price!)*(quantity!)}</span>
+				</#if>
 			</div>
 			<div style="display: flex;justify-content:space-between;align-items:center;width: 32%;background-color: #FF6647;height: 3.2em;text-align: center;">
 				<#if jp.shoppingCartPage??>
@@ -493,7 +518,7 @@ table tbody tr{border: solid 0px rgba(210, 215, 217, 0.75);}
 		<#if couponList?size gt 0>
 			<div>
 				<div style="display: flex;flex-direction:row;align-items:center">
-						<div id="0" onclick="chooseCoupon(this)" value="0">
+						<div id="0" onclick="chooseCoupon(this)" value="0" couponName="不使用优惠券">
 							<input class="couponChecked" type="radio" id="0">
 							<label for="coupon0"></label>
 						</div>
@@ -503,7 +528,7 @@ table tbody tr{border: solid 0px rgba(210, 215, 217, 0.75);}
 				</div>
 				<#list couponList as coupon>
 					<div style="display: flex;flex-direction:row;align-items:center;">
-						<div id="${coupon.couponUsedId!}" onclick="chooseCoupon(this)" value="${coupon.amount!}">
+						<div id="${coupon.couponUsedId!}" onclick="chooseCoupon(this)" value="${coupon.amount!}" couponName="${coupon.name!}">
 							<input class="couponChecked" type="radio" id="${coupon.couponUsedId!}">
 							<label for="coupon${coupon.id!}"></label>
 						</div>

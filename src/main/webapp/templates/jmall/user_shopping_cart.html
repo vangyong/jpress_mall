@@ -71,7 +71,9 @@
 		if(shoppingCarts.length > 0){
 			var shoppingCartIds=new Array();
 			$.each(shoppingCarts,function(n,shoppingCart) {
-				shoppingCartIds.push(shoppingCart.value);
+				if(shoppingCart.value > 0) {
+					shoppingCartIds.push(shoppingCart.value);
+				}
 			});
 			var goto=window.location.href;
 			var url="${CPATH}/user/userShoppingCartSettlement?ids="+shoppingCartIds+"&goto="+goto+"";
@@ -195,7 +197,7 @@
 					<!-- <li><a href="javascript:void(0)" class="button fit" onclick="clearShoppingCart()">清空</a></li>
 					<li ><a href="javascript:void(0)" class="button fit" onclick="deleteShoppingCart()">删除</a></li> -->
 					<div style="display: flex;align-items:center;margin-left: 5px" id="chooseAllDiv">
-						<input class="shoppingCartChecked" type="checkbox" id="chooseAllInput" price="0" quantity="0">
+						<input class="shoppingCartChecked" type="checkbox" id="chooseAllInput" price="0" quantity="0" value="0.0">
 						<label ></label>
 						<p style="margin-top:1.2em;color: #a7a7a7;margin-left: -10px">全选</p>
 					</div>

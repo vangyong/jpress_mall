@@ -39,6 +39,8 @@ import io.jpress.ui.freemarker.tag.UserAmountPageTag;
 import io.jpress.utils.CookieUtils;
 import io.jpress.utils.EncryptUtils;
 import io.jpress.utils.StringUtils;
+
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.SQLException;
 import java.util.Date;
@@ -471,7 +473,16 @@ public class UserController extends BaseFrontController {
 		
 		//查询当前用户的优惠券信息
         List<Coupon> couponList = CouponQuery.me().findListByUserId(1, 100, userId);
-        setAttr("couponList", couponList);
+        if (couponList != null && !couponList.isEmpty()) {
+            setAttr("couponList", couponList);
+            setAttr("couponDefault", couponList.get(0));
+        } else {
+            Coupon couponDefault = new Coupon();
+            couponDefault.setName("暂无可用");
+            couponDefault.setDesc("暂无可用");
+            couponDefault.setAmount(BigDecimal.valueOf(0.0));
+            setAttr("couponDefault", couponDefault);
+        }
         setAttr("amount", currUser.getAmount());
         
         setAttr(Consts.ATTR_GLOBAL_WEB_TITLE, "订单确认");
@@ -513,7 +524,16 @@ public class UserController extends BaseFrontController {
 		
 		//查询当前用户的优惠券信息
 		List<Coupon> couponList = CouponQuery.me().findListByUserId(1, 100, userId);
-		setAttr("couponList", couponList);
+		if (couponList != null && !couponList.isEmpty()) {
+		    setAttr("couponList", couponList);
+		    setAttr("couponDefault", couponList.get(0));
+		} else {
+            Coupon couponDefault = new Coupon();
+            couponDefault.setName("暂无可用");
+            couponDefault.setDesc("暂无可用");
+            couponDefault.setAmount(BigDecimal.valueOf(0.0));
+            setAttr("couponDefault", couponDefault);
+        }
 		setAttr("amount", currUser.getAmount());
 		
 		setAttr(Consts.ATTR_GLOBAL_WEB_TITLE, "订单确认");
