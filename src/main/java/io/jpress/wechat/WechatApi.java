@@ -15,6 +15,7 @@
  */
 package io.jpress.wechat;
 
+import com.jfinal.weixin.sdk.api.AccessTokenApi;
 import com.jfinal.weixin.sdk.api.ApiConfig;
 import com.jfinal.weixin.sdk.api.ApiResult;
 import com.jfinal.weixin.sdk.api.MenuApi;
@@ -26,6 +27,8 @@ import io.jpress.utils.HttpUtils;
 
 public class WechatApi {
 
+    private static String sendApiUrl = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=";
+    
 	public static ApiConfig getApiConfig() {
 		ApiConfig config = new ApiConfig();
 		config.setAppId(OptionQuery.me().findValue("wechat_appid"));
@@ -79,4 +82,15 @@ public class WechatApi {
 		return new ApiResult(jsonResult);
 	}
 
+	/**
+	 * <b>Description.:发送模板消息</b>和TemplateMsgApi.send方法一样的<br>
+	 * <b>Author:jianb.jiang</b>
+	 * <br><b>Date:</b> 2018年5月4日 下午2:00:28
+     * @param jsonStr json字符串
+     * @return {ApiResult}
+     */
+    public static ApiResult send(String jsonStr) {
+        String jsonResult = com.jfinal.weixin.sdk.utils.HttpUtils.post(sendApiUrl + AccessTokenApi.getAccessToken().getAccessToken(), jsonStr);
+        return new ApiResult(jsonResult);
+    }
 }

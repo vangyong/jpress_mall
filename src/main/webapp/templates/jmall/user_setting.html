@@ -85,13 +85,16 @@ input[type="text"], input[type="number"], input[type="password"], input[type="em
     right: 0px;
     top: 2px;box-shadow:inset 0 0 0 0px #f56a6a;border-radius:0px;border-left:1px solid rgba(210, 215, 217, 0.75); 
 }
+#sidebar .toggle{
+	top:0px
+}
 </style>
 <section>
 	<!-- <header class="major">
         <h4>个人信息</h4>
     </header> -->
     
-	<form class="setting" action="${CPATH}/user/doSaveUserSetting" method="post" id="form" style="margin: 0 -2em 0px -2em;">
+	<form class="setting" action="${CPATH}/user/doSaveUserSetting" method="post" id="form" style="margin: 10px -2em 0px -2em;">
 	<input type="hidden" name="user.id" value="${(user.id)!}">
 	<div class="col-xs-12 ">
 		<div class="row" >

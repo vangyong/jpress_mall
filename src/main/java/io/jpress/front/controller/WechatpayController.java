@@ -3,6 +3,7 @@ package io.jpress.front.controller;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +19,8 @@ import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.IAtom;
 import com.jfinal.weixin.sdk.api.ApiResult;
 import com.jfinal.weixin.sdk.api.PaymentApi;
+import com.jfinal.weixin.sdk.api.TemplateData;
+import com.jfinal.weixin.sdk.api.TemplateMsgApi;
 import com.jfinal.weixin.sdk.api.PaymentApi.TradeType;
 import com.jfinal.weixin.sdk.kit.IpKit;
 import com.jfinal.weixin.sdk.kit.PaymentKit;
@@ -45,6 +48,7 @@ import io.jpress.router.RouterMapping;
 import io.jpress.utils.DateUtils;
 import io.jpress.utils.RandomUtils;
 import io.jpress.utils.StringUtils;
+import io.jpress.wechat.WechatApiConfigInterceptor;
 import io.jpress.wechat.WechatUserInterceptor;
 
 /**
@@ -59,6 +63,11 @@ import io.jpress.wechat.WechatUserInterceptor;
 public class WechatpayController extends BaseFrontController {
 
     private static final String SUCCESS = "SUCCESS";
+    
+    /**
+     * 支付成功后奖金到账通知  消息的模板ID
+     */
+    private static final String PAY_SUCCESS_NOTICE_TEMP_ID = OptionQuery.me().findValue("wechat_bonus_tempMsg_id");
 
     private static final BigDecimal BOUNS_RATIO_LEVEL1 = BigDecimal.valueOf(0.3);
 
@@ -70,6 +79,7 @@ public class WechatpayController extends BaseFrontController {
     String partner = OptionQuery.me().findValue("wechat_partner");
     String paternerKey = OptionQuery.me().findValue("wechat_paternerKey");
     String notifyUrl = PropKit.get("wechat_notify_url");
+    String web_domain = OptionQuery.me().findValue("web_domain");
   
     //待支付-微信支付
     @Before(UCodeInterceptor.class)
@@ -110,7 +120,7 @@ public class WechatpayController extends BaseFrontController {
         params.put("mch_id", partner);
         params.put("body", OptionQuery.me().findValue("wechat_transferDesc"));
         params.put("out_trade_no", orderNo);
-        params.put("total_fee", Integer.toString(cashFee.multiply(BigDecimal.valueOf(100.00)).intValue()));
+        params.put("total_fee", Integer.toString(cashFee.setScale(2, BigDecimal.ROUND_DOWN).multiply(BigDecimal.valueOf(100.00)).intValue()));
         
         String ip = IpKit.getRealIp(getRequest());
         if (StrKit.isBlank(ip)) {
@@ -158,6 +168,7 @@ public class WechatpayController extends BaseFrontController {
     }
     
     @Clear({WechatUserInterceptor.class})
+    @Before({WechatApiConfigInterceptor.class})
     public void pay() {
         try {
             // 支付结果通用通知文档: https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_7
@@ -168,8 +179,8 @@ public class WechatpayController extends BaseFrontController {
             //-----------test-----------------------
 //            Map<String, String> params = new HashMap<>();
 //            params.put("result_code", "SUCCESS");
-//            params.put("total_fee", "10000");
-//            params.put("out_trade_no", "1801142043572365216");
+//            params.put("total_fee", "1522");
+//            params.put("out_trade_no", "18050414283431409212");
 //            params.put("transaction_id", "wx_fdskfsalkfalsjdl11");
 //            params.put("time_end", "20180125182222");
             //-----------test-----------------------
@@ -186,9 +197,9 @@ public class WechatpayController extends BaseFrontController {
 
             // 注意重复通知的情况，同一订单号可能收到多次通知，请注意一定先判断订单状态
             // 避免已经成功、关闭、退款的订单被再次更新
-
+            final List<TemplateData> tempMsgList = new ArrayList<TemplateData>();
             if (PaymentKit.verifyNotify(params, paternerKey)) {
-              // test -- if (true) {
+//            //--test   if (true) {
                 if (SUCCESS.equals(resultCode)) {
                     //更新订单信息
                     final Transaction transaction = new Transaction().findFirst("select * from jp_transaction where order_no = ?", orderNo);
@@ -201,7 +212,7 @@ public class WechatpayController extends BaseFrontController {
                         return;
                     }
                     BigDecimal cashFee = new BigDecimal(cashFeeStr).divide(new BigDecimal("100"));
-                    if (transaction.getCashFee().compareTo(cashFee) != 0) { //订单现金支付金额与实际支付金额不相等
+                    if (transaction.getCashFee().setScale(2, BigDecimal.ROUND_DOWN).compareTo(cashFee.setScale(2, BigDecimal.ROUND_DOWN)) != 0) { //订单现金支付金额与实际支付金额不相等
                         log.error("微信支付通知错误：orderCashFee[" + transaction.getCashFee() + "] <> payCashFee[" + cashFee + "]!params = []" + params);
                         return;
                     }
@@ -217,7 +228,7 @@ public class WechatpayController extends BaseFrontController {
                                 return false;
                             }
 
-                            if (!calculateBonus(transaction)) { //计算并分配奖金
+                            if (!calculateBonus(transaction,tempMsgList)) { //计算并分配奖金，同时组装奖金到账通知的模板消息
                                 return false;
                             }
 
@@ -228,6 +239,12 @@ public class WechatpayController extends BaseFrontController {
                     if (!res) { //订单更新失败
                         log.error("微信支付通知错误：order update failed!params = []" + params);
                         return;
+                    }
+                    
+                    //推送模板消息
+                    for (TemplateData templateData : tempMsgList) {
+                        ApiResult result = TemplateMsgApi.send(templateData.build());
+                        log.info("用户("+templateData.getTouser()+")奖金到账消息推送：" + result.toString());
                     }
                     
                     Map<String, String> xml = new HashMap<>();
@@ -244,15 +261,14 @@ public class WechatpayController extends BaseFrontController {
         }
     }
     
-    private boolean calculateBonus(Transaction transaction) {
+    private boolean calculateBonus(Transaction transaction, List<TemplateData> tempMsgList) {
         User currUser = UserQuery.DAO.findById(transaction.getUserId());//当前消费用户（不从缓存读取，因为缓存中的团队人数和团队金额不是最新值）
         BigDecimal spending = transaction.getCashFee().add(transaction.getAmountFee());//本次消费总金额 = 余额消费金额 + 现金消费金额，即不包括优惠券金额
-        BigInteger transactionId = transaction.getId();
         
         //计算当前用户的父亲的奖金
         User pUser = UserQuery.DAO.findById(currUser.getPid());
         if (pUser != null) {
-            if (!calculationBounsByUserLevel(spending, transactionId, pUser, "C")) {
+            if (!calculationBounsByUserLevel(spending, transaction, pUser, "C", tempMsgList)) {
                 return false;
             }
         } else {
@@ -262,7 +278,7 @@ public class WechatpayController extends BaseFrontController {
         //计算当前用户的父亲的父亲的奖金
         User ppUser = UserQuery.DAO.findById(pUser.getPid());
         if (ppUser != null) {
-            if (!calculationBounsByUserLevel(spending, transactionId, ppUser, "B")) {
+            if (!calculationBounsByUserLevel(spending, transaction, ppUser, "B", tempMsgList)) {
                 return false;
             }
         } else {
@@ -272,7 +288,7 @@ public class WechatpayController extends BaseFrontController {
         //计算当前用户的父亲的父亲的父亲的奖金
         User pppUser = UserQuery.DAO.findById(ppUser.getPid());
         if (pppUser != null) {
-            if (!calculationBounsByUserLevel(spending, transactionId, pppUser, "A")) {
+            if (!calculationBounsByUserLevel(spending, transaction, pppUser, "A", tempMsgList)) {
                 return false;
             }
         } else {
@@ -282,7 +298,8 @@ public class WechatpayController extends BaseFrontController {
         return true;
     }
 
-    private boolean calculationBounsByUserLevel(BigDecimal spending, BigInteger transactionId, User user, String level) {
+    private boolean calculationBounsByUserLevel(BigDecimal spending, Transaction transaction, 
+                User user, String level, List<TemplateData> tempMsgList) {
         //此笔消费计入团队总消费金额
         if (Db.update("update jp_user set team_buy_amount = team_buy_amount + ? where id = ?", spending, user.getId()) <= 0) {
             return false;
@@ -296,10 +313,11 @@ public class WechatpayController extends BaseFrontController {
                 bonusUseramount = spending.multiply(BOUNS_RATIO_LEVEL1);//直接推广提成30%
                 bonusUser.setBonusType(1L);//直接推广
             }
+            bonusUseramount = bonusUseramount.setScale(2, BigDecimal.ROUND_DOWN);
             bonusUser.setAmount(bonusUseramount);
             bonusUser.setBonusTime(new Date());
             bonusUser.setBonusCycle(1L);//奖金计算周期类型（1 按订单结算也就是实时结算;2 按月结算）
-            bonusUser.setTransactionId(transactionId);
+            bonusUser.setTransactionId(transaction.getId());
             bonusUser.setUserId(user.getId());
             if (!bonusUser.save()) {
                 return false;
@@ -307,17 +325,33 @@ public class WechatpayController extends BaseFrontController {
             if (Db.update("update jp_user set amount = amount + ? where id = ?", bonusUseramount, user.getId()) <= 0) {
                 return false;
             }
+            
+            tempMsgList.add(TemplateData.New()
+                .setTouser(user.getOpenid()) // 消息接收者
+                .setTemplate_id(PAY_SUCCESS_NOTICE_TEMP_ID) //模板id
+                .setTopcolor("#eb414a")
+                .setUrl(web_domain + "/user/center") //消息链接地址，此为个人中心详情页面也就是查看余额的页面
+                // 模板参数
+                .add("first", "恭喜您获得一笔推广奖金！\n", "#999")
+                .add("keyword1", user.getNickname(), "#999")
+                .add("keyword2", transaction.getOrderNo(), "#999")
+                .add("keyword3", DateUtils.now(), "#999")
+                .add("keyword4", spending.toString() + " 元", "#999")
+                .add("keyword5", bonusUseramount.toString() + " 元", "#999")
+                .add("remark", "奖金已存入商城账户余额，继续加油！^_^", "#999")
+             );
         }
         
         //计算获得的团队奖金
         BigDecimal bounsTeamAmount = calculationTeamBouns(user,spending);
         if (bounsTeamAmount != null) {
+            bounsTeamAmount = bounsTeamAmount.setScale(2, BigDecimal.ROUND_DOWN);
             Bonus bounsTeam = new Bonus();
             bounsTeam.setAmount(bounsTeamAmount);
             bounsTeam.setBonusCycle(1L);//奖金计算周期类型（1 按订单结算也就是实时结算;2 按月结算）
             bounsTeam.setBonusTime(new Date());
             bounsTeam.setBonusType(3L);//奖金分类（1 个人提成-直接推广;2 个人提成-间接推广;3 团队提成;4 团队管理费）
-            bounsTeam.setTransactionId(transactionId);
+            bounsTeam.setTransactionId(transaction.getId());
             bounsTeam.setUserId(user.getId());
             if (!bounsTeam.save()) {
                 return false;
@@ -511,9 +545,9 @@ public class WechatpayController extends BaseFrontController {
 //                    }
                     
                     //3、修改订单的cash_fee、amount_fee、coupon_fee
-                    transaction.setCouponFee(couponFee);
-                    transaction.setAmountFee(amountFee);
-                    transaction.setCashFee(cashFee);
+                    transaction.setCouponFee(couponFee.setScale(2, BigDecimal.ROUND_DOWN));
+                    transaction.setAmountFee(amountFee.setScale(2, BigDecimal.ROUND_DOWN));
+                    transaction.setCashFee(cashFee.setScale(2, BigDecimal.ROUND_DOWN));
                     
                     //4、如果使用了余额支付，需要记录余额支出
                     if (amountFee.compareTo(BigDecimal.valueOf(0)) > 0) {
@@ -564,7 +598,7 @@ public class WechatpayController extends BaseFrontController {
     }
 
     //商品立即购买微信支付
-    @Before(UCodeInterceptor.class)
+    @Before({UCodeInterceptor.class,WechatApiConfigInterceptor.class})
     public void contentWechatpay(){
         try {
             final String remark=getPara("remark");
@@ -710,9 +744,9 @@ public class WechatpayController extends BaseFrontController {
 //                    }
                     
                     //3、修改订单的cash_fee、amount_fee、coupon_fee
-                    transaction.setCouponFee(couponFee);
-                    transaction.setAmountFee(amountFee);
-                    transaction.setCashFee(cashFee);
+                    transaction.setCouponFee(couponFee.setScale(2, BigDecimal.ROUND_DOWN));
+                    transaction.setAmountFee(amountFee.setScale(2, BigDecimal.ROUND_DOWN));
+                    transaction.setCashFee(cashFee.setScale(2, BigDecimal.ROUND_DOWN));
                     
                     //4、如果使用了余额支付，需要记录余额支出
                     if (amountFee.compareTo(BigDecimal.valueOf(0)) > 0) {
@@ -729,7 +763,8 @@ public class WechatpayController extends BaseFrontController {
                     }
                     
                     //判断页面计算的支付金额是否与后台计算的支付金额相匹配
-                    if(payAmount.compareTo(transaction.getAmountFee().add(transaction.getCashFee())) != 0) {
+                    if(payAmount.setScale(2, BigDecimal.ROUND_DOWN).compareTo(
+                            transaction.getAmountFee().add(transaction.getCashFee()).setScale(2, BigDecimal.ROUND_DOWN)) != 0) {
                         log.error("订单[{"+ transaction.getOrderNo() +"}]支付金额不匹配");
                         return false;
                     }

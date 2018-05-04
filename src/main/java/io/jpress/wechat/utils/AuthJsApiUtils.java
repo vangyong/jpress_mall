@@ -83,8 +83,9 @@ public class AuthJsApiUtils {
 	        }
 		} catch (Exception e) {
 			accessToken = null;  
-			log.warn("获取JsapiTicket失败 errcode:"+apiResult.getInt("errcode")+"  errmsg:"+apiResult.getStr("errmsg")); 
 			e.printStackTrace();
+			log.warn("获取JsapiTicket失败 errcode:"+ 
+			        (apiResult != null ? (apiResult.getInt("errcode")+"  errmsg:"+apiResult.getStr("errmsg")) : "")); 
 		} 
         return ticket;  
     } 

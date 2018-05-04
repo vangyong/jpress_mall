@@ -132,15 +132,20 @@
 
 </#macro>
 <@layout>
+<style>
+#sidebar .toggle{
+	top:0px
+}
+</style>
 <section>
     <!-- <header class="major">
         <h4>${title!}</h4>
     </header> -->
     <input type="hidden" name="goto" value="${goto!}">
-    <@jp.transactionPage pageSize="10">
+    <@jp.transactionPage pageSize="5">
         <#if transactions?size gt 0>
             <#list transactions as transaction>
-                <div class="box">
+                <div class="box" style="margin-top: 10px;">
                     <div class="row uniform">
                         <div class="12u$" onclick="window.location.href='${CPATH}/user/userTransactionItem?id=${transaction.id!}&goto=${goto!}';">
                             <#if transaction.getContentThumbnailList()??>
@@ -169,7 +174,7 @@
                     </div>
                 </div>
             </#list>
-            <div class="box alt bottom">
+            <div class="box alt bottom" style="margin-bottom: 40px">
                 <div class="row uniform">
                     <div class="12u$">
                         <ul class="pagination">

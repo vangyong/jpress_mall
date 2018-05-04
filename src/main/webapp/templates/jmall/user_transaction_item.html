@@ -33,9 +33,14 @@
     }
 </#macro>
 <@layout>
+<style>
+#sidebar .toggle{
+	top:0px
+}
+</style>
 <section>
     <#if transaction??>
-        <div class="box alt">
+        <div class="box alt" style="margin-top: 10px;">
             <div class="row uniform">
                 <div class="12u$">
                     <h5>订单状态：</h5>
