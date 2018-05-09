@@ -166,4 +166,12 @@ public class BaseTransaction<M extends BaseTransaction<M>> extends JModel<M> imp
     public java.math.BigDecimal getCashFee() {
         return get("cash_fee");
     }
+
+    public void setExpressNo(java.lang.String expressNo) {
+        set("express_no", expressNo);
+    }
+
+    public java.lang.String getExpressNo() {
+        return get("express_no");
+    }
 }

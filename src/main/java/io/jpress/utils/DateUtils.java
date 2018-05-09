@@ -41,6 +41,20 @@ public class DateUtils {
 		return sdf.format(date);
 	}
 
+    public static String format(Date date, String sdfStr) {
+        if (null == date)
+            return null;
+        SimpleDateFormat sdf = new SimpleDateFormat(sdfStr);
+        return sdf.format(date);
+    }
+
+    public static String format(Date date, SimpleDateFormat sdf) {
+        if (null == date)
+            return null;
+
+        return sdf.format(date);
+    }
+
     public static Date parse1(String dateStr) throws ParseException {
         return sdf1.parse(dateStr);
     }

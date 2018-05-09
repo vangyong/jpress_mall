@@ -1,3 +1,49 @@
+<#macro script>
+
+	function doUpload(btn) {
+		layer.open({
+			type: 1,
+			skin: 'layui-layer-rim',
+			area: ['90%', 'auto'],
+			content: '<form id="myFormId" action="${CPATH}/admin/transaction/importExcel" method="post"enctype="multipart/form-data" target="frmright">'+
+				    '    <table class="tableStyle" formMode="transparent">'+
+				    '        <tr></tr>'+
+				    '        <tr>'+
+				    '            <td>'+
+				    '            <input type="file" id="filePath" name="filePath" class="validate[required]"/>'+
+				    '            </td>'+
+				    '        </tr>'+
+				    '    </table>'+
+				    '</form>',
+			btn: ['确定','取消'],
+			yes: function(index){
+				$("#myFormId").ajaxSubmit({
+					type : "post",
+					dataType : "json",
+					success : function(data) {
+						if(data.errorCode == 0){
+							layer.close(index);
+							location.reload();
+						} else{
+							layer.msg(data.message);
+						}
+					},
+					error : function() {
+						layer.msg("信息提交错误");
+					}
+				});
+			}
+		});
+	}
+	
+	function exportExcel(){
+		var k = $("#post-search-input").val();
+		var pay_type = $("#pay_type").val();
+		var status = $("#status").val();
+		window.open("${CPATH}/admin/transaction/exportExcel?m=${m!}&p=${p!}&c=${c!}" +"&k="+k +"&pay_type="+pay_type +"&status="+status);
+	}
+
+</#macro>
 <section class="content-header">
 	<h1>
 		所有交易记录
@@ -13,14 +59,14 @@
 				<input id="post-search-input" style="width:350px;" class="form-control input-sm" type="search" value="${k!}" name="k" placeholder="输入本地订单号，微信/支付宝订单号进行搜索">
 			</div>
 			<div class="form-group">
-				<select class="form-control input-sm" name="pay_type" >
+				<select class="form-control input-sm" name="pay_type" id="pay_type">
 					<option value="">请选择支付类型</option>
 					<option value="alipay" <#if 'alipay'==pay_type! >selected</#if> >支付宝支付</option>
 					<option value="wechatpay" <#if 'wechatpay'==pay_type! >selected</#if> >微信支付</option>
 				</select>
 			</div>
 			<div class="form-group">
-				<select class="form-control input-sm" name="status" >
+				<select class="form-control input-sm" name="status" id="status">
 					<option value="">请选择订单状态</option>
 					<option value="0" <#if '0'==status! >selected</#if> >支付失败</option>
 					<option value="1" <#if '1'==status! >selected</#if> >待支付</option>
@@ -32,6 +78,12 @@
 			</div>
 			<div class="form-group">
 				<input type="submit" class="btn btn-block btn-sm btn-default" style="width:100px;" value="搜索" />
+			</div>
+			<div class="form-group" onclick="exportExcel();">
+				<input class="btn btn-block btn-sm btn-default" style="width:100px;" value="导出" />
+			</div>
+			<div class="form-group" onclick="doUpload(this)">
+				<input class="btn btn-block btn-sm btn-default" style="width:100px;" value="导入快递单号" />
 			</div>
 		</form>
 	</div>
@@ -51,6 +103,8 @@
 							<th>支付类型</th>
 							<th>订单状态</th>
 							<th>创建时间</th>
+							<th>快递单号</th>
+							<th>快递信息（快递公司等）</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -93,6 +147,8 @@
 								</#if>
 							</td>
 							<td>${(bean.created)!}</td>
+							<td>${(bean.expressNo)!}</td>
+							<td>${(bean.express)!}</td>
 						</tr>
 						</#list> 
 						</#if>
