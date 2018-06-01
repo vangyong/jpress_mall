@@ -163,6 +163,7 @@ public class WechatMessageController extends MsgController {
                                         return false;
                                     }
                                 } else {
+                                    CookieUtils.put(ctr, Consts.COOKIE_LOGINED_USER, currUser.getId());//缓存当前用户id
                                     return true;
                                 }
                                 
@@ -176,6 +177,7 @@ public class WechatMessageController extends MsgController {
                                         return false;
                                     }
                                 } else {
+                                    CookieUtils.put(ctr, Consts.COOKIE_LOGINED_USER, currUser.getId());//缓存当前用户id
                                     return true;
                                 }
                                 
