@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -324,10 +325,11 @@ public class _TransactionController extends JBaseCRUDController<Transaction>{
                             String expressInfo = strings[7];
                             if (StringUtils.isNotBlank(orderNo) && StringUtils.isNotBlank(expressNo)) {
                                 Transaction transaction = TransactionQuery.me().findByOrderNo(orderNo);
-                                if (transaction != null) {
+                                if (transaction != null && "2".equals(transaction.getStatus())) {
                                     String oldExpressNo = transaction.getExpressNo();
                                     transaction.setExpressNo(expressNo);  
                                     transaction.setExpress(expressInfo);
+                                    transaction.setStatus("3"); //订单状态修改为已经发货
                                     if(transaction.update()) {
                                         if (StringUtils.isBlank(oldExpressNo)) {//已经导入过快递信息的订单不再发送消息通知
                                             User user = UserQuery.me().findById(transaction.getUserId());
@@ -339,8 +341,10 @@ public class _TransactionController extends JBaseCRUDController<Transaction>{
                                                         .setUrl(web_domain + "/user/userTransactionItem?id=" + transaction.getId()) //消息链接地址，此为个人订单详情页面
                                                         // 模板参数
                                                         .add("first", "订单发货通知！\n", "#999")
-                                                        .add("orderId", transaction.getOrderNo(), "#999")
-                                                        .add("waybillNo", transaction.getOrderNo(), "#999")
+                                                        .add("keyword1", "语味订单["+transaction.getOrderNo()+"]", "#999")
+                                                        .add("keyword2", "已发货", "#999")
+                                                        .add("keyword3", transaction.getExpress(), "#999")
+                                                        .add("keyword4", transaction.getExpressNo(), "#999")
                                                         .add("remark", "客官，您购买的宝贝已经发货啦！^_^", "#999")
                                                         ); 
                                             }
@@ -361,10 +365,21 @@ public class _TransactionController extends JBaseCRUDController<Transaction>{
             }
         });
         if(flag){
+        	List<TemplateData> tempMsgFailList = new ArrayList<>();
             //推送模板消息
             for (TemplateData templateData : tempMsgList) {
                 ApiResult result = TemplateMsgApi.send(templateData.build());
-                log.info("用户("+templateData.getTouser()+")订单发货消息推送：" + result.toString());
+                if (result.getErrorCode() == 40001) { //token失效
+                	tempMsgFailList.add(templateData);
+                }
+                log.info("用户("+templateData.getTouser()+")订单发货消息["+templateData.build()+"]第一次推送结果：" + result.toString());
+            }
+            
+            if (!tempMsgFailList.isEmpty()) {
+            	for (TemplateData templateData : tempMsgFailList) {
+            		ApiResult result = TemplateMsgApi.send(templateData.build());
+                    log.info("用户("+templateData.getTouser()+")订单发货消息["+templateData.build()+"]第二次推送结果：" + result.toString());
+				}
             }
             renderAjaxResult("操作成功", 0);
         }else{
