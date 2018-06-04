@@ -261,6 +261,8 @@ public class UserController extends BaseFrontController {
 		User loginedUser = getLoginedUser();
 		if(loginedUser!=null) {
 		    User u = UserQuery.DAO.findById(loginedUser.getId());
+            setAttr("userId", loginedUser.getId());
+            setAttr("title","个人中心");
 			setAttr("accountMoney", u.getAmount());
 			setAttr("extractedMoney", "10");//TODO
 			setAttr("teamNum", u.getTeamNum());

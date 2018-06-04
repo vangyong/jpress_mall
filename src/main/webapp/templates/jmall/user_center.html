@@ -26,6 +26,24 @@
 		  tips: [3, '#78BA32']
 		});
 	}
+	
+	var qrcode = new QRCode(document.getElementById("qrcode"), {
+		width : 200,
+		height : 200
+	});
+
+	function makeqrcode(){
+		var myCodeUrl = "${WEBDOMAIN}/?uid=${userId}";
+		qrcode.makeCode(myCodeUrl);
+		layer.open({
+		  offset: 'auto',
+		  type: 1,
+		  title: false,
+		  closeBtn: 0,
+		  shadeClose: true,
+		  content: $('#qrcode')
+		});
+	}
 </#macro>
 <@layout>
 <style>
@@ -42,7 +60,7 @@
                     <li><img class="litter-avatar" src="${CPATH}${USER.avatar!TPATH+'/images/avatar.jpg'}"/></li>
                 </ul> -->
                 <ul class="actions">
-                		<li style="margin-right: 3em"><img src="/templates/jmall/assets/images/myQRcode.png" style="width: 35px"/></li>
+                		<li style="margin-right: 3em" onclick="makeqrcode()"><img src="/templates/jmall/assets/images/myQRcode.png" style="width: 35px"/></li>
                     <li>
                     	<img class="litter-avatar" src="${CPATH}${USER.avatar!TPATH+'/images/avatar11.jpg'}" style="width:7em;height:7em"/>
                     	<p style="color: #FFFFFF;margin-top: 1em"> ${USER.username!}</p>
@@ -110,7 +128,7 @@
 			</div>
         </div>
     </div>
-   
+    <div id="qrcode" style="width:200px; height:200px; display: none"></div>
     <#include "_inc/_user_bottom_bar.html"/>
 </section>
 </@layout>
