@@ -140,6 +140,21 @@ public class IndexController extends BaseFrontController {
 		if (StringUtils.isNotBlank(description)) {
 			setAttr(Consts.ATTR_GLOBAL_META_DESCRIPTION, description);
 		}
+		
+		//分享参数
+		String share_title = OptionQuery.me().findValue("share_title");
+		String share_desc = OptionQuery.me().findValue("share_desc");
+		String share_img_url = OptionQuery.me().findValue("share_img_url");
+		if (StringUtils.isNotBlank(share_title)) {
+			setAttr(Consts.SHARE_TITLE, share_title);
+		}
+		if (StringUtils.isNotBlank(share_desc)) {
+			setAttr(Consts.SHARE_DESC, share_desc);
+		}
+		if (StringUtils.isNotBlank(share_img_url)) {
+			setAttr(Consts.SHARE_IMG_URL, share_img_url);
+		}
+		
 	}
 
 	private Render onRenderBefore() {

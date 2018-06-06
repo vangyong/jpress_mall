@@ -117,5 +117,11 @@ public class Consts {
 	//腾讯云短信服务
 	public static final String TENCENT_SMS_APPID = "tencent_sms_APPID";
 	public static final String TENCENT_SMS_APPKEY = "tencent_sms_APPKEY";
+	
+	
+	//分享参数
+	public static final String SHARE_TITLE = "share_title";
+	public static final String SHARE_DESC = "share_desc";
+	public static final String SHARE_IMG_URL = "share_img_url";
 
 }

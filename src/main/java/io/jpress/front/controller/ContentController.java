@@ -98,6 +98,19 @@ public class ContentController extends BaseFrontController {
 
 		setAttr("p", page);
 		setAttr("content", content);
+		
+		//重新赋值分享参数
+		if (StringUtils.isNotBlank(content.getTitle())) {
+			setAttr(Consts.SHARE_TITLE, content.getTitle());
+		}
+		if (StringUtils.isNotBlank(content.getTitle())) {
+			setAttr(Consts.SHARE_DESC, content.getTitle());
+		}
+		if (StringUtils.isNotBlank(content.getThumbnail())) {
+			String web_domain = OptionQuery.me().findValue("web_domain");
+			setAttr(Consts.SHARE_IMG_URL, web_domain+content.getThumbnail());
+		}
+		
 
 		setAttr(NextContentTag.TAG_NAME, new NextContentTag(content));
 		setAttr(PreviousContentTag.TAG_NAME, new PreviousContentTag(content));
