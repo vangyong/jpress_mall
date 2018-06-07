@@ -60,11 +60,7 @@ public class WechatUserInterceptor implements Interceptor {
         // 被拦截前的请求URL
         String toUrl = request.getRequestURI();
         if (StringUtils.isNotBlank(queryString)) {
-            String newQueryString =queryString;
-            if(queryString.contains("?")) {
-                newQueryString = queryString.replace("?","&");
-            }
-            toUrl =  toUrl.concat("?").concat(newQueryString);
+            toUrl =  toUrl.concat("?").concat(queryString);
         }
         toUrl = toUrl.replaceAll(request.getContextPath(), "");
         //当前url
