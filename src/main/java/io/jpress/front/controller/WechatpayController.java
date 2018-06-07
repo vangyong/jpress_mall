@@ -207,6 +207,13 @@ public class WechatpayController extends BaseFrontController {
                         log.error("微信支付通知错误：orderNo [" + orderNo + "] is not exists!params = []" + params);
                         return;
                     }
+                    if ("2".equals(transaction.getStatus())) {//订单已经被处理过，直接返回成功
+                        log.error("微信支付通知错误：order status[" + transaction.getStatus() + "] 已经被处理，不用重复处理!params = []" + params);
+                        Map<String, String> xml = new HashMap<>();
+                        xml.put("return_code", SUCCESS);
+                        xml.put("return_msg", "OK");
+                        renderText(PaymentKit.toXml(xml));
+                    }
                     if (!"0".equals(transaction.getStatus()) && !"1".equals(transaction.getStatus())) {//订单状态不对
                         log.error("微信支付通知错误：order status[" + transaction.getStatus() + "] is error!params = []" + params);
                         return;
@@ -241,10 +248,21 @@ public class WechatpayController extends BaseFrontController {
                         return;
                     }
                     
+                    List<TemplateData> tempMsgFailList = new ArrayList<>();
                     //推送模板消息
                     for (TemplateData templateData : tempMsgList) {
                         ApiResult result = TemplateMsgApi.send(templateData.build());
-                        log.info("用户("+templateData.getTouser()+")奖金到账消息推送：" + result.toString());
+                        if (result.getErrorCode() == 40001) { //token失效
+                            tempMsgFailList.add(templateData);
+                        }
+                        log.info("用户("+templateData.getTouser()+")奖金到账消息["+templateData.build()+"]第一次推送结果：" + result.toString());
+                    }
+                    
+                    if (!tempMsgFailList.isEmpty()) {
+                        for (TemplateData templateData : tempMsgFailList) {
+                            ApiResult result = TemplateMsgApi.send(templateData.build());
+                            log.info("用户("+templateData.getTouser()+")奖金到账消息["+templateData.build()+"]第二次推送结果：" + result.toString());
+                        }
                     }
                     
                     Map<String, String> xml = new HashMap<>();
