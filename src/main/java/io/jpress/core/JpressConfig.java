@@ -16,6 +16,7 @@
 package io.jpress.core;
 
 import com.alibaba.druid.filter.stat.StatFilter;
+import com.alibaba.druid.wall.WallFilter;
 import com.jfinal.config.*;
 import com.jfinal.core.Controller;
 import com.jfinal.core.JFinal;
@@ -151,7 +152,16 @@ public abstract class JpressConfig extends JFinalConfig {
 				/*+ "characterEncoding=utf8&"*/ + "zeroDateTimeBehavior=convertToNull";
 
 		DruidPlugin druidPlugin = new DruidPlugin(jdbc_url, db_user, db_password);
+		int db_initialSize = dbProp.getInt("db_initialSize");
+		int db_minIdle = dbProp.getInt("db_minIdle");
+        int db_maxActive = dbProp.getInt("db_maxActive");
+		druidPlugin.set(db_initialSize, db_minIdle, db_maxActive);  
 		druidPlugin.addFilter(new StatFilter());
+		
+		// 3.防注入插件
+	    WallFilter wall = new WallFilter();
+	    wall.setDbType("mysql");
+	    druidPlugin.addFilter(wall);
 
 		return druidPlugin;
 	}
