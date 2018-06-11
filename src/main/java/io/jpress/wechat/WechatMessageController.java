@@ -91,6 +91,7 @@ public class WechatMessageController extends MsgController {
 	public void callback() {
 		String gotoUrl = getPara("goto");
 		String code = getPara("code");
+		String ifAjax = getPara("ajax");
 
 		String appId = OptionQuery.me().findValue("wechat_appid");
 		String appSecret = OptionQuery.me().findValue("wechat_appsecret");
@@ -209,7 +210,9 @@ public class WechatMessageController extends MsgController {
 			}
 		}
 
-		redirect(gotoUrl);
+		if (!"1".equals(ifAjax)) {
+			redirect(gotoUrl);
+		}
 	}
 	
 	private void copyUserInfoToMap(ApiResult userInfo, Map<String, Object> userInfoMap) {

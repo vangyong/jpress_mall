@@ -38,6 +38,21 @@
 			});
 		}
 		
+		<!-- var uid = getQueryString("uid");
+		$.ajax({
+				type: "POST",
+				traditional: true,
+				url: "${CPATH}/getWechatUser?uid=" + uid,
+				data: {
+				},
+				success: function(data){
+					alert(data.data);
+					console.log(data.data);
+					layer.closeAll('loading');
+					window.location.href= data.data.url;
+				}
+			}); -->
+		
 	} 
 	
 	function closeCouponDiv() {

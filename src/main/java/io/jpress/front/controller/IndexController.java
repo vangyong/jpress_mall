@@ -17,6 +17,7 @@ package io.jpress.front.controller;
 
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Clear;
+import com.jfinal.core.Controller;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.IAtom;
 import com.jfinal.render.Render;
@@ -35,11 +36,15 @@ import io.jpress.router.RouterMapping;
 import io.jpress.ui.freemarker.tag.IndexPageTag;
 import io.jpress.utils.StringUtils;
 import io.jpress.wechat.WechatUserInterceptor;
+import io.jpress.wechat.utils.AuthJsApiUtils;
 
 import java.math.BigInteger;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
 
 @RouterMapping(url = "/")
 @Before(WechatUserInterceptor.class)
@@ -202,5 +207,75 @@ public class IndexController extends BaseFrontController {
             return;
         }
         renderAjaxResult("系统异常", Consts.ERROR_CODE_SYSTEM_ERROR, null);
+	}
+	
+	/**
+	 * <b>Description.首页加载完成的时候再获取微信用户信息:--行不通，没有使用</b><br>
+	 * <b>Author:jianb.jiang</b>
+	 * <br><b>Date:</b> 2018年2月12日 下午8:57:25
+	 */
+	@Clear(WechatUserInterceptor.class)
+	public void getWechatUser(){
+		String appid = OptionQuery.me().findValue(Consts.WECHAT_APPID);
+		if (StringUtils.isBlank(appid)) {
+			renderAjaxResult("操作成功", 0, "");
+			return;
+		}
+		
+		String appsecret = OptionQuery.me().findValue(Consts.WECHAT_APPSECRET);
+		if (StringUtils.isBlank(appsecret)) {
+			renderAjaxResult("操作成功", 0, "");
+			return;
+		}
+		
+		HttpServletRequest request = getRequest();
+		
+		// 获取用户将要去的路径
+        String queryString = request.getQueryString();
+        // 被拦截前的请求URL
+        String toUrl = request.getRequestURI();
+        if (StringUtils.isNotBlank(queryString)) {
+            toUrl =  toUrl.concat("?").concat(queryString);
+        }
+        toUrl = toUrl.replaceAll(request.getContextPath(), "");
+        //当前url
+        String currUrl = request.getScheme() + "://" + 
+                (request.getServerName().startsWith("1") ? request.getServerName()+":"+request.getServerPort() : request.getServerName()) + 
+                request.getContextPath() + toUrl;
+        toUrl = StringUtils.urlEncode(toUrl);
+		
+		
+		//1、获取AccessToken  
+		String accessToken = AuthJsApiUtils.getAccessToken(OptionQuery.me().findValue(Consts.WECHAT_APPID),  OptionQuery.me().findValue(Consts.WECHAT_APPSECRET));
+		//2、获取Ticket 
+		String jsapi_ticket = AuthJsApiUtils.getTicket(accessToken);
+		
+		Map<String, Object> newSignature = AuthJsApiUtils.sign(appid, jsapi_ticket, currUrl);
+		
+		String signature = String.valueOf(newSignature.get("signature"));
+		String timestamp = String.valueOf(newSignature.get("timestamp"));
+		String nonceStr =  String.valueOf(newSignature.get("nonceStr"));
+		
+		request.setAttribute("signature", signature);
+		request.setAttribute("timestamp", timestamp);
+		request.setAttribute("nonceStr", nonceStr);
+		
+		String userJson = getSessionAttr(Consts.SESSION_WECHAT_USER);
+		
+		if (StringUtils.isNotBlank(userJson)) {
+			renderAjaxResult("操作成功", 0, newSignature);
+			return;
+		}
+		
+		String redirectUrl = request.getScheme() + "://" + 
+		        (request.getServerName().startsWith("1") ? request.getServerName()+":"+request.getServerPort() : request.getServerName()) + 
+		        request.getContextPath() +
+		        "/wechat/callback?ajax=1&goto=" + toUrl;
+		redirectUrl = StringUtils.urlEncode(redirectUrl);
+
+		String url = WechatUserInterceptor.AUTHORIZE_URL.replace("{redirecturi}", redirectUrl).replace("{appid}", appid.trim());
+
+		newSignature.put("url", url);
+		renderAjaxResult("操作成功", 0, newSignature);
 	}
 }
