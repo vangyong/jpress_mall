@@ -47,7 +47,6 @@ if (!!(window.history && history.pushState)){
 	var share_title ='${share_title!"语味特餐馆"}';
     var share_desc ='${share_desc!WEB_TITLE!"健康生活从这里开始"}';
     var share_img_url ='${share_img_url!WEBDOMAIN+"/attachment/logo/sharelogo.png"}';
-    console.log(share_img_url);
 	var wxShare = {
 			shareData: {
 				title:share_title,
@@ -214,7 +213,15 @@ wx.ready(function(){
             }
         }
 
+    	function sidebarTips() {
+    		layer.tips('敢戳我试试^_^', '#sidebar_a', {
+    		  tips: [2, '#78BA32']
+    		});
+    	}
+    	
+    	
         $(document).ready(function(){
+        	setTimeout("sidebarTips()","3000"); 
             $('.autoplay').slick({
                 dots: true,
                 slidesToShow: 1,

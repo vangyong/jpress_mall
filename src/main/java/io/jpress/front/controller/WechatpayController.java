@@ -69,7 +69,7 @@ public class WechatpayController extends BaseFrontController {
      */
     private static final String PAY_SUCCESS_NOTICE_TEMP_ID = OptionQuery.me().findValue("wechat_bonus_tempMsg_id");
 
-    private static final BigDecimal BOUNS_RATIO_LEVEL1 = BigDecimal.valueOf(0.3);
+    private static final BigDecimal BOUNS_RATIO_LEVEL1 = BigDecimal.valueOf(0.2);
 
     private static final BigDecimal BOUNS_RATIO_LEVEL2 = BigDecimal.valueOf(0.05);
     
