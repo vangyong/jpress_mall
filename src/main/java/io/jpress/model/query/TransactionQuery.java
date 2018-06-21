@@ -58,7 +58,7 @@ public class TransactionQuery extends JBaseQuery{
     }
 
     public Page<Transaction> paginate(int pageNumber, int pageSize, BigInteger user_id, String status, String orderBy) {
-        String select = " SELECT t.id,t.status,t.created,SUM(ti.quantity*ti.price) AS price,SUM(ti.quantity) AS quantity,GROUP_CONCAT(c.thumbnail SEPARATOR ',') AS contentThumbnails ";
+        String select = " SELECT t.id,t.status,t.created,SUM(ti.quantity*ti.price) AS price,SUM(ti.quantity) AS quantity,GROUP_CONCAT(c.thumbnail SEPARATOR ',') AS contentThumbnails,GROUP_CONCAT(c.title SEPARATOR ',') AS contentTitles ";
         StringBuilder fromBuilder = new StringBuilder(" FROM transaction t ");
         fromBuilder.append(" LEFT JOIN transactionitem ti ON ti.transaction_id=t.id ");
         fromBuilder.append(" LEFT JOIN content c ON ti.content_id=c.id ");

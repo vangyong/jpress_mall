@@ -147,18 +147,23 @@
             <#list transactions as transaction>
                 <div class="box" style="margin-top: 10px;">
                     <div class="row uniform">
-                        <div class="12u$" onclick="window.location.href='${CPATH}/user/userTransactionItem?id=${transaction.id!}&goto=${goto!}';">
+                        <div class="12u$" style="position: relative;" onclick="window.location.href='${CPATH}/user/userTransactionItem?id=${transaction.id!}&goto=${goto!}';">
                             <#if transaction.getContentThumbnailList()??>
-                                <#list transaction.getContentThumbnailList() as thumbnail>
-                                    <img style="width: 32%;" class="image" src="${thumbnail!}" alt="" />
-                                </#list>
+                                   <img style="float: left;width: 120px;height: 90px;position: absolute;" class="image" src="${transaction.contentThumbnailList[0]!}" alt="" />
                             </#if>
+                            <div style="margin-left: 128px;">
+	                            <span style="height: 90px;overflow:hidden; text-overflow:ellipsis;display:-webkit-box; -webkit-box-orient:vertical;-webkit-line-clamp:4; font-size:1.18em;">
+	                            <#if transaction.getContentTitleList()??>
+	                                <#list transaction.getContentTitleList() as title>
+	                                    ${title!}&nbsp;
+	                                </#list>
+	                            </#if>
+                            	</span>
+	                        </div>
                         </div>
-                        <div class="12u$">
-                            <span style="float: right;">共${transaction.quantity!}件商品 实付款：￥${transaction.price!}</span>
-                        </div>
-                        <div class="12u$">
-                            <span style="float: right;">
+                        <div class="12u$" style="position: relative;">
+                        	<span style="float: left;width: 120px;position: absolute;"><span style="float: right;margin-right: 20px">共&nbsp;${transaction.quantity!}&nbsp;件商品</span><span style="float: right;;margin-right: 10px">实付款：￥${transaction.price!}</span></span>
+                            <span style="float: right;margin-top: 5px">
                                 <#if "1"==transaction.status!>
                                     <a href="javascript:void(0)" class="button" onclick="del('${transaction.id!}')">删除</a>
                                     &nbsp;<a href="javascript:void(0)" class="button special" onclick="reWechatPay('${transaction.id!}')">立即支付</a>
@@ -167,7 +172,7 @@
                                 <#elseif "4"==transaction.status!>
                                     <a href="${CPATH}/user/userTransactionItem?id=${transaction.id!}&goto=${goto!}" class="button">立即评价</a>
                                 <#elseif "5"==transaction.status!>
-                                    已完成
+                                    	<a href="javascript:void(0)" class="button">已完成</a>
                                 </#if>
                             </span>
                         </div>

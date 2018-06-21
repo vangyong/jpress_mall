@@ -90,4 +90,20 @@ public class Transaction extends BaseTransaction<Transaction> {
         return get("contentThumbnails");
     }
 
+    public List<String> getContentTitleList(){
+        String data=getContentTitles();
+        if(StringUtils.isBlank(data)){
+            return null;
+        }
+        String[] contentTitles=data.split(",");
+        List<String> list=new ArrayList<String>();
+        for(String contentTitle:contentTitles){
+            list.add(contentTitle);
+        }
+        return list;
+    }
+    public java.lang.String getContentTitles() {
+        return get("contentTitles");
+    }
+
 }
