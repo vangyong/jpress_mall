@@ -24,6 +24,7 @@ import com.jfinal.weixin.sdk.kit.ParaMap;
 
 import io.jpress.model.query.OptionQuery;
 import io.jpress.utils.HttpUtils;
+import io.jpress.utils.StringUtils;
 
 public class WechatApi {
 
@@ -66,9 +67,10 @@ public class WechatApi {
 		String url = "https://api.weixin.qq.com/sns/oauth2/access_token" + "?appid={appid}"
 				+ "&secret={secret}" + "&code={code}" + "&grant_type=authorization_code";
 
-		String getOpenIdUrl = url.replace("{appid}", appId).replace("{secret}", appSecret)
-				.replace("{code}", code);
-
+		String getOpenIdUrl = url.replace("{appid}", appId).replace("{secret}", appSecret);
+		if (StringUtils.areNotBlank(code)) {
+			getOpenIdUrl = getOpenIdUrl.replace("{code}", code);
+		}
 		String jsonResult = null;
 		try {
 			jsonResult = HttpUtils.get(getOpenIdUrl);

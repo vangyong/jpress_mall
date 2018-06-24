@@ -146,7 +146,7 @@
         <span style="color: #FFF;font-size: 15px;margin-left: 10px">购物车</span>
     </header> -->
 	<@jp.shoppingCartPage pageSize="100">
-		<div class="table-wrapper" style="margin: 0 -2em 0 -2em;">
+		<div class="table-wrapper" style="margin: 0 -2em 0 -2em;padding-bottom: 4.9em;">
 			<form action="#" method="post">
 				<input type="hidden" name="goto" value="${goto!}">
 				<#if shoppingCarts?size gt 0>
@@ -192,7 +192,7 @@
 			</form>
 		</div>
 		<#if shoppingCarts?size gt 0>
-			<div  style="position: fixed;bottom: 50px;height: 2.8em;width: 90%">
+			<div  style="position: fixed;bottom: 50px;height: 2.8em;width: 90%;background-color:rgba(255,255,255,0.95)">
 				<div  style="display: flex;justify-content:space-between;align-items:center">
 					<!-- <li><a href="javascript:void(0)" class="button fit" onclick="clearShoppingCart()">清空</a></li>
 					<li ><a href="javascript:void(0)" class="button fit" onclick="deleteShoppingCart()">删除</a></li> -->
