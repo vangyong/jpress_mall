@@ -192,17 +192,17 @@
 			</form>
 		</div>
 		<#if shoppingCarts?size gt 0>
-			<div  style="position: fixed;bottom: 50px;height: 2.8em;width: 90%;background-color:rgba(255,255,255,0.95)">
-				<div  style="display: flex;justify-content:space-between;align-items:center">
+			<div  style="position: fixed;bottom: 50px;height: 2.9em;width: 100%;">
+				<div  style="display: flex;justify-content:space-between;align-items:center;background-color:rgba(255,255,255,0.95);margin-left:-2.2em;margin-right: 2.3em">
 					<!-- <li><a href="javascript:void(0)" class="button fit" onclick="clearShoppingCart()">清空</a></li>
 					<li ><a href="javascript:void(0)" class="button fit" onclick="deleteShoppingCart()">删除</a></li> -->
-					<div style="display: flex;align-items:center;margin-left: 5px" id="chooseAllDiv">
+					<div style="display: flex;align-items:center;margin-left: 1.6em" id="chooseAllDiv">
 						<input class="shoppingCartChecked" type="checkbox" id="chooseAllInput" price="0" quantity="0" value="0.0">
-						<label ></label>
-						<p style="margin-top:1.2em;color: #a7a7a7;margin-left: -10px">全选</p>
+						<label style="margin-bottom: 1.3em;"></label>
+						<p style="margin-top:1em;color: #a7a7a7;margin-left: -10px">全选</p>
 					</div>
 					<div class="right" style="display: flex;justify-content:space-between;align-items:center;">
-						<span class="right" style="color: #f5696a;padding-right: 10px" id="totalSpan">合计：￥</span>
+						<span class="right" style="margin-top:0.5em;color: #f5696a;padding-right: 10px" id="totalSpan">合计：￥</span>
 						<div><a href="javascript:void(0)" class="button Modelspecial right" onclick="userShoppingCartSettlement()">去结算</a></div>
 					</div>
 				</div>

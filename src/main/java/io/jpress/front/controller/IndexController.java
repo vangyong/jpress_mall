@@ -98,7 +98,8 @@ public class IndexController extends BaseFrontController {
 
 		String para = getPara();
 
-		if (StringUtils.isBlank(para)||(!para.contains("-"))) {
+//		if (StringUtils.isBlank(para)||(!para.contains("-"))) { //我X，为啥要加：||(!para.contains("-"))，坑爹啊
+		if (StringUtils.isBlank(para)) {
 			setAttr(IndexPageTag.TAG_NAME, new IndexPageTag(getRequest(), null, 1, null));
 			render("index.html");
 			return;
@@ -108,6 +109,7 @@ public class IndexController extends BaseFrontController {
 		if (paras.length == 1) {
 			if (StringUtils.isNumeric(para.trim())) {
 				setAttr(IndexPageTag.TAG_NAME, new IndexPageTag(getRequest(), null, StringUtils.toInt(para.trim(), 1), null));
+				setAttr("para",para);//jiangjb,2018-06-25
 				render("index.html");
 			} else {
 				setAttr(IndexPageTag.TAG_NAME, new IndexPageTag(getRequest(), para.trim(), 1, null));

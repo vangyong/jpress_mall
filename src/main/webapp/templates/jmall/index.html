@@ -9,6 +9,16 @@
 	    return result[1];
 	}
 
+	function scrollTo(ele, speed){
+		if(!speed) speed = 300;
+		if(!ele){
+			$("html,body").animate({scrollTop:0},speed);
+		}else{
+			if(ele.length>0) $("html,body").animate({scrollTop:$(ele).offset().top},speed);
+		}
+		return false;
+	}
+
 	window.onload=function(){ 
 		var cp_code = getQueryString("cp_code");
 		
@@ -38,6 +48,10 @@
 			});
 		}
 		
+		var para = "${para!}";
+		if (para != null && para != '' &&　para.length > 0) {
+			scrollTo('#content_a',300);
+		}
 	} 
 	
 	function closeCouponDiv() {
@@ -107,7 +121,7 @@ body, input, select, textarea{font-size:8pt}
 		<img src="/templates/jmall/assets/images/indexImgThree.jpg" style="width:100%;"/>
  	</div>
     <div class="posts" name="content_a">
-    	<a name="content_a"></a>
+    	<a name="content_a" id="content_a"></a>
         <@jp.indexPage module="mall" pageSize="6">
             <#if page.getList()?size gt 0>
                 <#list page.getList() as content>
