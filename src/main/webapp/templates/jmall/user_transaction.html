@@ -171,6 +171,8 @@
                                     <a href="javascript:void(0)" class="button" onclick="received('${transaction.id!}')">确认收货</a>
                                 <#elseif "4"==transaction.status!>
                                     <a href="${CPATH}/user/userTransactionItem?id=${transaction.id!}&goto=${goto!}" class="button">立即评价</a>
+                                <#elseif "2"==transaction.status!>
+                                    	<a href="javascript:void(0)" class="button">待发货</a>
                                 <#elseif "5"==transaction.status!>
                                     	<a href="javascript:void(0)" class="button">已完成</a>
                                 </#if>
