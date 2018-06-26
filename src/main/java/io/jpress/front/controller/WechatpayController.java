@@ -75,11 +75,11 @@ public class WechatpayController extends BaseFrontController {
     
     private static final Log log = Log.getLog(WechatpayController.class);
     
-    String appid = OptionQuery.me().findValue("wechat_appid");
-    String partner = OptionQuery.me().findValue("wechat_partner");
-    String paternerKey = OptionQuery.me().findValue("wechat_paternerKey");
-    String notifyUrl = PropKit.get("wechat_notify_url");
-    String web_domain = OptionQuery.me().findValue("web_domain");
+    private static final String appid = OptionQuery.me().findValue("wechat_appid");
+    private static final String partner = OptionQuery.me().findValue("wechat_partner");
+    private static final String paternerKey = OptionQuery.me().findValue("wechat_paternerKey");
+    private static final String notifyUrl = PropKit.get("wechat_notify_url");
+    private static final String web_domain = OptionQuery.me().findValue("web_domain");
   
     //待支付-微信支付
     @Before(UCodeInterceptor.class)
@@ -175,31 +175,31 @@ public class WechatpayController extends BaseFrontController {
             String xmlMsg = HttpKit.readData(getRequest());
             log.info("支付通知=" + xmlMsg);
             Map<String, String> params = PaymentKit.xmlToMap(xmlMsg);
-
-            //-----------test-----------------------
-//            Map<String, String> params = new HashMap<>();
-//            params.put("result_code", "SUCCESS");
-//            params.put("total_fee", "1522");
-//            params.put("out_trade_no", "18050414283431409212");
-//            params.put("transaction_id", "wx_fdskfsalkfalsjdl11");
-//            params.put("time_end", "20180125182222");
-            //-----------test-----------------------
-            
-            String resultCode = params.get("result_code");
-            // 支付总金额
-            String cashFeeStr = params.get("total_fee");
-            // 商户订单号
-            String orderNo = params.get("out_trade_no");
-            // 微信支付订单号
-            String tradeNo = params.get("transaction_id");
-            // 支付完成时间，格式为yyyyMMddHHmmss
-            String payed = params.get("time_end");
-
-            // 注意重复通知的情况，同一订单号可能收到多次通知，请注意一定先判断订单状态
-            // 避免已经成功、关闭、退款的订单被再次更新
-            final List<TemplateData> tempMsgList = new ArrayList<TemplateData>();
             if (PaymentKit.verifyNotify(params, paternerKey)) {
-//            //--test   if (true) {
+
+                //-----------test-----------------------
+    //            Map<String, String> params = new HashMap<>();
+    //            params.put("result_code", "SUCCESS");
+    //            params.put("total_fee", "1522");
+    //            params.put("out_trade_no", "18050414283431409212");
+    //            params.put("transaction_id", "wx_fdskfsalkfalsjdl11");
+    //            params.put("time_end", "20180125182222");
+                //-----------test-----------------------
+                
+                String resultCode = params.get("result_code");
+                // 支付总金额
+                String cashFeeStr = params.get("total_fee");
+                // 商户订单号
+                String orderNo = params.get("out_trade_no");
+                // 微信支付订单号
+                String tradeNo = params.get("transaction_id");
+                // 支付完成时间，格式为yyyyMMddHHmmss
+                String payed = params.get("time_end");
+    
+                // 注意重复通知的情况，同一订单号可能收到多次通知，请注意一定先判断订单状态
+                // 避免已经成功、关闭、退款的订单被再次更新
+                final List<TemplateData> tempMsgList = new ArrayList<TemplateData>();
+//              //--test   if (true) {
                 if (SUCCESS.equals(resultCode)) {
                     //更新订单信息
                     final Transaction transaction = new Transaction().findFirst("select * from jp_transaction where order_no = ?", orderNo);
@@ -272,6 +272,9 @@ public class WechatpayController extends BaseFrontController {
                 } else {
                     log.error("微信支付通知错误：result_code =" + resultCode);
                 }
+            } else {
+                log.error("微信支付通知错误：签名校验错误");
+                renderText("who are you!!!");
             }
             renderText("");
         } catch (Exception e) {
