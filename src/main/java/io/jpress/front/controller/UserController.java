@@ -18,8 +18,10 @@ package io.jpress.front.controller;
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Clear;
 import com.jfinal.core.ActionKey;
+import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.IAtom;
+import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.activerecord.Record;
 
 import io.jpress.Consts;
@@ -44,7 +46,10 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.SQLException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
 import io.jpress.wechat.WechatUserInterceptor;
 
 @RouterMapping(url = Consts.ROUTER_USER)
@@ -52,6 +57,8 @@ import io.jpress.wechat.WechatUserInterceptor;
 @Before(WechatUserInterceptor.class)
 public class UserController extends BaseFrontController {
 
+    private static final Log log = Log.getLog(UserController.class);
+    
 	private void gotoUrl(){
 		String gotoUrl=getPara("goto");
 		if (StringUtils.isNotEmpty(gotoUrl)) {
@@ -264,7 +271,6 @@ public class UserController extends BaseFrontController {
             setAttr("userId", loginedUser.getId());
             setAttr("title","个人中心");
 			setAttr("accountMoney", u.getAmount());
-			setAttr("extractedMoney", "10");//TODO
 			setAttr("teamNum", u.getTeamNum());
 			setAttr("teamBuyAmount", u.getTeamBuyAmount());
 			
@@ -601,9 +607,11 @@ public class UserController extends BaseFrontController {
 	
 	//用户基本信息设置
 	public void userSetting(){
+	    String from = getPara("from");
 		BigInteger userId=getLoginedUser().getId();
 		setAttr("user", UserQuery.me().findById(userId));
-		setAttr(Consts.ATTR_GLOBAL_WEB_TITLE, "个人信息设置");
+		setAttr(Consts.ATTR_GLOBAL_WEB_TITLE, "请先完善基本信息");
+		setAttr("from",from);
 		render("user_setting.html");
 	}
 	
@@ -660,7 +668,8 @@ public class UserController extends BaseFrontController {
 		int pageNumber=getParaToInt("pageNumber", 1);
 		BigInteger userId=getLoginedUser().getId();
 		User user = UserQuery.me().findById(userId);
-		if(user!=null && user.getRealname()!=null) {
+		
+		if(user!=null && StringUtils.areNotBlank(user.getRealname()) && StringUtils.areNotBlank(user.getMobile())) {
 			setAttr(ExtractPageTag.TAG_NAME, new ExtractPageTag(getRequest(), pageNumber, userId, null));
 			setAttr(Consts.ATTR_GLOBAL_WEB_TITLE, "钱包提现");
 			render("account_extract.html");
@@ -668,7 +677,7 @@ public class UserController extends BaseFrontController {
 			setAttr("user", user);
 			setAttr("msg", "请先完善基本信息");
 			setAttr(Consts.ATTR_GLOBAL_WEB_TITLE, "基本信息完善");
-			redirect("/user/userSetting");
+			redirect("/user/userSetting?from=extract");
 		}
 	}
 	
@@ -676,10 +685,31 @@ public class UserController extends BaseFrontController {
 	public void addAccountExtract(){
 		BigInteger userId=getLoginedUser().getId();
 		User user = UserQuery.DAO.findById(userId);
-		if(user!=null){
-			renderAjaxResult("操作成功", 0, user);
+		
+		//构造一个map包含可提现信息数据对象给前端
+		Map<String,String> extract = new HashMap<>();
+		extract.put("userId", user.getId().toString());
+		extract.put("userRealname", user.getRealname());
+        extract.put("userMobile", user.getMobile());
+        Record record = UserQuery.me().getExtractAvailableAmount(user.getId());
+        BigDecimal extractAvailableAmount = record.getBigDecimal("extractAvailableAmount");
+        BigDecimal userAmount = record.getBigDecimal("userAmount");
+        //用户的不可提现金额 = 用户账户余额 - 可提现金额
+        BigDecimal extractUnavailableAmount = userAmount.subtract(extractAvailableAmount);
+        
+        if (extractUnavailableAmount.compareTo(BigDecimal.valueOf(0)) < 0 ||
+                extractAvailableAmount.compareTo(BigDecimal.valueOf(0)) < 0 ) {
+            log.error("用户["+user.getId()+"]的提现金额获取错误");
+            renderAjaxResultForError("您目前没有可提现金额噢，赶紧推荐给小伙伴赚取奖金吧^_^");
+            return;
+        }
+        extract.put("extractAvailableAmount", extractAvailableAmount.toString());
+        extract.put("extractUnavailableAmount", extractUnavailableAmount.toString());
+		
+		if(!extract.isEmpty()){
+			renderAjaxResult("操作成功", 0, extract);
 		}else{
-			renderAjaxResultForError("用户信息获取失败");
+			renderAjaxResultForError("提现信息获取失败，请与系统管理员联系！");
 		}
 	}
 	
@@ -693,10 +723,36 @@ public class UserController extends BaseFrontController {
 			renderAjaxResultForError("手机号码不能为空");
 			return;
 		}
+		
+		BigInteger userId=getLoginedUser().getId();
+		Record record = UserQuery.me().getExtractAvailableAmount(userId);
+        BigDecimal extractAvailableAmount = record.getBigDecimal("extractAvailableAmount");
+        BigDecimal userAmount = record.getBigDecimal("userAmount");
+        //用户的不可提现金额 = 用户账户余额 - 可提现金额
+        BigDecimal extractUnavailableAmount = userAmount.subtract(extractAvailableAmount);
+        
 		if(extract.getExtractMoney()==null){
 			renderAjaxResultForError("提现金额不能为空");
 			return;
 		}
+		if(extractUnavailableAmount.compareTo(BigDecimal.valueOf(0)) < 0 ||
+                extractAvailableAmount.compareTo(BigDecimal.valueOf(0)) < 0 || 
+                extract.getExtractMoney().compareTo(BigDecimal.valueOf(0)) <= 0){
+            renderAjaxResultForError("您目前没有可提现金额噢，赶紧推荐给小伙伴赚取奖金吧^_^");
+            return;
+        }
+		
+		extract.setExtractMoney(extractAvailableAmount);//可提现金额设置为当前实时查询的金额，避免极端情况出现的申请的可提现金额出现变化
+		
+        Page<Extract> page=ExtractQuery.me().paginate(1, Integer.MAX_VALUE, userId, "");
+        List<Extract> list = page.getList();
+        for (Extract e : list) {
+            if (StringUtils.isBlank(e.getStatus()) || "0".equals(e.getStatus()) || "1".equals(e.getStatus())) {
+                renderAjaxResultForError("上次提现正在处理中，不可以重复提现噢^_^");
+                return;
+            }
+        }
+        
 		boolean flag = extract.saveOrUpdate();
 		if(flag){
 			renderAjaxResultForSuccess();
@@ -705,8 +761,8 @@ public class UserController extends BaseFrontController {
 		}
 	}
 	
-	//删除钱包提现
-	public void doDeleteAccountExtract(){
+	//删除钱包提现//不能删除提现记录，jiangjb,20180626
+	/*public void doDeleteAccountExtract(){
 		String ids=getPara("ids");
 		if(StringUtils.isBlank(ids)){
 			renderAjaxResultForError("钱包提现id为空");
@@ -714,7 +770,7 @@ public class UserController extends BaseFrontController {
 		}
 		ExtractQuery.me().deleteByIds(ids);
 		renderAjaxResultForSuccess();
-	}
+	}*/
 	
 	public void doGetAccountExtract(){
 		BigInteger id=getParaToBigInteger("id");

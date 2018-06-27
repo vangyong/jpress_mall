@@ -114,7 +114,7 @@
 
 							// Toggle.
 								$sidebar.toggleClass('inactive');
-
+								layer.closeAll('tips');//关闭所有的tips层,jiangjb,2018.06.26
 						});
 
 				}

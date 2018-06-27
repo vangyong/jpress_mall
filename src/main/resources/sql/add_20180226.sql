@@ -17,7 +17,7 @@ CREATE TABLE `jp_extract` (
   `status` varchar(32) DEFAULT '0' COMMENT '申请状态(0：待审核,1：审核通过,2：审核不通过，3：支付完成)',
   `remark` varchar(256) DEFAULT NULL COMMENT '用户备注',
   `payed_time` datetime DEFAULT NULL COMMENT '支付完成时间',
-  `created_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `created_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `payed_money` decimal(10,0) DEFAULT NULL COMMENT '支付金额',
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),

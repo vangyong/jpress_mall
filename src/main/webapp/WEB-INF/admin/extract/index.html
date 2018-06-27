@@ -12,13 +12,30 @@ function agree(id){
 }
 
 function unagree(id){
-	$.get("${CPATH}/admin/extract/changeStatus?status=2&id="+id, function(data){
-		if(data.errorCode > 0){
-			toastr.error(data.message,'操作失败');
-		}else{
-			location.reload();
-		}
-	});
+	layer.open({
+            type: 1,
+            skin: 'layui-layer-rim',
+            area: ['50%', 'auto'],
+            content: '<textarea class="form-control " rows="4" id="desc" placeholder="请输入审核不通过原因"></textarea>',
+            btn: ['确定','取消'],
+            yes: function(index){
+                var desc=$("#desc").val();
+                if(!desc){
+                    layer.msg('审核不通过原因不能为空');
+                    return;
+                }
+	
+                $.post('${CPATH}/admin/extract/changeStatus',{status:2,id:id,desc:desc}, function(result){
+                    layer.close(index);
+                    if(result.errorCode > 0){
+                        layer.msg(result.message);
+                    }else{
+                        location.reload();
+                    }
+                });
+            }
+        });
+        
 }
 
 </#macro> 

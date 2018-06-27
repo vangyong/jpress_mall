@@ -60,8 +60,8 @@ public class AuthJsApiUtils {
 	        }
 		} catch (Exception e) {
 			accessToken = null;  
-            log.warn("获取AccessToken失败errcode:"+apiResult.getInt("errcode")+" errmsg:"+apiResult.getStr("errmsg")); 
 			e.printStackTrace();
+            log.warn("获取AccessToken失败errcode:"+apiResult.getInt("errcode")+" errmsg:"+apiResult.getStr("errmsg")); 
 		} 		
 		return accessToken;
 	}

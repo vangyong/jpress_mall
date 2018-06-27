@@ -70,9 +70,11 @@ public class _ExtractController extends JBaseCRUDController<Extract> {
 	public void changeStatus(){
 		BigInteger id = getParaToBigInteger("id");
 		String status = getPara("status");
+		String desc=getPara("desc");
 		Extract extract = ExtractQuery.me().findById(id);
 		if(extract != null){
 			extract.setStatus(status);
+			extract.setRemark(desc);
 			extract.saveOrUpdate();
 			renderAjaxResultForSuccess("操作成功！");
 		}else{
@@ -132,13 +134,19 @@ public class _ExtractController extends JBaseCRUDController<Extract> {
 			public boolean run() throws SQLException {
 				
 				//本地保存支付明细,更新提现申请支付状态
-				extract.setPayedMoney(extract.getPayedMoney()==null ? new BigDecimal("0").add(extractPay.getPayMoney()) : extract.getPayedMoney().add(extractPay.getPayMoney()));
+//				extract.setPayedMoney(extract.getPayedMoney()==null ? new BigDecimal("0").add(extractPay.getPayMoney()) : extract.getPayedMoney().add(extractPay.getPayMoney()));
+			    extract.setPayedMoney(extractPay.getPayMoney());
 				extract.setPayedTime(new Date());
 				extract.setStatus(Extract.STATUS_PAYED);
 				extractPay.saveOrUpdate();
 				extract.saveOrUpdate();
 				
+				//扣减用户账户余额
 				User user = UserQuery.me().findById(extract.getUserId());
+				if (Db.update("update jp_user set amount = amount - ? where id = ?", extractPay.getPayMoney(), user.getId()) <= 0) {
+	                return false;
+	            }
+				
 				if(user!=null&&user.getOpenid()!=null) {
 					String partner_trade_no = String.valueOf(extractPay.getId());
 					String openid = user.getOpenid();

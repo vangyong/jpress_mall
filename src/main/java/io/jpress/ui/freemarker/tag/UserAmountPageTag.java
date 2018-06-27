@@ -33,7 +33,7 @@ public class UserAmountPageTag extends JTag{
 
     @Override
     public void onRender() {
-        int pagesize=getParamToInt("pageSize", 10);
+        int pagesize=getParamToInt("pageSize", Integer.MAX_VALUE);//提现记录默认一页查询所有记录,jiangjb,20180627
         orderBy=StringUtils.isBlank(orderBy) ? getParam("orderBy") : orderBy;
         List<Record> accountDetailList = UserQuery.me().findAmountList(pageNumber, pagesize, userId);
         setVariable("accountDetailList", accountDetailList);

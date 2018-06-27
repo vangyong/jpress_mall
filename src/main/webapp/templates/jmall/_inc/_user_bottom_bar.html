@@ -1,15 +1,15 @@
 <div class="bottombar" style="background: url(/templates/jmall/assets/images/backBottom.png) 100% 100%">
 	<ul class="icons">
-		<li style="width: 30%;" onclick="window.location.href='${CPATH}/';">
+		<li style="width: 30%;" onclick="winLocation('${CPATH}/')">
 			<img src="/templates/jmall/assets/images/indexBottom.png" style="width:30px;height:30px"/>
 		</li>
-		<li style="width: 30%;" onclick="window.location.href='${CPATH}/user/shoppingCart';">
+		<li style="width: 30%;" onclick="winLocation('${CPATH}/user/shoppingCart')">
 				<!-- <#if USER??>
 					<span class="mainRed">（${USER.getShoppingCartCount()!}）</span>
 				</#if> -->
 			<img src="/templates/jmall/assets/images/shoppingBottom.png" style="width:30px;height:30px"/>
 		</li>
-		<li style="width: 30%;" onclick="window.location.href='${CPATH}/user/center';">
+		<li style="width: 30%;" onclick="winLocation('${CPATH}/user/center')">
 			<img src="/templates/jmall/assets/images/myBottom.png" style="width:30px;height:30px"/>
 		</li>
 	</ul>

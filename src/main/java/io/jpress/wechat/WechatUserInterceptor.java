@@ -17,6 +17,8 @@ package io.jpress.wechat;
 
 import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
+
+import com.jfinal.aop.Before;
 import com.jfinal.aop.Interceptor;
 import com.jfinal.aop.Invocation;
 import com.jfinal.core.Controller;
@@ -25,6 +27,10 @@ import com.jfinal.weixin.sdk.api.AccessToken;
 import com.jfinal.weixin.sdk.api.AccessTokenApi;
 import com.jfinal.weixin.sdk.api.ApiConfig;
 import com.jfinal.weixin.sdk.api.ApiConfigKit;
+import com.jfinal.weixin.sdk.api.JsTicket;
+import com.jfinal.weixin.sdk.api.JsTicketApi;
+import com.jfinal.weixin.sdk.api.JsTicketApi.JsApiType;
+
 import io.jpress.Consts;
 import io.jpress.model.Option;
 import io.jpress.model.query.OptionQuery;
@@ -70,10 +76,16 @@ public class WechatUserInterceptor implements Interceptor {
         toUrl = StringUtils.urlEncode(toUrl);
 		
 		
-		//1、获取AccessToken  
-		String accessToken = AuthJsApiUtils.getAccessToken(OptionQuery.me().findValue(Consts.WECHAT_APPID),  OptionQuery.me().findValue(Consts.WECHAT_APPSECRET));
-		//2、获取Ticket 
-		String jsapi_ticket = AuthJsApiUtils.getTicket(accessToken);
+//		//1、获取AccessToken  
+//		String accessToken = AuthJsApiUtils.getAccessToken(OptionQuery.me().findValue(Consts.WECHAT_APPID),  OptionQuery.me().findValue(Consts.WECHAT_APPSECRET));
+//		//2、获取Ticket 
+//		String jsapi_ticket = AuthJsApiUtils.getTicket(accessToken);
+        
+		//获取AccessToken和Ticket要使用缓存，每次获取太费时间,jiangjb,2018.06.26
+        ApiConfig ac = WechatApi.getApiConfig();
+        ApiConfigKit.setThreadLocalApiConfig(ac);
+		JsTicket jsTicket = JsTicketApi.getTicket(JsApiType.jsapi);
+		String jsapi_ticket = jsTicket.getTicket();
 		
 		Map<String, Object> newSignature = AuthJsApiUtils.sign(appid, jsapi_ticket, currUrl);
 		
@@ -82,88 +94,88 @@ public class WechatUserInterceptor implements Interceptor {
 		String nonceStr =  String.valueOf(newSignature.get("nonceStr"));
 		
 		//先从数据库中获取，判断时间戳是否超过2两小时，如果超过则重新获取签名
-//		String signature = OptionQuery.me().findValue(Consts.WECHAT_SIGNATURE);
-//		String timestamp = OptionQuery.me().findValue(Consts.WECHAT_TIMESTAMP);
-//		String nonceStr = OptionQuery.me().findValue(Consts.WECHAT_NONCESTR);
-//		if(signature!=null&&timestamp!=null) {
-//			long current_time = System.currentTimeMillis()/1000;
-//			if(current_time>Long.valueOf(timestamp)+60*60*2) {
-//				ApiConfig apiConfig = new ApiConfig("token",appid,appsecret); 
-//				ApiConfigKit.setThreadLocalApiConfig(apiConfig);
-//				//1、获取AccessToken  
-//				//AccessToken accessToken = AccessTokenApi.getAccessToken();
-//				String accessToken = AuthJsApiUtils.getAccessToken(OptionQuery.me().findValue(Consts.WECHAT_APPID),  OptionQuery.me().findValue(Consts.WECHAT_APPSECRET));
-//				//2、获取Ticket 
-//				String jsapi_ticket = AuthJsApiUtils.getTicket(accessToken);
-//				//3、获取签名
-//				//String web_domain = OptionQuery.me().findValue("web_domain");
-//				
-//				String web_domain = request.getRequestURL().toString();
-//				
-//				
-//				Map<String, Object> newSignature = AuthJsApiUtils.sign(appid, jsapi_ticket, web_domain);
-//				signature = String.valueOf(newSignature.get("signature"));
-//				timestamp = String.valueOf(newSignature.get("timestamp"));
-//				nonceStr = String.valueOf(newSignature.get("nonceStr"));
-//				
-//				//签名
-//				Option option_signature = OptionQuery.me().findByKey(Consts.WECHAT_SIGNATURE);
-//				option_signature.setOptionKey(Consts.WECHAT_SIGNATURE);
-//				option_signature.setOptionValue(String.valueOf(newSignature.get("signature")));
-//				option_signature.saveOrUpdate();
-//				//时间戳
-//				Option option_timestamp = OptionQuery.me().findByKey(Consts.WECHAT_TIMESTAMP);
-//				option_timestamp.setOptionKey(Consts.WECHAT_TIMESTAMP);
-//				option_timestamp.setOptionValue(String.valueOf(newSignature.get("timestamp")));
-//				option_timestamp.saveOrUpdate();
-//				//随机字符串
-//				Option option_nonceStr = OptionQuery.me().findByKey(Consts.WECHAT_NONCESTR);
-//				option_nonceStr.setOptionKey(Consts.WECHAT_NONCESTR);
-//				option_nonceStr.setOptionValue(String.valueOf(newSignature.get("nonceStr")));
-//				option_nonceStr.saveOrUpdate();
-//				//更新缓存
-//				CacheKit.put(Option.CACHE_NAME, Consts.WECHAT_SIGNATURE, signature);
-//				CacheKit.put(Option.CACHE_NAME, Consts.WECHAT_TIMESTAMP, timestamp);
-//				CacheKit.put(Option.CACHE_NAME, Consts.WECHAT_NONCESTR, nonceStr);
-//			}
-//		}else {
-//			ApiConfig apiConfig = new ApiConfig("token",appid,appsecret); 
-//			ApiConfigKit.setThreadLocalApiConfig(apiConfig);
-//			//1、获取AccessToken  
-//			//AccessToken accessToken = AccessTokenApi.getAccessToken();
-//			String accessToken = AuthJsApiUtils.getAccessToken(OptionQuery.me().findValue(Consts.WECHAT_APPID),  OptionQuery.me().findValue(Consts.WECHAT_APPSECRET));
-//			//2、获取Ticket 
-//			String jsapi_ticket = AuthJsApiUtils.getTicket(accessToken);
-//			//3、获取签名
-//			String web_domain = OptionQuery.me().findValue("web_domain");
-//			
-//			
-//			
-//			Map<String, Object> newSignature = AuthJsApiUtils.sign(appid, jsapi_ticket, web_domain);
-//			signature = String.valueOf(newSignature.get("signature"));
-//			timestamp = String.valueOf(newSignature.get("timestamp"));
-//			nonceStr = String.valueOf(newSignature.get("nonceStr"));
-//			
-//			//签名
-//			Option option_signature = OptionQuery.me().findByKey(Consts.WECHAT_SIGNATURE);
-//			option_signature.setOptionKey(Consts.WECHAT_SIGNATURE);
-//			option_signature.setOptionValue(String.valueOf(newSignature.get("signature")));
-//			option_signature.saveOrUpdate();
-//			//时间戳
-//			Option option_timestamp = OptionQuery.me().findByKey(Consts.WECHAT_TIMESTAMP);
-//			option_timestamp.setOptionKey(Consts.WECHAT_TIMESTAMP);
-//			option_timestamp.setOptionValue(String.valueOf(newSignature.get("timestamp")));
-//			option_timestamp.saveOrUpdate();
-//			//随机字符串
-//			Option option_nonceStr = OptionQuery.me().findByKey(Consts.WECHAT_NONCESTR);
-//			option_nonceStr.setOptionKey(Consts.WECHAT_NONCESTR);
-//			option_nonceStr.setOptionValue(String.valueOf(newSignature.get("nonceStr")));
-//			option_nonceStr.saveOrUpdate();
-//			//更新缓存
-//			CacheKit.put(Option.CACHE_NAME, Consts.WECHAT_SIGNATURE, signature);
-//			CacheKit.put(Option.CACHE_NAME, Consts.WECHAT_TIMESTAMP, timestamp);
-//			CacheKit.put(Option.CACHE_NAME, Consts.WECHAT_NONCESTR, nonceStr);
-//		}
+		/*String signature = OptionQuery.me().findValue(Consts.WECHAT_SIGNATURE);
+		String timestamp = OptionQuery.me().findValue(Consts.WECHAT_TIMESTAMP);
+		String nonceStr = OptionQuery.me().findValue(Consts.WECHAT_NONCESTR);
+		if(StringUtils.areNotBlank(signature) && StringUtils.areNotBlank(timestamp)) {
+			long current_time = System.currentTimeMillis()/1000;
+			if(current_time>Long.valueOf(timestamp)+60*60*2) {
+				ApiConfig apiConfig = new ApiConfig("token",appid,appsecret); 
+				ApiConfigKit.setThreadLocalApiConfig(apiConfig);
+				//1、获取AccessToken  
+				//AccessToken accessToken = AccessTokenApi.getAccessToken();
+				String accessToken = AuthJsApiUtils.getAccessToken(OptionQuery.me().findValue(Consts.WECHAT_APPID),  OptionQuery.me().findValue(Consts.WECHAT_APPSECRET));
+				//2、获取Ticket 
+				String jsapi_ticket = AuthJsApiUtils.getTicket(accessToken);
+				//3、获取签名
+				//String web_domain = OptionQuery.me().findValue("web_domain");
+				
+				String web_domain = request.getRequestURL().toString();
+				
+				
+				Map<String, Object> newSignature = AuthJsApiUtils.sign(appid, jsapi_ticket, web_domain);
+				signature = String.valueOf(newSignature.get("signature"));
+				timestamp = String.valueOf(newSignature.get("timestamp"));
+				nonceStr = String.valueOf(newSignature.get("nonceStr"));
+				
+				//签名
+				Option option_signature = OptionQuery.me().findByKey(Consts.WECHAT_SIGNATURE);
+				option_signature.setOptionKey(Consts.WECHAT_SIGNATURE);
+				option_signature.setOptionValue(String.valueOf(newSignature.get("signature")));
+				option_signature.saveOrUpdate();
+				//时间戳
+				Option option_timestamp = OptionQuery.me().findByKey(Consts.WECHAT_TIMESTAMP);
+				option_timestamp.setOptionKey(Consts.WECHAT_TIMESTAMP);
+				option_timestamp.setOptionValue(String.valueOf(newSignature.get("timestamp")));
+				option_timestamp.saveOrUpdate();
+				//随机字符串
+				Option option_nonceStr = OptionQuery.me().findByKey(Consts.WECHAT_NONCESTR);
+				option_nonceStr.setOptionKey(Consts.WECHAT_NONCESTR);
+				option_nonceStr.setOptionValue(String.valueOf(newSignature.get("nonceStr")));
+				option_nonceStr.saveOrUpdate();
+				//更新缓存
+				CacheKit.put(Option.CACHE_NAME, Consts.WECHAT_SIGNATURE, signature);
+				CacheKit.put(Option.CACHE_NAME, Consts.WECHAT_TIMESTAMP, timestamp);
+				CacheKit.put(Option.CACHE_NAME, Consts.WECHAT_NONCESTR, nonceStr);
+			}
+		}else {
+			ApiConfig apiConfig = new ApiConfig("token",appid,appsecret); 
+			ApiConfigKit.setThreadLocalApiConfig(apiConfig);
+			//1、获取AccessToken  
+			//AccessToken accessToken = AccessTokenApi.getAccessToken();
+			String accessToken = AuthJsApiUtils.getAccessToken(OptionQuery.me().findValue(Consts.WECHAT_APPID),  OptionQuery.me().findValue(Consts.WECHAT_APPSECRET));
+			//2、获取Ticket 
+			String jsapi_ticket = AuthJsApiUtils.getTicket(accessToken);
+			//3、获取签名
+			String web_domain = OptionQuery.me().findValue("web_domain");
+			
+			
+			
+			Map<String, Object> newSignature = AuthJsApiUtils.sign(appid, jsapi_ticket, web_domain);
+			signature = String.valueOf(newSignature.get("signature"));
+			timestamp = String.valueOf(newSignature.get("timestamp"));
+			nonceStr = String.valueOf(newSignature.get("nonceStr"));
+			
+			//签名
+			Option option_signature = OptionQuery.me().findByKey(Consts.WECHAT_SIGNATURE);
+			option_signature.setOptionKey(Consts.WECHAT_SIGNATURE);
+			option_signature.setOptionValue(String.valueOf(newSignature.get("signature")));
+			option_signature.saveOrUpdate();
+			//时间戳
+			Option option_timestamp = OptionQuery.me().findByKey(Consts.WECHAT_TIMESTAMP);
+			option_timestamp.setOptionKey(Consts.WECHAT_TIMESTAMP);
+			option_timestamp.setOptionValue(String.valueOf(newSignature.get("timestamp")));
+			option_timestamp.saveOrUpdate();
+			//随机字符串
+			Option option_nonceStr = OptionQuery.me().findByKey(Consts.WECHAT_NONCESTR);
+			option_nonceStr.setOptionKey(Consts.WECHAT_NONCESTR);
+			option_nonceStr.setOptionValue(String.valueOf(newSignature.get("nonceStr")));
+			option_nonceStr.saveOrUpdate();
+			//更新缓存
+			CacheKit.put(Option.CACHE_NAME, Consts.WECHAT_SIGNATURE, signature);
+			CacheKit.put(Option.CACHE_NAME, Consts.WECHAT_TIMESTAMP, timestamp);
+			CacheKit.put(Option.CACHE_NAME, Consts.WECHAT_NONCESTR, nonceStr);
+		}*/
 
 		
 		request.setAttribute("signature", signature);

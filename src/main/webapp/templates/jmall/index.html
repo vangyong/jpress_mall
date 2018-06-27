@@ -1,6 +1,10 @@
 <#include "_inc/_layout.html"/>
 <#macro script>
-
+	layermobile.open({
+		    type: 2
+		    ,content: '加载中'
+		  });
+		  
 	function getQueryString(name) {
 	    var result = window.location.search.match(new RegExp("[\?\&]" + name + "=([^\&]+)", "i"));
 	    if (result == null || result.length < 1) {
@@ -23,7 +27,6 @@
 		var cp_code = getQueryString("cp_code");
 		
 		if (cp_code != null && cp_code != '' &&　cp_code.length > 0) {
-			layer.load();
 			$.ajax({
 				type: "POST",
 				traditional: true,
@@ -43,7 +46,7 @@
 						  content: $('#coupon_div')
 						});
 					}
-					layer.closeAll('loading');
+					layermobile.closeAll();
 				}
 			});
 		}
@@ -52,6 +55,8 @@
 		if (para != null && para != '' &&　para.length > 0) {
 			scrollTo('#content_a',300);
 		}
+		
+		layermobile.closeAll();
 	} 
 	
 	function closeCouponDiv() {

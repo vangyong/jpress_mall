@@ -84,14 +84,14 @@
                     	<img class="litter-avatar" src="${CPATH}${USER.avatar!TPATH+'/images/avatar11.jpg'}" style="width:7em;height:7em"/>
                     	<p style="color: #FFFFFF;margin-top: 1em"> ${USER.username!}</p>
                     </li>
-                    <li style="margin-left: 3em" onclick="window.location.href='${CPATH}/user/userTransaction?goto=${CPATH}/user/userTransaction';"><img  src="/templates/jmall/assets/images/myOrder.png" style="width: 35px;"/></li>
+                    <li style="margin-left: 3em" onclick="winLocation('${CPATH}/user/userTransaction?goto=${CPATH}/user/userTransaction')"><img  src="/templates/jmall/assets/images/myOrder.png" style="width: 35px;"/></li>
                 </ul>
             </div>
              <div style="width: 100%;padding: 0;position: relative;">
 				<li style="background: url(/templates/jmall/assets/images/userRim.png) 100% 100%;width：100%;height:31px;display: block;">
 				</li>
 				<div style="position: absolute;width: 100%;top:-45px;text-align: center;">
-					<div onclick="window.location.href='${CPATH}/user/accountDetail?goto=${CPATH}/user/accountMoney';" style="background: url(/templates/jmall/assets/images/userMoney.png) no-repeat;display: flex;flex-direction:column;text-align:center;margin:auto;width: 118px;height: 118px;">
+					<div onclick="winLocation('${CPATH}/user/accountDetail?goto=${CPATH}/user/accountMoney')" style="background: url(/templates/jmall/assets/images/userMoney.png) no-repeat;display: flex;flex-direction:column;text-align:center;margin:auto;width: 118px;height: 118px;">
 						<span style="color: #ffed27;margin-top: 23px;font-size: 12px">MEMBER POINTS</span>
 						<span style="color: #ffed27;font-size: 28px">${accountMoney!}</span>
 						<span style="color: #ffed27">会员钱包</span>
@@ -101,27 +101,30 @@
         </div> 
         <div style="padding-bottom: 3em;padding-top: 2.8em">
         	<ul class="icons" style="text-align: center;margin: 1em 0em 1em 0em;padding:1em -2em 1em -2em ">
-				<li style="width: 25%;padding:0;margin-left:-1em" onclick="window.location.href='${CPATH}/user/accountDetail';">
+				<li style="width: 25%;padding:0;margin-left:-1em" onclick="winLocation('${CPATH}/user/accountDetail')">
 					<img src="/templates/jmall/assets/images/userAmount.png" style="width:50px;height:50px"/>
 				</li>
-				<li style="width: 25%;padding:0;margin-left:-1em" onclick="window.location.href='${CPATH}/user/accountExtract';">
+				<li style="width: 25%;padding:0;margin-left:-1em" onclick="winLocation('${CPATH}/user/accountExtract')">
 					<img src="/templates/jmall/assets/images/userRecovered.png" style="width:50px;height:50px"/>
 				</li>
-				<li style="width: 25%;padding:0;margin-left:-1em" >
+				<li style="width: 25%;padding:0;margin-left:-1em" onclick="winLocation('${CPATH}/user/userSetting')">
+					<img src="/templates/jmall/assets/images/userSetup.png" style="width:50px;height:50px"/>
+				</li>
+				<!-- <li style="width: 25%;padding:0;margin-left:-1em" >
 					<img src="/templates/jmall/assets/images/userTeamNum.png" style="width:50px;height:50px"/>
 				</li>
 				<li style="width: 25%;padding:0;margin-left:-1em" >
 					<img src="/templates/jmall/assets/images/userTeamBuyAmount.png" style="width:50px;height:50px"/>
-				</li>
+				</li> -->
 			</ul>
 			<ul class="icons" style="text-align: center;margin: 1em 0em 1em 0em;padding:1em -2em 1em -2em ">
-				<li style="width: 25%;padding:0;margin-left:-1em" onclick="window.location.href='${CPATH}/user/userUncomment';">
+				<li style="width: 25%;padding:0;margin-left:-1em" onclick="winLocation('${CPATH}/user/userUncomment')">
 					<img src="/templates/jmall/assets/images/userUncomment.png" style="width:50px;height:50px"/>
 				</li>
-				<li style="width: 25%;padding:0;margin-left:-1em" onclick="window.location.href='${CPATH}/user/shoppingCart';">
+				<!-- <li style="width: 25%;padding:0;margin-left:-1em" onclick="winLocation('${CPATH}/user/shoppingCart')">
 					<img src="/templates/jmall/assets/images/userShoping.png" style="width:50px;height:50px"/>
-				</li>
-				<li style="width: 25%;padding:0;margin-left:-1em" onclick="window.location.href='${CPATH}/user/userUnreceived';">
+				</li> -->
+				<li style="width: 25%;padding:0;margin-left:-1em" onclick="winLocation('${CPATH}/user/userUnreceived')">
 					<img src="/templates/jmall/assets/images/userUnreceived.png" style="width:50px;height:50px"/>
 				</li>
 				<li style="width: 25%;padding:0;margin-left:-1em" >
@@ -129,21 +132,21 @@
 				</li>
 			</ul>
 			<ul class="icons" style="text-align: center;margin: 1em 0em 1em 0em;padding:1em -2em 1em -2em ">
-				<li style="width: 25%;padding:0;margin-left:-1em" onclick="window.location.href='${CPATH}/user/userAddress';">
+				<!-- <li style="width: 25%;padding:0;margin-left:-1em" onclick="winLocation('${CPATH}/user/userAddress')">
 					<img src="/templates/jmall/assets/images/userAddress.png" style="width:50px;height:50px"/>
 				</li>
 				<li style="width: 25%;padding:0;margin-left:-1em" >
 					<img src="/templates/jmall/assets/images/userQuestion.png" style="width:50px;height:50px"/>
-				</li>
-				<li style="width: 25%;padding:0;margin-left:-1em" onclick="window.location.href='${CPATH}/user/userSetting';">
+				</li> -->
+				<!-- <li style="width: 25%;padding:0;margin-left:-1em" onclick="winLocation('${CPATH}/user/userSetting')">
 					<img src="/templates/jmall/assets/images/userSetup.png" style="width:50px;height:50px"/>
-				</li>
-				<li style="width: 25%;padding:0;margin-left:-1em" >
+				</li> -->
+				<!-- <li style="width: 25%;padding:0;margin-left:-1em" >
 					<img src="/templates/jmall/assets/images/userSetting.png" style="width:50px;height:50px"/>
-				</li>
+				</li> -->
 			</ul>
-			<div style="text-align: center;margin-top: 2em">
-				<img src="/templates/jmall/assets/images/userBeing.png" onclick="window.location.href='${CPATH}/user/userBeing';" style="width:177px;height:41px"/>
+			<div style="text-align: center;margin: 2em 0 2em 0">
+				<img src="/templates/jmall/assets/images/userBeing.png" onclick="winLocation('${CPATH}/user/userBeing')" style="width:177px;height:41px"/>
 			</div>
         </div>
     </div>

@@ -164,7 +164,7 @@
                         <div class="12u$" style="position: relative;">
                         	<span style="float: left;width: 120px;position: absolute;"><span style="float: right;margin-right: 20px">共&nbsp;${transaction.quantity!}&nbsp;件商品</span><span style="float: right;;margin-right: 10px">实付款：￥${transaction.price!}</span></span>
                             <span style="float: right;margin-top: 5px">
-                                <#if "1"==transaction.status!>
+                                <#if "1"==transaction.status! || "0"==transaction.status!>
                                     <a href="javascript:void(0)" class="button" onclick="del('${transaction.id!}')">删除</a>
                                     &nbsp;<a href="javascript:void(0)" class="button special" onclick="reWechatPay('${transaction.id!}')">立即支付</a>
                                 <#elseif "3"==transaction.status!>

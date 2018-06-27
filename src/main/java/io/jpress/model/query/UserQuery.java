@@ -25,6 +25,7 @@ import io.jpress.template.TemplateManager;
 import io.jpress.template.TplModule;
 import io.jpress.utils.StringUtils;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.LinkedList;
 import java.util.List;
@@ -230,7 +231,7 @@ public class UserQuery extends JBaseQuery {
             "select  " +
             "    '提现支付' as amountName, " +
             "    ep.payed_time as amountTime, " +
-            "    e.payed_money as amount " +
+            "    -ep.pay_money as amount " +
             "from jp_extract e,jp_extract_pay ep " +
             "where e.id = ep.extract_id " +
             "and e.`status` = 3 and e.user_id = ? " +
@@ -251,4 +252,45 @@ public class UserQuery extends JBaseQuery {
         }
 
     }
+
+    /**
+     * <b>Description.:查询当前用户的可提现金额：用户可提现金额 = 用户入账15天后的奖金 - 已经提现金额</b><br>
+     * <b>Author:jianb.jiang</b>
+     * <br><b>Date:</b> 2018年6月27日 下午2:17:03
+     * @return
+     */
+    public Record getExtractAvailableAmount(BigInteger userId) {
+        StringBuilder sqlBuilder = new StringBuilder(
+                "SELECT "+
+                "( SELECT "+
+                "       IFNULL(SUM(b.amount), 0) AS all15 "+
+                "   FROM jp_bonus b "+
+                "   WHERE b.user_id = ? AND b.bonus_type != 5"+
+                "   AND DATE(b.bonus_time) <= DATE_SUB(CURDATE(), INTERVAL 15 DAY) "+
+                ") - ( "+
+                "   SELECT "+
+                "       IFNULL(SUM(ep.pay_money), 0) AS extractPayed "+
+                "   FROM "+
+                "       jp_extract e, "+
+                "       jp_extract_pay ep "+
+                "   WHERE "+
+                "       e.id = ep.extract_id "+
+                "   AND e.user_id = ? "+
+                "   AND e.`status` = 3 "+
+                ") AS extractAvailableAmount,"+ 
+                "(SELECT IFNULL(u.amount, 0) FROM jp_user u where u.id = ?) AS userAmount FROM DUAL");
+            LinkedList<Object> params = new LinkedList<Object>();
+
+            params.add(userId);
+            params.add(userId);
+            params.add(userId);
+            
+            if (params.isEmpty()) {
+                return Db.findFirst(sqlBuilder.toString());
+            } else {
+                return Db.findFirst(sqlBuilder.toString(), params.toArray());
+            }
+    }
+
+    
 }

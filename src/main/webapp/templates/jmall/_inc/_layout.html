@@ -205,6 +205,7 @@ wx.ready(function(){
     <script src="${CTPATH}/assets/touchspin/jquery.bootstrap-touchspin.min.js"></script>
     <script src="${CPATH}/static/layer/layer.js"></script>
 	<script src="${CPATH}/static/layer/laydate.js"></script>
+	<script src="${CPATH}/static/layer/layer_mobile/layer.js"></script>
     <script type="text/javascript">
         document.onkeydown=function(event){
             e = event ? event :(window.event ? window.event : null);
@@ -219,6 +220,13 @@ wx.ready(function(){
     		});
     	}
     	
+    	function winLocation(url) {
+    		layermobile.open({
+    		    type: 2
+    		    ,content: '加载中'
+    		  });
+    		window.location.href=url;
+    	}
     	
         $(document).ready(function(){
         	setTimeout("sidebarTips()","2000"); 

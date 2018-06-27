@@ -52,7 +52,7 @@ function doSubmit(){
 		return;
 	}
 	
-	//TODO 暂时屏蔽,jianb.jiang var flag = checkVerifyCode();
+	var flag = checkVerifyCode();
 	var flag = true;
 	if(flag){
 		$("#form").ajaxSubmit({
@@ -60,7 +60,12 @@ function doSubmit(){
 		dataType : "json", 
 		success : function(data) {
 			if(data.errorCode == 0){
-				window.location.href="${CPATH}/user/center";
+				var from = "${from!}";
+				if (from != null && from != undefined && from == "extract") {
+					window.location.href="${CPATH}/user/accountExtract";
+				} else {
+					window.location.href="${CPATH}/user/center";
+				}
 			}else{
 				layer.msg('用户信息更新失败:'+data.message);
 			}
@@ -94,14 +99,14 @@ input[type="text"], input[type="number"], input[type="password"], input[type="em
         <h4>个人信息</h4>
     </header> -->
     
-	<form class="setting" action="${CPATH}/user/doSaveUserSetting" method="post" id="form" style="margin: 10px -2em 0px -2em;">
+	<form class="setting" action="${CPATH}/user/doSaveUserSetting" method="post" id="form" style="margin: 10px 2em 0px 2em;">
 	<input type="hidden" name="user.id" value="${(user.id)!}">
 	<div class="col-xs-12 ">
-		<div class="row" >
-			<ul style="width: 100%">
+		<div class="row" style="">
+			<ul style="width: 100%;">
 				<li class="jp-set-pad">
 					<div class="col-sm-9">
-						<div class="col-sm-3" style="margin-bottom: 10px;margin-left: 10px">真实姓名</div>
+						<div class="col-sm-3" style="margin-bottom: 10px;margin-left: 10px">真实姓名：</div>
 						<div class="col-sm-6">
 							<input class="form-control input-md"  type="text" id="realname" name="user.realname" value="${(user.realname)!}" >
 						</div>
@@ -110,7 +115,7 @@ input[type="text"], input[type="number"], input[type="password"], input[type="em
 				
 				<li class="jp-set-pad">
 					<div class="col-sm-9">
-						<div class="col-sm-3" style="margin-bottom: 10px;margin-left: 10px">手机号码</div>
+						<div class="col-sm-3" style="margin-bottom: 10px;margin-left: 10px">手机号码：</div>
 						<div class="col-sm-6" style="position: relative;">
 							<input class="form-control input-md" type="text" id="mobile" name="user.mobile" value="${(user.mobile)!}" >
 							<button class="GetVerify" type="button" onclick="getVerifyCode()" >获取验证码</button>
@@ -120,7 +125,7 @@ input[type="text"], input[type="number"], input[type="password"], input[type="em
 				
 				<li class="jp-set-pad">
 					<div class="col-sm-9">
-						<div class="col-sm-3" style="margin-bottom: 10px;margin-left: 10px">验证码</div>
+						<div class="col-sm-3" style="margin-bottom: 10px;margin-left: 10px">验证码：</div>
 						<div class="col-sm-6">
 							<input class="form-control input-md" type="text" id="verifyCode" name="verifyCode" >
 						</div>
@@ -131,12 +136,16 @@ input[type="text"], input[type="number"], input[type="password"], input[type="em
 		
 	</div>
 	
-	<div class="align-center" >
-			<button type="button" onclick="doSubmit()" class="settingButton">保存更改</button>
-	</div>
 	
 	
 	</form>
+	<p/>
+	<p/>
+	<p/>
+	<p/>
+	<div class="align-center" >
+			<button type="button" onclick="doSubmit()" class="settingButton">保存更改</button>
+	</div>
 	<#include "_inc/_user_bottom_bar.html"/>
 </section>
 </@layout>
