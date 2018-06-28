@@ -174,7 +174,7 @@ wx.ready(function(){
     </div>
 
     <!-- Sidebar -->
-    <div id="sidebar">
+    <div id="sidebar" class="inactive">
         <div class="inner">
             <!-- Search -->
             <#include "_search_box.html"/>
@@ -221,11 +221,13 @@ wx.ready(function(){
     	}
     	
     	function winLocation(url) {
-    		layermobile.open({
-    		    type: 2
-    		    ,content: '加载中'
-    		  });
-    		window.location.href=url;
+    		if (url.indexOf("javascript") < 0) {
+	    		layermobile.open({
+	    		    type: 2
+	    		    ,content: '加载中'
+	    		  });
+	    		window.location.href=url;
+    		}
     	}
     	
         $(document).ready(function(){
