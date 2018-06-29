@@ -90,6 +90,9 @@ public class WechatMessageController extends MsgController {
 	@Before(WechatApiConfigInterceptor.class)
 	public void callback() {
 		String gotoUrl = getPara("goto");
+		if(gotoUrl == null){//解决异常情况(goto参数丢失的情况)下页面出现空白的问题,jiangjb,20180629
+		    gotoUrl = "/";  
+		}
 		String code = getPara("code");
 		String ifAjax = getPara("ajax");
 

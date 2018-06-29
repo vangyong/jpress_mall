@@ -8,15 +8,19 @@
 	    return result[1];
 	}
 
-	function scrollTo(ele, speed){
-		if(!speed) speed = 300;
-		if(!ele){
-			$("html,body").animate({scrollTop:0},speed);
-		}else{
-			if(ele.length>0) $("html,body").animate({scrollTop:$(ele).offset().top},speed);
-		}
-		return false;
-	}
+	$(function(){
+		//根据图片宽度同比例设置图片高度,图片自适应高度
+		var img = $(".indexImg");
+		realWidth =img.width();
+		realHeight = realWidth*1.05;
+		img.css({height:realHeight});
+		
+		//控制商品描述的高度
+		<!-- var img_p = $(".indexImg_p");
+		realHeight_p = realWidth*0.549;
+		img_p.css({height:realHeight_p}); -->
+	});
+
 
 	window.onload=function(){ 
 		var cp_code = getQueryString("cp_code");
@@ -125,8 +129,10 @@ body, input, select, textarea{font-size:8pt}
                 <#list page.getList() as content>
                     <article>
                         <a href="${(content.url)!'#'}" style="color: black;">
-                            <span class="image"><img src="${content.thumbnailByName('t1')!}" alt="" /></span>
-                            <p>${(content.title)!}</p>
+                            <span class="image"><img src="${content.thumbnailByName('t1')!}" alt="" class="indexImg"/></span>
+                            <p class="indexImg_p" style="overflow:hidden; text-overflow:ellipsis;display:-webkit-box; -webkit-box-orient:vertical;-webkit-line-clamp:4;">
+                            	${(content.title)!}
+                           	</p>
                             <p class="price">￥${(content.price)!0}</p>
                         </a>
                     </article>
