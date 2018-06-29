@@ -1,6 +1,6 @@
 <div class="bottombar">
 	<ul class="icons">
-		<li style="width: 30%;" onclick="window.location.href='${CPATH}/user/shoppingCart';">
+		<li style="width: 30%;" onclick="winLocation('${CPATH}/user/shoppingCart')">
 			<span class="icon fa-shopping-cart">
 				<#if USER??>
 					<span class="mainRed">（${USER.getShoppingCartCount()!}）</span>

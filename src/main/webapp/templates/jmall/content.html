@@ -21,6 +21,10 @@
 	$("#quantity").TouchSpin({min: 1}).focus(function(){$(this).blur();});
 
 	function addShoppingCart(){
+		layermobile.open({
+   		    type: 2
+   		    ,content: '加载中'
+   		  });
 		$("#form").attr("action","${CPATH}/user/doAddShoppingCart");
 		$("#form").ajaxSubmit({
 			type : "post",
@@ -33,16 +37,22 @@
 					var url="${CPATH}"+data.data+"?goto="+goto;
 					window.location.href=url;
 				}else{
+					layermobile.closeAll();
 					layer.msg(data.message);
 				}
 			},
 			error : function() {
 				layer.msg("系统异常");
+				layermobile.closeAll();
 			}
 		});
 	}
 
 	function userSettlement(){
+		layermobile.open({
+   		    type: 2
+   		    ,content: '加载中'
+   		  });
 		$("#form").attr("action","${CPATH}/user/checkUserSettlement");
 		$("#form").ajaxSubmit({
 			type : "post",
@@ -57,10 +67,12 @@
 					window.location.href=url;
 				}else{
 					layer.msg(data.message);
+					layermobile.closeAll();
 				}
 			},
 			error : function() {
 				layer.msg("系统异常");
+				layermobile.closeAll();
 			}
 		});
 	}

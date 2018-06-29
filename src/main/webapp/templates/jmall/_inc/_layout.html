@@ -246,9 +246,18 @@ wx.ready(function(){
         // 判断图片加载状况，加载完成后回调
     	isImgLoad(function(){
     	    // 加载完成
-    	    sidebarTipsTimer = setTimeout("sidebarTips()","1000"); 
+        	sidebarTipsTimer = setTimeout("showSideBarTips()","3000");
     	});
      
+        function showSideBarTips() {
+        	sidebarTips();
+        	$(window).scroll(function() {
+        		clearTimeout(sidebarTipsTimer);
+        		layer.closeAll('tips'); 
+        		sidebarTips();
+       		});
+        }
+        
     	function sidebarTips() {
     		layer.tips('敢戳我试试^_^', '#sidebar_a', {
     		  tips: [2, '#78BA32']
@@ -279,12 +288,6 @@ wx.ready(function(){
     	/* $(window).on('scroll', function(e) {
     		//do something
     	}, 500); */
-    	
-    	$(window).scroll(function() {
-    		clearTimeout(sidebarTipsTimer);
-    		layer.closeAll('tips'); 
-    		sidebarTips();
-   		});
     	
         $(document).ready(function(){
             $('.autoplay').slick({
