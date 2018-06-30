@@ -198,6 +198,7 @@ wx.ready(function(){
     <script src="${CPATH}/static/plugins/jquery/jquery.form.min.js"></script>
 	<script src="${CPATH}/static/plugins/jquery/qrcode.min.js"></script>
 	<!-- <script src="${CPATH}/static/plugins/jquery/jquery.unevent.js"></script> -->
+	<script src="${CPATH}/static/plugins/jquery/jquery.lazyload.min.js"></script>
     <script src="${CTPATH}/assets/js/skel.min.js"></script>
     <script src="${CTPATH}/assets/js/util.js"></script>
     <!--[if lte IE 8]><script src="${CTPATH}/assets/js/ie/respond.min.js"></script><![endif]-->
@@ -284,12 +285,22 @@ wx.ready(function(){
     		return false;
     	}
     	
-    	//滚动停止事件（500毫秒没有滚动发生时）
-    	/* $(window).on('scroll', function(e) {
+    	//滚动停止事件（250毫秒没有滚动发生时）
+    	//$(window).on('scroll', function(e) {
     		//do something
-    	}, 500); */
+    	//}, 250);
     	
+       	$("img.sidebarImgLazy").lazyload({
+   		    effect : "fadeIn",
+   		    event : "sporty"
+   		});
+       	
+       	$(window).bind("load", function() {
+       	    var timeout = setTimeout(function(){$("img.sidebarImgLazy").trigger("sporty")},500);//2秒后自动加载图片
+       	});
+       	
         $(document).ready(function(){
+        	
             $('.autoplay').slick({
                 dots: true,
                 slidesToShow: 1,

@@ -6,7 +6,7 @@
         <@jp.contents  module="mall" count="3" orderBy="view_count" hasThumbnail="true">
             <#list contents as content>
                 <article>
-                    <a href="${(content.url)!'#'}" class="image"><img src="${(content.thumbnail)!}" alt="" /></a>
+                    <a href="${(content.url)!'#'}" class="image"><img width="248" height="260" class="sidebarImgLazy" data-original="${(content.thumbnail)!}" alt="" /></a>
                     <p>${(content.title)!}</p>
                     <p class="price">￥${(content.price)!0}</p>
                 </article>
