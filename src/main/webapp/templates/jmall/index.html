@@ -1,5 +1,16 @@
 <#include "_inc/_layout.html"/>
 <#macro script>
+	$(function(){
+       	//根据图片宽度同比例设置图片高度,图片自适应高度
+   		var img = $("img[name='indexContent']");
+   		realWidth =img.width();
+   		realHeight = realWidth*1.048;
+   		img.css({height:realHeight});
+		$("img.indexImgLazy").lazyload({
+		    effect : "fadeIn"
+		});
+	});
+      	
 	function getQueryString(name) {
 	    var result = window.location.search.match(new RegExp("[\?\&]" + name + "=([^\&]+)", "i"));
 	    if (result == null || result.length < 1) {
@@ -7,20 +18,6 @@
 	    }
 	    return result[1];
 	}
-
-	$(function(){
-		//根据图片宽度同比例设置图片高度,图片自适应高度
-		var img = $(".indexImg");
-		realWidth =img.width();
-		realHeight = realWidth*1.05;
-		img.css({height:realHeight});
-		
-		//控制商品描述的高度
-		//var img_p = $(".indexImg_p");
-		//realHeight_p = realWidth*0.549;
-		//img_p.css({height:realHeight_p});
-	});
-
 
 	window.onload=function(){ 
 		var cp_code = getQueryString("cp_code");
@@ -120,7 +117,7 @@ body, input, select, textarea{font-size:8pt}
  			<img src="/templates/jmall/assets/images/indexRecomd.png" style="width:90%"/>
  		</div>
 		<img src="/templates/jmall/assets/images/indexImgTwo.jpg" style="width:100%;"/>
-		<img src="/templates/jmall/assets/images/indexImgThree.jpg" style="width:100%;"/>
+		<img height="146.88" class="sidebarImgLazy" data-original="/templates/jmall/assets/images/indexImgThree.jpg" style="width:100%;"/>
  	</div>
     <div class="posts" name="content_a">
     	<a name="content_a" id="content_a"></a>
@@ -129,7 +126,7 @@ body, input, select, textarea{font-size:8pt}
                 <#list page.getList() as content>
                     <article>
                         <a href="${(content.url)!'#'}" style="color: black;">
-                            <span class="image"><img src="${content.thumbnailByName('t1')!}" alt="" class="indexImg"/></span>
+                            <span class="image"><img name="indexContent" class="indexImgLazy" data-original="${content.thumbnailByName('t1')!}" alt=""/></span>
                             <p class="indexImg_p" style="overflow:hidden; text-overflow:ellipsis;display:-webkit-box; -webkit-box-orient:vertical;-webkit-line-clamp:4;">
                             	${(content.title)!}
                            	</p>
