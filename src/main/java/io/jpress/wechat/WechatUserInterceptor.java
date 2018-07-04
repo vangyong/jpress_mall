@@ -16,15 +16,13 @@
 package io.jpress.wechat;
 
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
-import com.jfinal.aop.Before;
 import com.jfinal.aop.Interceptor;
 import com.jfinal.aop.Invocation;
 import com.jfinal.core.Controller;
-import com.jfinal.plugin.ehcache.CacheKit;
-import com.jfinal.weixin.sdk.api.AccessToken;
-import com.jfinal.weixin.sdk.api.AccessTokenApi;
+import com.jfinal.log.Log;
 import com.jfinal.weixin.sdk.api.ApiConfig;
 import com.jfinal.weixin.sdk.api.ApiConfigKit;
 import com.jfinal.weixin.sdk.api.JsTicket;
@@ -32,7 +30,6 @@ import com.jfinal.weixin.sdk.api.JsTicketApi;
 import com.jfinal.weixin.sdk.api.JsTicketApi.JsApiType;
 
 import io.jpress.Consts;
-import io.jpress.model.Option;
 import io.jpress.model.query.OptionQuery;
 import io.jpress.utils.StringUtils;
 import io.jpress.wechat.utils.AuthJsApiUtils;
@@ -41,8 +38,10 @@ public class WechatUserInterceptor implements Interceptor {
 
 	public static final String AUTHORIZE_URL = "https://open.weixin.qq.com/connect/oauth2/authorize" + "?appid={appid}"
 			+ "&redirect_uri={redirecturi}" + "&response_type=code" + "&scope=snsapi_userinfo"
-			+ "&state=235#wechat_redirect";
+			+ "&state=235&connect_redirect=1#wechat_redirect";
 
+	private static final Log log = Log.getLog(WechatUserInterceptor.class);
+    
 	@Override
 	public void intercept(Invocation inv) {
 
@@ -195,6 +194,7 @@ public class WechatUserInterceptor implements Interceptor {
 		redirectUrl = StringUtils.urlEncode(redirectUrl);
 
 		String url = AUTHORIZE_URL.replace("{redirecturi}", redirectUrl).replace("{appid}", appid.trim());
+		log.info("微信回调地址；" + url);
 		controller.redirect(url);
 
 	}
