@@ -97,6 +97,15 @@ public class IndexController extends BaseFrontController {
 		setGlobleAttrs();
 
 		String para = getPara();
+		
+		String typeId = getPara("typeId");
+		
+		if(typeId!=null) {
+			setAttr(IndexPageTag.TAG_NAME, new IndexPageTag(getRequest(), para,new BigInteger(typeId), 1, null));
+			setAttr("typeId",typeId);
+			render("index.html");
+			return;
+		}
 
 //		if (StringUtils.isBlank(para)||(!para.contains("-"))) { //我X，为啥要加：||(!para.contains("-"))，坑爹啊
 		if (StringUtils.isBlank(para)) {
@@ -113,7 +122,8 @@ public class IndexController extends BaseFrontController {
 				render("index.html");
 			} else {
 				setAttr(IndexPageTag.TAG_NAME, new IndexPageTag(getRequest(), para.trim(), 1, null));
-				render("page_" + para + ".html");
+				//render("page_" + para + ".html");
+				render("index.html");
 			}
 		} else if (paras.length == 2) {
 			String pageName = paras[0];
