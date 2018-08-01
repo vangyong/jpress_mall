@@ -97,9 +97,17 @@ public class BaseContentSpecItem<M extends BaseContentSpecItem<M>> extends JMode
 		set("stock", stock);
 	}
 
-	public java.lang.Integer getStock() {
-		return get("stock");
-	}
+    public java.lang.Integer getStock() {
+        return get("stock");
+    }
+
+    public java.lang.Integer getLimitPerUser() {
+        return get("limit_per_user");
+    }
+    
+    public void setLimitPerUser(java.lang.Integer limitPerUser) {
+        set("limit_per_user", limitPerUser);
+    }
 
     public void setCreated(java.util.Date created) {
         set("created", created);

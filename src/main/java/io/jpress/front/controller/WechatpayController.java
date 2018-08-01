@@ -461,6 +461,11 @@ public class WechatpayController extends BaseFrontController {
                     renderAjaxResultForError(content.getTitle()+"货存不足");
                     return;
                 }
+
+                if (!ContentSpecItemQuery.me().checkLimitPerUser(userId, shoppingCart.getContentId(), shoppingCart.getSpecValueId(), shoppingCart.getQuantity())) {
+                    renderAjaxResultForError("商品["+content.getTitle()+"]是限制购买的，不要太贪心噢^_^");
+                    return;
+                }
                 shoppingCartIdSb.append(shoppingCartId).append(",");
             }
 
@@ -672,7 +677,10 @@ public class WechatpayController extends BaseFrontController {
                 renderAjaxResultForError("货存不足");
                 return;
             }
-
+            if (!ContentSpecItemQuery.me().checkLimitPerUser(userId, content.getId(), specValueId, quantity)) {
+                renderAjaxResultForError("该商品是限制购买的，不要太贪心噢^_^");
+                return;
+            }
             // 商户订单号，商户网站订单系统中唯一订单号，必填
             final String orderNo=RandomUtils.randomKey(null, userId.toString());
             // 商品总金额，必填

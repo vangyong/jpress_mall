@@ -64,4 +64,28 @@ public class ContentSpecItemQuery extends JBaseQuery{
         return DAO.findFirst(sql.toString());
     }
 
+    /**
+     * <b>Description.:检测是否本次下单份数超过了sku的每人限购份数</b><br>
+     * <b>Author:jianb.jiang</b>
+     * <br><b>Date:</b> 2018年8月1日 下午4:39:25
+     * @param userId
+     * @param content_id
+     * @param spec_value_id
+     * @param num
+     * @return
+     */
+    public boolean checkLimitPerUser(BigInteger userId, BigInteger content_id, BigInteger spec_value_id, Integer num) {
+        StringBuilder sql = new StringBuilder();
+        sql.append(" SELECT csi.* ");
+        sql.append(" FROM contentspecitem csi ");
+        sql.append(" WHERE 1=1 ");
+        sql.append(" AND csi.content_id = "+content_id);
+        sql.append(" AND csi.spec_value_id = "+spec_value_id);
+        sql.append(" AND ifnull(csi.limit_per_user - ?,0) >= (select ifnull(sum(ifnull(ti.quantity,0)),0) from jp_transaction t,jp_transaction_item ti where ti.transaction_id = t.id and t.user_id = ? and ti.content_id = ? and ti.spec_value_id = ?)");
+        sql.append(" GROUP BY csi.id ");
+        sql.append(" ORDER BY csi.created DESC ");
+        ContentSpecItem r = DAO.findFirst(sql.toString(),num,userId,content_id,spec_value_id);
+        return r != null;
+    }
+
 }

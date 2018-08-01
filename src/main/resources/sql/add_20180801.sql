@@ -1,0 +1,1 @@
+ALTER TABLE `jpress_mall`.`jp_content_spec_item` add `limit_per_user` int(11) COMMENT '每人限购份数';
