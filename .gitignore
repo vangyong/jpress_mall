@@ -29,3 +29,4 @@ logs
 D:
 
 *.classpath
+/src/main/webapp/attachment/*
