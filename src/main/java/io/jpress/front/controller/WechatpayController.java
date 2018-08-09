@@ -677,7 +677,8 @@ public class WechatpayController extends BaseFrontController {
                 renderAjaxResultForError("货存不足");
                 return;
             }
-            if (!ContentSpecItemQuery.me().checkLimitPerUser(userId, content.getId(), specValueId, quantity)) {
+            if (contentSpecItem.getLimitPerUser() != null && contentSpecItem.getLimitPerUser()>0 
+                    && !ContentSpecItemQuery.me().checkLimitPerUser(userId, content.getId(), specValueId, quantity)) {
                 renderAjaxResultForError("该商品是限制购买的，不要太贪心噢^_^");
                 return;
             }
