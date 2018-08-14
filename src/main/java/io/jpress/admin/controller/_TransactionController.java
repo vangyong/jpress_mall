@@ -189,6 +189,7 @@ public class _TransactionController extends JBaseCRUDController<Transaction>{
         sheet.setColumnWidth(5, 250 * 30);
         sheet.setColumnWidth(6, 256 * 30);
         sheet.setColumnWidth(7, 256 * 30);
+        sheet.setColumnWidth(8, 500 * 30);
 
         // 创建报表头部  
         HSSFRow row0 = sheet.createRow(0);
@@ -236,7 +237,11 @@ public class _TransactionController extends JBaseCRUDController<Transaction>{
         //第一行第8列  
         cell1 = row1.createCell(7);  
         cell1.setCellStyle(cellStyleTitle);  
-        cell1.setCellValue(new HSSFRichTextString("快递信息（快递公司等）"));   
+        cell1.setCellValue(new HSSFRichTextString("快递信息（快递公司等）"));
+        //第一行第9列  
+        cell1 = row1.createCell(8);  
+        cell1.setCellStyle(cellStyleTitle);  
+        cell1.setCellValue(new HSSFRichTextString("收货地址"));   
 
         String keyword=getPara("k", "").trim();
         String pay_type=getPara("pay_type");
@@ -294,7 +299,11 @@ public class _TransactionController extends JBaseCRUDController<Transaction>{
             
             cell = row.createCell(5);  
             cell.setCellStyle(cellStyle);  
-            cell.setCellValue(new HSSFRichTextString(DateUtils.format(z.getCreated())));        
+            cell.setCellValue(new HSSFRichTextString(DateUtils.format(z.getCreated())));    
+            
+            cell = row.createCell(8);  
+            cell.setCellStyle(cellStyle);  
+            cell.setCellValue(new HSSFRichTextString(z.getUserAddress()));       
         }
         try {  
             bufferedOutPut.flush();  
