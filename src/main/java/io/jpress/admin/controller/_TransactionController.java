@@ -334,13 +334,14 @@ public class _TransactionController extends JBaseCRUDController<Transaction>{
                             String expressInfo = strings[7];
                             if (StringUtils.isNotBlank(orderNo) && StringUtils.isNotBlank(expressNo)) {
                                 Transaction transaction = TransactionQuery.me().findByOrderNo(orderNo);
-                                if (transaction != null && "2".equals(transaction.getStatus())) {
+                                if (transaction != null) {
                                     String oldExpressNo = transaction.getExpressNo();
+                                    String oldStatus = transaction.getStatus();
                                     transaction.setExpressNo(expressNo);  
                                     transaction.setExpress(expressInfo);
                                     transaction.setStatus("3"); //订单状态修改为已经发货
                                     if(transaction.update()) {
-                                        if (StringUtils.isBlank(oldExpressNo)) {//已经导入过快递信息的订单不再发送消息通知
+                                        if (StringUtils.isBlank(oldExpressNo) && "2".equals(oldStatus)) {//已经导入过快递信息的订单不再发送消息通知
                                             User user = UserQuery.me().findById(transaction.getUserId());
                                             if (user != null) {
                                                 tempMsgList.add(TemplateData.New()
