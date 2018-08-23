@@ -2,6 +2,7 @@ package io.jpress.model;
 
 import io.jpress.model.base.BaseTransaction;
 import io.jpress.model.core.Table;
+import io.jpress.model.query.RefundQuery;
 import io.jpress.model.query.UserQuery;
 import io.jpress.utils.StringUtils;
 
@@ -106,4 +107,38 @@ public class Transaction extends BaseTransaction<Transaction> {
         return get("contentTitles");
     }
 
+    public void setRefundNo(java.lang.String refundNo) {
+        set("refund_no", refundNo);
+    }
+    
+    public String getRefundNo(){
+        /*String orderNo=getOrderNo();
+        if(StringUtils.isBlank(orderNo)){
+            return null;
+        }
+        Refund refund=RefundQuery.me().findByOrderNo(orderNo);
+        if(refund==null){
+            return null;
+        }
+        return refund.getRefundNo();*/
+        return get("refund_no");
+    }
+
+    public void setRefundStatus(java.lang.String refundStatus) {
+        set("refund_status", refundStatus);
+    }
+    
+    public String getRefundStatus(){
+        /*String orderNo=getOrderNo();
+        if(StringUtils.isBlank(orderNo)){
+            return null;
+        }
+        Refund refund=RefundQuery.me().findByOrderNo(orderNo);
+        if(refund==null){
+            return null;
+        }
+        return refund.getStatus();*/
+
+        return get("refund_status");
+    }
 }

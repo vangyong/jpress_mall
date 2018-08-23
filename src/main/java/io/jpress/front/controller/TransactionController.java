@@ -495,7 +495,7 @@ public class TransactionController extends BaseFrontController {
                 transaction.deleteById(id);
                 TransactionItemQuery.me().deleteByTransactionId(id);
                 
-                Bonus bonus = BonusQuery.me().findByTransactionId(id);
+                Bonus bonus = BonusQuery.me().findFirstByTransactionId(id);
                 if (bonus != null && bonus.getBonusType() == 5L) {
                     //退还余额
                     if (Db.update("update jp_user set amount = amount - ? where id = ?", bonus.getAmount(), userId) <= 0) {

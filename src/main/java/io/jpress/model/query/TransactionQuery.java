@@ -37,8 +37,8 @@ public class TransactionQuery extends JBaseQuery{
     }
 
     public Page<Transaction> paginate(int pageNumber, int pageSize, String keyword, String status, String pay_type) {
-        String select = " SELECT t.* ";
-        StringBuilder fromBuilder = new StringBuilder(" FROM transaction t ");
+        String select = " SELECT t.*,r.refund_no,r.status as refund_status ";
+        StringBuilder fromBuilder = new StringBuilder(" FROM transaction t LEFT JOIN refund r on t.order_no=r.order_no ");
         fromBuilder.append(" WHERE 1=1 ");
         if(StringUtils.isNotBlank(keyword)){
             fromBuilder.append(" AND ( ");

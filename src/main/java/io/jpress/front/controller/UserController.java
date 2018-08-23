@@ -694,7 +694,7 @@ public class UserController extends BaseFrontController {
         Record record = UserQuery.me().getExtractAvailableAmount(user.getId());
         BigDecimal extractAvailableAmount = record.getBigDecimal("extractAvailableAmount");
         BigDecimal userAmount = record.getBigDecimal("userAmount");
-        //用户的不可提现金额 = 用户账户余额 - 可提现金额
+        //用户的不可提现金额 = 用户账户余额 - 可提现金额（不可提现金额通常为15天内的奖金，此笔奖金可能发生退款）
         BigDecimal extractUnavailableAmount = userAmount.subtract(extractAvailableAmount);
         
         if (extractUnavailableAmount.compareTo(BigDecimal.valueOf(0)) < 0 ||

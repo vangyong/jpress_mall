@@ -43,6 +43,35 @@
 		window.open("${CPATH}/admin/transaction/exportExcel?m=${m!}&p=${p!}&c=${c!}" +"&k="+k +"&pay_type="+pay_type +"&status="+status);
 	}
 
+	function preRefund(id){
+        if(!id){
+            layer.msg("id为空");
+            return;
+        }
+        layer.open({
+            type: 1,
+            skin: 'layui-layer-rim',
+            area: ['50%', 'auto'],
+            content: '<textarea class="form-control " rows="4" id="refundDesc" placeholder="请输入申请退款原因"></textarea>',
+            btn: ['确定','取消'],
+            yes: function(index){
+                var refundDesc=$("#refundDesc").val();
+                if(!refundDesc){
+                    layer.msg('申请退款原因不能为空');
+                    return;
+                }
+                $.post('${CPATH}/admin/transaction/prerefund',{id:id,refundDesc:refundDesc}, function(result){
+                    layer.close(index);
+                    if(result.errorCode > 0){
+                        layer.msg(result.message);
+                    }else{
+                    	alert('退款申请成功，款项将2天内返回用户支付账户');
+                        location.reload();
+                    }
+                });
+            }
+        });
+    }
 </#macro>
 <section class="content-header">
 	<h1>
@@ -116,9 +145,9 @@
 								<div class="jp-flash-comment">
 									<p class="row-actions jp-cancel-pad">
 										<span class="approve"><a class="vim-a" onclick="openLayer('80%', '80%', '详情','${CPATH}/admin/transaction/view?id=${bean.id}&c=${c!}&p=${p!}&m=${m!}')">详情</a></span>
-										<!-- <#if "2"==bean.status!>
-											<span class="approve">|&nbsp;<a class="vim-a" onclick="delivered('${bean.id!}')">已发货</a></span>
-										</#if> -->
+										<#if bean.status =="2" || bean.status =="3" || bean.status =="4" || bean.status =="5">
+											<span class="approve">|&nbsp;<a class="vim-a" onclick="preRefund('${bean.id!}')">申请退款</a></span>
+										</#if>
 									</p>
 								</div>
 							</td>
@@ -144,6 +173,10 @@
 									已收货/待评价
 								<#elseif "5"==bean.status!>
 									完成
+								</#if>
+								<#if "" != bean.refundStatus!>
+								<br/>
+								<span style="font-size: 12px;color: blue">[${(bean.refundStatus)!}]</span>
 								</#if>
 							</td>
 							<td>${(bean.created)!}</td>

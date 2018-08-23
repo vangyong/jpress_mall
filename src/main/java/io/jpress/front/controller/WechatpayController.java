@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.alipay.api.domain.AlipayTradeWapPayModel;
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Clear;
 import com.jfinal.kit.HttpKit;
@@ -33,18 +34,22 @@ import io.jpress.model.Bonus;
 import io.jpress.model.Content;
 import io.jpress.model.ContentSpecItem;
 import io.jpress.model.Coupon;
+import io.jpress.model.Refund;
 import io.jpress.model.ShoppingCart;
 import io.jpress.model.Transaction;
 import io.jpress.model.TransactionItem;
 import io.jpress.model.User;
+import io.jpress.model.query.BonusQuery;
 import io.jpress.model.query.ContentQuery;
 import io.jpress.model.query.ContentSpecItemQuery;
 import io.jpress.model.query.CouponQuery;
 import io.jpress.model.query.OptionQuery;
+import io.jpress.model.query.RefundQuery;
 import io.jpress.model.query.ShoppingCartQuery;
 import io.jpress.model.query.TransactionQuery;
 import io.jpress.model.query.UserQuery;
 import io.jpress.router.RouterMapping;
+import io.jpress.utils.AES256EncryptionUtil;
 import io.jpress.utils.DateUtils;
 import io.jpress.utils.RandomUtils;
 import io.jpress.utils.StringUtils;
@@ -79,6 +84,7 @@ public class WechatpayController extends BaseFrontController {
     private static final String partner = OptionQuery.me().findValue("wechat_partner");
     private static final String paternerKey = OptionQuery.me().findValue("wechat_paternerKey");
     private static final String notifyUrl = PropKit.get("wechat_notify_url");
+    private static final String refundNotifyUrl = PropKit.get("wechat_refund_notify_url");
     private static final String web_domain = OptionQuery.me().findValue("web_domain");
   
     //待支付-微信支付
@@ -111,7 +117,7 @@ public class WechatpayController extends BaseFrontController {
             renderAjaxResult("系统异常", Consts.ERROR_CODE_SYSTEM_ERROR, null);
         }
     }
-
+    
     private String wechartPrePay(String openId, String orderNo, BigDecimal cashFee) {
         // 统一下单文档地址：https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_1
         
@@ -279,6 +285,131 @@ public class WechatpayController extends BaseFrontController {
             renderText("");
         } catch (Exception e) {
             log.error("微信支付通知错误：", e);
+        }
+    }
+    
+    @Clear({WechatUserInterceptor.class})
+    @Before({WechatApiConfigInterceptor.class})
+    public void refund() {
+        try {
+            String xmlMsg = HttpKit.readData(getRequest());
+            log.info("退款结果通知=" + xmlMsg);
+            Map<String, String> params = PaymentKit.xmlToMap(xmlMsg);
+//            if (true) { //--test
+            if (PaymentKit.verifyNotify(params, paternerKey)) {
+                String reqInfoSec = params.get("req_info");//需要解密的信息
+                String reqInfoXml = AES256EncryptionUtil.Aes256Decode(reqInfoSec, paternerKey);//解密
+                log.info("退款结果通知解密=" + reqInfoXml);
+                Map<String, String> reqInfo = PaymentKit.xmlToMap(reqInfoXml);//将解密后的xml解析成map
+                //-----------test-----------------------
+//                Map<String, String> reqInfo = new HashMap<>();
+//                reqInfo.put("result_code", "SUCCESS");
+//                reqInfo.put("settlement_refund_fee", "100");
+//                reqInfo.put("out_trade_no", "18072617130566285420");
+//                reqInfo.put("out_refund_no", "312312d");
+//                reqInfo.put("refund_id", "wx_fdskfsalkfalsjdl11");
+                //-----------test-----------------------
+                
+                
+                
+                String resultCode = reqInfo.get("result_code");
+                String resultMsg = reqInfo.get("return_msg");
+                // 退款总金额
+                String refundFeeStr = reqInfo.get("settlement_refund_fee");
+                // 商户订单号
+                String orderNo = reqInfo.get("out_trade_no");
+                // 商户退款单号
+                String refundNo = reqInfo.get("out_refund_no");
+                // 微信退款单号
+                String tradeRefundNo = reqInfo.get("refund_id");
+    
+                // 注意重复通知的情况，同一订单号可能收到多次通知，请注意一定先判断订单状态
+                // 避免已经成功、关闭、退款的订单被再次更新
+                if (SUCCESS.equals(resultCode)) {
+                    final Transaction transaction = new Transaction().findFirst("select * from jp_transaction where order_no = ?", orderNo);
+                    if (transaction == null) { //订单不存在
+                        log.error("微信退款结果通知错误：transaction [" + orderNo + "] is not exists!reqInfo = []" + reqInfo);
+                        return;
+                    }
+                    //更新订单信息
+                    final Refund refund = new Refund().findFirst("select * from jp_refund where refund_no = ?", refundNo);
+                    if (refund == null) { //退款单不存在
+                        log.error("微信退款结果通知错误：refund [" + refundNo + "] is not exists!reqInfo = []" + reqInfo);
+                        return;
+                    }
+                    if ("退款成功".equals(refund.getStatus())) {//退款单已经被处理过，直接返回成功
+                        log.error("微信退款结果通知错误：refund status[" + refund.getStatus() + "] 已经被处理，不用重复处理!reqInfo = []" + reqInfo);
+                        Map<String, String> xml = new HashMap<>();
+                        xml.put("return_code", SUCCESS);
+                        xml.put("return_msg", "OK");
+                        renderText(PaymentKit.toXml(xml));
+                    }
+                    if (!"退款中".equals(refund.getStatus())) {//退款单状态不对
+                        log.error("微信退款结果通知错误：refund status[" + refund.getStatus() + "] is error!reqInfo = []" + reqInfo);
+                        return;
+                    }
+                    BigDecimal refundFee = new BigDecimal(refundFeeStr).divide(new BigDecimal("100"));
+                    if (refund.getAmount().setScale(2, BigDecimal.ROUND_DOWN).compareTo(refundFee.setScale(2, BigDecimal.ROUND_DOWN)) != 0) { //退款金额与实际支付金额不相等
+                        log.error("微信退款结果通知错误：refundAmount[" + refund.getAmount() + "] <> refundFee[" + refundFee + "]!reqInfo = []" + reqInfo);
+                        return;
+                    }
+                    refund.setTradeRefundNo(tradeRefundNo);
+                    refund.setStatus("退款成功");//退款单状态修改为退款成功
+                    
+                    
+                    boolean res = Db.tx(new IAtom() {
+                        @Override
+                        public boolean run() throws SQLException {
+
+                            if (!refund.update()) { //跟新退款单状态
+                                return false;
+                            }
+
+                            //扣除此订单产生的所有奖金
+                            List<Bonus> bonus = BonusQuery.me().findByTransactionId(transaction.getId());
+                            for (Bonus b : bonus) {
+                                if (b.getBonusType() == 1 || b.getBonusType() == 2 || b.getBonusType() == 3) {
+                                    Bonus vb = new Bonus();
+                                    vb.setBonusType(6L);//订单退款扣减
+                                    vb.setAmount(b.getAmount().negate());//负数
+                                    vb.setBonusTime(new Date());//退款完成时间
+                                    vb.setBonusCycle(b.getBonusCycle());
+                                    vb.setTransactionId(b.getTransactionId());
+                                    vb.setUserId(b.getUserId());
+                                    if (!vb.save()) { //保存奖金扣减数据
+                                        return false;
+                                    }
+                                    
+                                    //扣减用户的账户余额
+                                    if (Db.update("update jp_user set amount = amount + ? where id = ?", vb.getAmount(), vb.getUserId()) <= 0) {
+                                        return false;
+                                    }
+                                }
+                            }
+                            
+                            return true;
+                        }
+                    });
+                    
+                    if (!res) { //退款单更新失败
+                        log.error("微信退款通知错误：refund update failed!reqInfo = []" + reqInfo);
+                        return;
+                    }
+                    
+                    Map<String, String> xml = new HashMap<>();
+                    xml.put("return_code", SUCCESS);
+                    xml.put("return_msg", "OK");
+                    renderText(PaymentKit.toXml(xml));
+                } else {
+                    log.error("微信退款结果通知错误：result_msg =" + resultMsg);
+                }
+            } else {
+                log.error("微信退款结果通知错误：签名校验错误");
+                renderText("who are you!!!");
+            }
+            renderText("");
+        } catch (Exception e) {
+            log.error("微信退款结果通知错误：", e);
         }
     }
     
