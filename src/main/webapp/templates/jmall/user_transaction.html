@@ -176,6 +176,10 @@
                                 <#elseif "5"==transaction.status!>
                                     	<a href="javascript:void(0)" class="button">已完成</a>
                                 </#if>
+                                <#if "" != transaction.refundStatus!>
+                                <br/>
+								<span style="font-size: 11px;color: blue;border: 2">[${(transaction.refundStatus)!}]</span>
+								</#if>
                             </span>
                         </div>
                     </div>

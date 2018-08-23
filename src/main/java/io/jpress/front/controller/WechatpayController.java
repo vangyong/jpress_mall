@@ -294,11 +294,18 @@ public class WechatpayController extends BaseFrontController {
         try {
             String xmlMsg = HttpKit.readData(getRequest());
             log.info("退款结果通知=" + xmlMsg);
+//            xmlMsg = "<xml><return_code>SUCCESS</return_code><appid><![CDATA[wxd0b33231fc543b7b]]></appid><mch_id><![CDATA[1337083401]]></mch_id><nonce_str><![CDATA[1156fd7d54572ccda5093b95753e6584]]></nonce_str><req_info><![CDATA[9yyDBycNPn5AZki1smWGfu40/kJOg7DeuyFDSppYiGTgKPb4SlohDpma17EjMQq7PtUr75vIihQUCD5JB5fEtiFlB/KQ+TY6mnwujLmlCNgb3cT+24HZysarfdNkXnCwy94WPGbyrRbyp01NZsiAc5aasyMUBNT6qaGYs8sEan9iRGcgmt/7S2B3gmqiVBZ/1DQ2hA6fWJgGVoup1+vpMAoHU/jdj10E69zrkVbmljaZin2k+xXTZn8sXM5dZ3sTr1lUsXMF2j27BSL2MRwYEONO1E4iZEG5hyrY/ZheTneTVRLxNLEnyHFBfBFeB0ty1bi/EgAoDgE7z2pqSh4OlIqcn3Q3qHjJZkSoLC/C0wrjsg4kVcRbb9T/Hp2QvHIjM/BnjBB7TfnMdYub+XRFSkQvptr8OuTtc/kEQ4vFCayLphY59K2j0Fxi7wV96vJk3Hr3MCAs3DbSzGDQkfzB/WXHng85SDZ1tclXgk/5Z7vNAw+d+0JGbqxdQgRfEIgW+4eZR/VJvwGGCfqPAAAkW6z2EUbz9W0rFu0iyx75huv2UMnZMt9EEWZunJcWmIEcI/K32ZvCDfxqdD1xBp6KHDHjxo4pKGTdGKb+xwmloxDz1XT1EkDd9aClUhzKewArEWjWL1h/chqdYkAEk4fzWzNzOVp6CQ0XjlGdxC8IOFBLNEwcl2AXGy8u6eNg4ec/Rk9TS3zbHihoBtLUVpcM9BuklE49oOs66c6z+PhMhyCBXq+lWFKEyj/KvC+237CMj5RPcYLxf2TwQ33NvKzDJDhtOFRh5JPK4BG1Jd+el+NNoRtqr31j3RJKFrtMSg20hN0pkEPWTG5JqZAYXc/cryGrk8LSsJvlvDlzaPX+negfSOa3ryCpQ6kplaxdBXhX/PU3NPlLRm+MDF8gsuFF6YJW+0yYSJ4tI3jm+DROFs5u+hGsx87INmeJqYULABiXxf8HjzDOSp6AGCOXkUdFSqk36EfPp4PPHWgA6eMf8pHDYswp3P/58n55UTsrjo4KK9pBwMxw7ifYKD4qVx53YlTstUEGnE30KQdfQJ8iDic=]]></req_info></xml>";
             Map<String, String> params = PaymentKit.xmlToMap(xmlMsg);
+            String returnCode = params.get("return_code");
+            String returnMsg = params.get("return_msg");
+            if (!SUCCESS.equals(returnCode)) {
+                log.error("微信退款结果通知错误：returnMsg：" + returnMsg);
+                return;
+            }
+            String reqInfoSec = params.get("req_info");//需要解密的信息
+            String reqInfoXml = AES256EncryptionUtil.decryptData(reqInfoSec, paternerKey);//解密
 //            if (true) { //--test
-            if (PaymentKit.verifyNotify(params, paternerKey)) {
-                String reqInfoSec = params.get("req_info");//需要解密的信息
-                String reqInfoXml = AES256EncryptionUtil.Aes256Decode(reqInfoSec, paternerKey);//解密
+            if (StringUtils.isNotBlank(reqInfoXml)) {
                 log.info("退款结果通知解密=" + reqInfoXml);
                 Map<String, String> reqInfo = PaymentKit.xmlToMap(reqInfoXml);//将解密后的xml解析成map
                 //-----------test-----------------------
@@ -312,8 +319,7 @@ public class WechatpayController extends BaseFrontController {
                 
                 
                 
-                String resultCode = reqInfo.get("result_code");
-                String resultMsg = reqInfo.get("return_msg");
+                String resultStatus = reqInfo.get("refund_status");
                 // 退款总金额
                 String refundFeeStr = reqInfo.get("settlement_refund_fee");
                 // 商户订单号
@@ -325,7 +331,7 @@ public class WechatpayController extends BaseFrontController {
     
                 // 注意重复通知的情况，同一订单号可能收到多次通知，请注意一定先判断订单状态
                 // 避免已经成功、关闭、退款的订单被再次更新
-                if (SUCCESS.equals(resultCode)) {
+                if (SUCCESS.equals(resultStatus)) {
                     final Transaction transaction = new Transaction().findFirst("select * from jp_transaction where order_no = ?", orderNo);
                     if (transaction == null) { //订单不存在
                         log.error("微信退款结果通知错误：transaction [" + orderNo + "] is not exists!reqInfo = []" + reqInfo);
@@ -401,15 +407,16 @@ public class WechatpayController extends BaseFrontController {
                     xml.put("return_msg", "OK");
                     renderText(PaymentKit.toXml(xml));
                 } else {
-                    log.error("微信退款结果通知错误：result_msg =" + resultMsg);
+                    log.error("微信退款结果通知错误：resultStatus =" + resultStatus);
                 }
             } else {
-                log.error("微信退款结果通知错误：签名校验错误");
+                log.error("微信退款结果通知错误：解密错误");
                 renderText("who are you!!!");
             }
             renderText("");
         } catch (Exception e) {
             log.error("微信退款结果通知错误：", e);
+            renderText("who are you!!!");
         }
     }
     

@@ -1,8 +1,8 @@
 package io.jpress.utils;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
+
+import io.jpress.wechat.utils.MD5Util;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
@@ -10,85 +10,43 @@ import java.io.IOException;
 import java.security.Security;
 
 /**
- * Created by dong on 2017/8/7.
+ * <b>Description:</b>
+ * <br><b>ClassName:</b> AES256EncryptionUtil
+ * <br><b>Date:</b> 2018年8月23日 下午5:20:12
+ * <br>@author <b>jianb.jiang</b>
  */
 public class AES256EncryptionUtil {
-    public static boolean initialized = false;
-
-    public static final String ALGORITHM = "AES/ECB/PKCS7Padding";
-
-    /**
-     * @param str String   要被加密的字符串
-     * @param key String   加/解密要用的长度为32的字符串（256位字节）密钥
-     * @return String  加密后的字符串
-     */
-    public static String Aes256Encode(String str, String key) {
-        initialize();
-        String result = null;
-        try {
-            Cipher cipher = Cipher.getInstance(ALGORITHM, "BC");
-            SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(), "AES"); //生成加密解密需要的Key
-            cipher.init(Cipher.ENCRYPT_MODE, keySpec);
-            byte[] bytes = cipher.doFinal(str.getBytes("UTF-8"));
-            result = new BASE64Encoder().encode(bytes);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    /**
-     * @param content String   要被解密的字符串
-     * @param key     String     加/解密要用的长度为32的字符串（256位字节）密钥
-     * @return String  解密后的字符串
-     */
-    public static String Aes256Decode(String content, String key) {
-        initialize();
-        String result = null;
-        try {
-            Cipher cipher = Cipher.getInstance(ALGORITHM, "BC");
-            SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(), "AES"); //生成加密解密需要的Key
-            cipher.init(Cipher.DECRYPT_MODE, keySpec);
-            byte[] bytes = new BASE64Decoder().decodeBuffer(content);
-            byte[] decoded = cipher.doFinal(bytes);
-            result = new String(decoded, "UTF-8");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    public static void initialize() {
-        if (initialized) return;
-        Security.addProvider(new BouncyCastleProvider());
-        initialized = true;
-    }
 
     public static void main(String[] args) throws IOException {
         //商户key
-        String key = "1b75caff90f978b5f1b2beb936fc540e";
-        key = key.toLowerCase();
-        String msg = "<root>\n" +
-                "<out_refund_no><![CDATA[xx]]></out_refund_no>\n" +
-                "<out_trade_no><![CDATA[xx]]></out_trade_no>\n" +
-                "<refund_account><![CDATA[REFUND_SOURCE_RECHARGE_FUNDS]]></refund_account>\n" +
-                "<refund_fee><![CDATA[1]]></refund_fee>\n" +
-                "<refund_id><![CDATA[xx]]></refund_id>\n" +
-                "<refund_recv_accout><![CDATA[用户零钱]]></refund_recv_accout>\n" +
-                "<refund_request_source><![CDATA[API]]></refund_request_source>\n" +
-                "<refund_status><![CDATA[SUCCESS]]></refund_status>\n" +
-                "<settlement_refund_fee><![CDATA[1]]></settlement_refund_fee>\n" +
-                "<settlement_total_fee><![CDATA[1]]></settlement_total_fee>\n" +
-                "<success_time><![CDATA[2017-08-07 17:40:21]]></success_time>\n" +
-                "<total_fee><![CDATA[1]]></total_fee>\n" +
-                "<transaction_id><![CDATA[xxx]]></transaction_id>\n" +
-                "</root>";
-
-        String  enc = Aes256Encode(msg, key);
-        System.out.printf("enc:%s\n",enc);
-
-        String dec = Aes256Decode(enc, key);
-
-        System.out.printf("dec:%s\n" , dec);
+        String key = "fsfsafad";
+        String msg = "9yyDBycNPn5AZki1smWGfu40/kJOg7DeuyFDSppYiGTgKPb4SlohDpma17EjMQq7PtUr75vIihQUCD5JB5fEtiFlB/KQ+TY6mnwujLmlCNgb3cT+24HZysarfdNkXnCwy94WPGbyrRbyp01NZsiAc5aasyMUBNT6qaGYs8sEan9iRGcgmt/7S2B3gmqiVBZ/1DQ2hA6fWJgGVoup1+vpMAoHU/jdj10E69zrkVbmljaZin2k+xXTZn8sXM5dZ3sTr1lUsXMF2j27BSL2MRwYEONO1E4iZEG5hyrY/ZheTneTVRLxNLEnyHFBfBFeB0ty1bi/EgAoDgE7z2pqSh4OlIqcn3Q3qHjJZkSoLC/C0wrjsg4kVcRbb9T/Hp2QvHIjM/BnjBB7TfnMdYub+XRFSkQvptr8OuTtc/kEQ4vFCayLphY59K2j0Fxi7wV96vJk3Hr3MCAs3DbSzGDQkfzB/WXHng85SDZ1tclXgk/5Z7vNAw+d+0JGbqxdQgRfEIgW+4eZR/VJvwGGCfqPAAAkW6z2EUbz9W0rFu0iyx75huv2UMnZMt9EEWZunJcWmIEcI/K32ZvCDfxqdD1xBp6KHDHjxo4pKGTdGKb+xwmloxDz1XT1EkDd9aClUhzKewArEWjWL1h/chqdYkAEk4fzWzNzOVp6CQ0XjlGdxC8IOFBLNEwcl2AXGy8u6eNg4ec/Rk9TS3zbHihoBtLUVpcM9BuklE49oOs66c6z+PhMhyCBXq+lWFKEyj/KvC+237CMj5RPcYLxf2TwQ33NvKzDJDhtOFRh5JPK4BG1Jd+el+NNoRtqr31j3RJKFrtMSg20hN0pkEPWTG5JqZAYXc/cryGrk8LSsJvlvDlzaPX+negfSOa3ryCpQ6kplaxdBXhX/PU3NPlLRm+MDF8gsuFF6YJW+0yYSJ4tI3jm+DROFs5u+hGsx87INmeJqYULABiXxf8HjzDOSp6AGCOXkUdFSqk36EfPp4PPHWgA6eMf8pHDYswp3P/58n55UTsrjo4KK9pBwMxw7ifYKD4qVx53YlTstUEGnE30KQdfQJ8iDic=";
+        
+        try {
+            String aaa = decryptData(msg,key);
+            System.out.println(aaa);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
+    
+    static {
+        try {
+            Security.addProvider(new BouncyCastleProvider());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public static String decryptData(String content, String key) throws Exception {
+        byte[] keyB = MD5Util.getMD5Lower(key).getBytes();
+        Cipher cipher = null;
+        cipher = Cipher.getInstance("AES/ECB/PKCS7Padding");
+        SecretKeySpec keys = new SecretKeySpec(keyB, "AES");
+        cipher.init(Cipher.DECRYPT_MODE, keys);
+        byte[] b = org.bouncycastle.util.encoders.Base64.decode(content);
+        return new String(cipher.doFinal(b));
+    }
+    
 }
