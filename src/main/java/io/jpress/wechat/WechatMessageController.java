@@ -136,7 +136,9 @@ public class WechatMessageController extends MsgController {
                                 pUser = UserQuery.me().findById(pid);
                                 if (pUser == null ) {
                                     currUser.setPid(BigInteger.valueOf(0)); //系统找不到父亲的用户数据则记录为-1
-                                } else {
+                                } else if (currUser.getId() !=null && currUser.getId().compareTo(pUser.getId()) == 0) {
+                                    currUser.setPid(BigInteger.valueOf(0)); //当前用户试图把pid设置为自己，是不允许的
+                                }  else {
                                     currUser.setPid(pid); //设置当前用户的父id
                                     setPid = true;
                                 }

@@ -220,8 +220,8 @@ public class UserQuery extends JBaseQuery {
             "select  " +
             " case when b.bonus_type=1 then '个人直接推广奖励' " +
             "    when b.bonus_type=2 then '个人间接推广奖励' " +
-            "    when b.bonus_type=3 then '团队消费达标奖励' " +
-            "    when b.bonus_type=4 then '团队管理达标奖励' " +
+            "    when b.bonus_type=3 then '经销商推广佣金' " +
+            "    when b.bonus_type=4 then '经销商达标奖励' " +
             "    when b.bonus_type=5 then '购买商品付款' " +
             "    when b.bonus_type=6 then '订单退款扣减' END as amountName, " +
             "    b.bonus_time as amountTime, " +

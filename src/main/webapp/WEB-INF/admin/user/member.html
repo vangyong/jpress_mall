@@ -32,6 +32,25 @@ function del(id){
 	}
 }
 
+function batchAction(){
+	var roleSelect=$("#roleSelect").val();
+	$("#form").attr("action","${CPATH}/admin/user/batchRole?role="+roleSelect+"");
+	$("#form").ajaxSubmit({
+		type : "post",
+		dataType : "json",
+		success : function(result) {
+			if(result.errorCode > 0){
+				toastr.error(result.message,'操作失败');
+			}else{
+				location.reload();
+			}
+		},
+		error : function() {
+			alert("信息提交错误");
+		}
+	});
+}
+
 </#macro> 
 <@layout active_id=p child_active_id=c>
 <#include include/>

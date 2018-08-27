@@ -450,6 +450,27 @@ public class WechatpayController extends BaseFrontController {
             if (!calculationBounsByUserLevel(spending, transaction, pppUser, "A", tempMsgList)) {
                 return false;
             }
+            
+            //如果A层级是经销商则给与计算团队奖金
+            if (User.ROLE_DEALER.equals(ppUser.getRole())) { 
+                BigDecimal bounsTeamAmount = calculationTeamBouns(pppUser,spending);
+                if (bounsTeamAmount != null) {
+                    bounsTeamAmount = bounsTeamAmount.setScale(2, BigDecimal.ROUND_DOWN);
+                    Bonus bounsTeam = new Bonus();
+                    bounsTeam.setAmount(bounsTeamAmount);
+                    bounsTeam.setBonusCycle(1L);//奖金计算周期类型（1 按订单结算也就是实时结算;2 按月结算）
+                    bounsTeam.setBonusTime(new Date());
+                    bounsTeam.setBonusType(3L);//奖金分类（1 个人提成-直接推广;2 个人提成-间接推广;3 团队提成;4 团队管理费）
+                    bounsTeam.setTransactionId(transaction.getId());
+                    bounsTeam.setUserId(pppUser.getId());
+                    if (!bounsTeam.save()) {
+                        return false;
+                    }
+                    if (Db.update("update jp_user set amount = amount + ? where id = ?", bounsTeamAmount, pppUser.getId()) <= 0) {
+                        return false;
+                    }
+                }
+            }
         } else {
             return true;
         }
@@ -499,25 +520,6 @@ public class WechatpayController extends BaseFrontController {
                 .add("keyword5", bonusUseramount.toString() + " 元", "#999")
                 .add("remark", "奖金已存入商城账户余额，继续加油！^_^", "#999")
              );
-        }
-        
-        //计算获得的团队奖金
-        BigDecimal bounsTeamAmount = calculationTeamBouns(user,spending);
-        if (bounsTeamAmount != null) {
-            bounsTeamAmount = bounsTeamAmount.setScale(2, BigDecimal.ROUND_DOWN);
-            Bonus bounsTeam = new Bonus();
-            bounsTeam.setAmount(bounsTeamAmount);
-            bounsTeam.setBonusCycle(1L);//奖金计算周期类型（1 按订单结算也就是实时结算;2 按月结算）
-            bounsTeam.setBonusTime(new Date());
-            bounsTeam.setBonusType(3L);//奖金分类（1 个人提成-直接推广;2 个人提成-间接推广;3 团队提成;4 团队管理费）
-            bounsTeam.setTransactionId(transaction.getId());
-            bounsTeam.setUserId(user.getId());
-            if (!bounsTeam.save()) {
-                return false;
-            }
-            if (Db.update("update jp_user set amount = amount + ? where id = ?", bounsTeamAmount, user.getId()) <= 0) {
-                return false;
-            }
         }
         
         return true;
