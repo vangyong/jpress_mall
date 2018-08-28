@@ -143,6 +143,57 @@ public class _TransactionController extends JBaseCRUDController<Transaction>{
         }
     }
 
+    //退款申请-审核
+    public void checkRefund() {
+        try {
+            final BigInteger id=getParaToBigInteger("id");
+            final String checkResult=getPara("checkResult");
+
+            if (id==null) {
+                renderAjaxResultForError("订单id不能为空");
+                return;
+            }
+            if (StringUtils.isBlank(checkResult)) {
+                renderAjaxResultForError("退款审核理由不能为空");
+                return;
+            }
+            final Transaction transaction=TransactionQuery.me().findById(id);
+            if (transaction==null) {
+                renderAjaxResultForError("订单不存在");
+                return;
+            }
+            Refund refund = RefundQuery.me().findByOrderNo(transaction.getOrderNo());
+            if (refund == null) {
+                renderAjaxResultForError("退款单不存在");
+                return;
+            }
+            
+            if (!"退款申请成功".equals(refund.getStatus()) && !"退款失败".equals(refund.getStatus())) {
+                renderAjaxResultForError("退款进行中，不允许重复退款");
+                return;
+            }
+            
+            if ("ok".equals(checkResult)) { //审核通过。
+                String jsonStr = wechartPreRefund(transaction, refund.getRefundNo(), refund.getDesc());
+                if (StringUtils.isBlank(jsonStr)) {
+                    renderAjaxResultForError("调起微信退款申请接口失败了");
+                    return;
+                }
+                log.info(jsonStr);
+                renderAjaxResult("操作成功", 0, jsonStr);
+            } else {
+                refund.setStatus("退款失败");
+                refund.setDesc(refund.getDesc() + "【审核失败："+checkResult+"】");
+                refund.saveOrUpdate();
+                renderAjaxResult("操作成功", 0, refund.getDesc());
+            }
+            
+        } catch (Exception e) {
+            log.error("系统异常:",e);
+            renderAjaxResult("系统异常", Consts.ERROR_CODE_SYSTEM_ERROR, null);
+        }
+    }
+
     //退款申请-微信
     public void prerefund() {
         try {
@@ -163,10 +214,40 @@ public class _TransactionController extends JBaseCRUDController<Transaction>{
                 return;
             }
             
-            String jsonStr = wechartPreRefund(transaction, refundDesc);
-            if (StringUtils.isBlank(jsonStr)) {
+            if (DateUtils.getDayDiff(new Date(), transaction.getPayed()) > 5) { //订单支付超过5天后不允许退款
+                renderAjaxResultForError("订单支付超过5天后不允许退款，不允许退款");
                 return;
             }
+            //一个订单只允许创建一个退款单
+            Refund refund = RefundQuery.me().findByOrderNo(transaction.getOrderNo());
+            if (refund == null) {
+                refund = new Refund();
+                refund.setAmount(transaction.getCashFee());//退款金额默认为订单总的现金支付金额（注意：如果退款成功，那么订单产生的奖金就是此笔订单亏损的钱）
+                refund.setOrderNo(transaction.getOrderNo());
+                refund.setRefundNo(RandomUtils.randomKey("2", transaction.getId().toString()));//退款单编号以2开头，以订单id结尾
+                refund.setStatus("退款申请成功");//退款单初始状态为'退款申请成功'
+                refund.setTradeNo(transaction.getTradeNo());
+            }
+            
+            if (!"退款申请成功".equals(refund.getStatus()) && !"退款失败".equals(refund.getStatus())) {
+                renderAjaxResultForError("退款进行中，不允许重复退款");
+                return;
+            }
+            refund.setDesc(refundDesc);
+            
+            if(!refund.saveOrUpdate()){
+                renderAjaxResultForError("退款单创建失败了");
+                return;
+            }
+            
+            String jsonStr = wechartPreRefund(transaction, refund.getRefundNo(), refundDesc);
+            if (StringUtils.isBlank(jsonStr)) {
+                renderAjaxResultForError("调起微信退款申请接口失败了");
+                return;
+            }
+            refund.setStatus("退款中");
+            refund.saveOrUpdate();
+            
             log.info(jsonStr);
             renderAjaxResult("操作成功", 0, jsonStr);
         } catch (Exception e) {
@@ -175,37 +256,14 @@ public class _TransactionController extends JBaseCRUDController<Transaction>{
         }
     }
     
-    private String wechartPreRefund(Transaction transaction, String refundDesc) {
-        String returnMsg = "退款申请成功，款项将2天内返回用户支付账户";
-        if (DateUtils.getDayDiff(new Date(), transaction.getPayed()) > 10) { //订单支付超过10天后不允许退款
-            renderAjaxResultForError("订单支付超过10天后不允许退款，不允许退款");
-            return "";
-        }
-        //一个订单只允许创建一个退款单
-        Refund refund = RefundQuery.me().findByOrderNo(transaction.getOrderNo());
-        if (refund == null) {
-            refund = new Refund();
-            refund.setAmount(transaction.getCashFee());//退款金额默认为订单总的现金支付金额（注意：如果退款成功，那么订单产生的奖金就是此笔订单亏损的钱）
-            refund.setOrderNo(transaction.getOrderNo());
-            refund.setRefundNo(RandomUtils.randomKey("2", transaction.getId().toString()));//退款单编号以2开头，以订单id结尾
-            refund.setStatus("退款申请成功");//退款单初始状态为'退款申请成功'
-            refund.setTradeNo(transaction.getTradeNo());
-        }
-        
-        if (!"退款申请成功".equals(refund.getStatus()) && !"退款失败".equals(refund.getStatus())) {
-            renderAjaxResultForError("退款进行中，不允许重复退款");
-            return "";
-        }
-        refund.setDesc(refundDesc);
-        
-        if(refund.saveOrUpdate()){
-            returnMsg = "创建退款单成功";
+    private String wechartPreRefund(Transaction transaction,String refundNo, String refundDesc) {
+            String returnMsg = "退款申请成功，款项将2天内返回用户支付账户";
             // 退款申请文档地址：https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_4
             Map<String, String> params = new HashMap<>();
             params.put("appid", appid);
             params.put("mch_id", partner);
             params.put("out_trade_no", transaction.getOrderNo());
-            params.put("out_refund_no", refund.getRefundNo());
+            params.put("out_refund_no", refundNo);
             String totalFee = Integer.toString(transaction.getCashFee().setScale(2, BigDecimal.ROUND_DOWN).multiply(BigDecimal.valueOf(100.00)).intValue());
             params.put("total_fee", totalFee);
             params.put("refund_fee", totalFee);
@@ -231,10 +289,6 @@ public class _TransactionController extends JBaseCRUDController<Transaction>{
                 renderAjaxResult("系统异常", Consts.ERROR_CODE_SYSTEM_ERROR, null);
                 return "";
             }
-            
-            refund.setStatus("退款中");
-            refund.saveOrUpdate();
-        }
         
         return returnMsg;
     }

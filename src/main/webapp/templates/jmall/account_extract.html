@@ -23,7 +23,7 @@
 						type: 1,
 						skin: 'footer',
 						anim: 'up',
-						content: '<form id="accountExtractForm" style="width:90%;margin: 0 0 0 0;" action="${CPATH}/user/doSaveAccountExtract" method="post"><input type="hidden" name="extract.user_id" value="'+userId+'"><input type="hidden" name="extract.realname" value="'+realName+'"/><input type="hidden" name="extract.telephone" value="'+telephone+'"/><input type="hidden" name="extract.extract_money" value="'+extractAvailableAmount+'"/><div style="position: relative;vertical-align: middle;"><div style="float: left;width: 5em;padding-top: 8px">姓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;名：</div><div style="margin-left: 5em;"><input type="text" disabled="disabled" style="width:98%" value="'+realName+'"/></div></div><div><div style="float: left;width: 5em;padding-top: 8px">电&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;话：</div><div style="margin-left: 5em;"><input type="text" disabled="disabled" style="width:98%" value="'+telephone+'"/></div></div><div><div style="float: left;width: 5em;padding-top: 8px">可提金额：</div><div style="margin-left: 5em;"><input disabled="disabled" style="width:98%" type="text" value="'+extractAvailableAmount+'"/></div></div></form><p style="width:98.5%;padding-top:2em;font-size: 0.5em;color: #14ACFF;">特别说明：您的余额账户有【<b style="color: red;">'+extractUnavailableAmount+'</b>】的资金<b style="color: #14ACFF;">暂时不能提现</b>(为了避免恶意行为，每笔推广奖金自划入余额起，设定了 <b style="color: red;">15天</b> 的冻结期)，冻结期满的资金可立即提现！</p>',
+						content: '<form id="accountExtractForm" style="width:90%;margin: 0 0 0 0;" action="${CPATH}/user/doSaveAccountExtract" method="post"><input type="hidden" name="extract.user_id" value="'+userId+'"><input type="hidden" name="extract.realname" value="'+realName+'"/><input type="hidden" name="extract.telephone" value="'+telephone+'"/><input type="hidden" name="extract.extract_money" value="'+extractAvailableAmount+'"/><div style="position: relative;vertical-align: middle;"><div style="float: left;width: 5em;padding-top: 8px">姓&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;名：</div><div style="margin-left: 5em;"><input type="text" disabled="disabled" style="width:98%" value="'+realName+'"/></div></div><div><div style="float: left;width: 5em;padding-top: 8px">电&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;话：</div><div style="margin-left: 5em;"><input type="text" disabled="disabled" style="width:98%" value="'+telephone+'"/></div></div><div><div style="float: left;width: 5em;padding-top: 8px">可提金额：</div><div style="margin-left: 5em;"><input disabled="disabled" style="width:98%" type="text" value="'+extractAvailableAmount+'"/></div></div></form><p style="width:98.5%;padding-top:2em;font-size: 1em;color: #14ACFF;">特别说明：您的余额账户有【<b style="color: red;">'+extractUnavailableAmount+'</b>】的资金<b style="color: #14ACFF;">暂时不能提现</b>(为了避免恶意行为，每笔推广奖金自划入余额起，设定了 <b style="color: red;">7天</b> 的冻结期)，冻结期满的资金可立即提现！</p>',
 						btn: ['立即提现','考虑一下'],
 						yes: function(index){
 							layermobile.open({
@@ -80,8 +80,8 @@ table tbody tr td P{margin: 7px 0em 0em 0em}
 	<!-- <header class="major" style="background-color:#FFF">
         <h4>钱包提现</h4>
     </header> -->
-    	  <p style="width:98.5%;margin-top:1em;font-size: 0.5em;color: red;">
-    	  	说明：您所推广的用户的每笔交易金额所产生的奖励会及时送到达您的账户余额中，从入账时间起15天后即可提现。
+    	  <p style="width:98.5%;margin-top:1em;font-size: 1em;color: red;">
+    	  	说明：您所推广的用户的每笔交易金额所产生的奖励会及时送到达您的账户余额中，从入账时间起7天后即可提现。
     	  </p>
 		  <div class="table-wrapper" style="margin: 1em 0.1em 1em 0.1em;">
 			<div class="box alt bottom" style="margin-bottom: 0.5em;padding: 0 0 0 0;">

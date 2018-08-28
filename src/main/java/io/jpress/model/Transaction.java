@@ -112,16 +112,20 @@ public class Transaction extends BaseTransaction<Transaction> {
     }
     
     public String getRefundNo(){
-        /*String orderNo=getOrderNo();
-        if(StringUtils.isBlank(orderNo)){
-            return null;
+        String rs = get("refund_no");
+        if (StringUtils.isBlank(rs)) {
+            String orderNo=getOrderNo();
+            if(StringUtils.isBlank(orderNo)){
+                return null;
+            }
+            Refund refund=RefundQuery.me().findByOrderNo(orderNo);
+            if(refund==null){
+                return null;
+            }
+            return refund.getRefundNo();
+        } else {
+            return rs;
         }
-        Refund refund=RefundQuery.me().findByOrderNo(orderNo);
-        if(refund==null){
-            return null;
-        }
-        return refund.getRefundNo();*/
-        return get("refund_no");
     }
 
     public void setRefundStatus(java.lang.String refundStatus) {
@@ -129,16 +133,19 @@ public class Transaction extends BaseTransaction<Transaction> {
     }
     
     public String getRefundStatus(){
-        /*String orderNo=getOrderNo();
-        if(StringUtils.isBlank(orderNo)){
-            return null;
+        String rs = get("refund_status");
+        if (StringUtils.isBlank(rs)) {
+            String orderNo=getOrderNo();
+            if(StringUtils.isBlank(orderNo)){
+                return null;
+            }
+            Refund refund=RefundQuery.me().findByOrderNo(orderNo);
+            if(refund==null){
+                return null;
+            }
+            return refund.getStatus();
+        } else {
+            return rs;
         }
-        Refund refund=RefundQuery.me().findByOrderNo(orderNo);
-        if(refund==null){
-            return null;
-        }
-        return refund.getStatus();*/
-
-        return get("refund_status");
     }
 }

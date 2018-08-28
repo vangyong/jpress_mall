@@ -255,7 +255,7 @@ public class UserQuery extends JBaseQuery {
     }
 
     /**
-     * <b>Description.:查询当前用户的可提现金额：用户可提现金额 = 用户入账15天后的奖金收入 - 用户的奖金扣除(消费和退款扣除) - 已经提现金额</b><br>
+     * <b>Description.:查询当前用户的可提现金额：用户可提现金额 = 用户入账7天后的奖金收入 - 用户的奖金扣除(消费和退款扣除) - 已经提现金额</b><br>
      * <b>Author:jianb.jiang</b>
      * <br><b>Date:</b> 2018年6月27日 下午2:17:03
      * @return
@@ -267,7 +267,7 @@ public class UserQuery extends JBaseQuery {
                 "       IFNULL(SUM(b.amount), 0) AS all15 "+
                 "   FROM jp_bonus b "+
                 "   WHERE b.user_id = ? AND (b.bonus_type != 5 AND b.bonus_type != 6"+
-                "   AND DATE(b.bonus_time) <= DATE_SUB(CURDATE(), INTERVAL 15 DAY) OR b.bonus_type in (5,6))"+
+                "   AND DATE(b.bonus_time) <= DATE_SUB(CURDATE(), INTERVAL 7 DAY) OR b.bonus_type in (5,6))"+
                 ") - ( "+
                 "   SELECT "+
                 "       IFNULL(SUM(ep.pay_money), 0) AS extractPayed "+

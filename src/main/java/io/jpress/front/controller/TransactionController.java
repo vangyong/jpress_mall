@@ -17,6 +17,7 @@ import io.jpress.interceptor.UserInterceptor;
 import io.jpress.model.*;
 import io.jpress.model.query.*;
 import io.jpress.router.RouterMapping;
+import io.jpress.utils.DateUtils;
 import io.jpress.utils.RandomUtils;
 import io.jpress.utils.StringUtils;
 import io.jpress.wechat.WechatUserInterceptor;
@@ -531,6 +532,55 @@ public class TransactionController extends BaseFrontController {
         transaction.setStatus(Transaction.STATUS_4);
         if(!transaction.update()){
             renderAjaxResultForError("操作失败");
+            return;
+        }
+
+        renderAjaxResultForSuccess();
+    }
+
+    //用户申请退款
+    @Before(UCodeInterceptor.class)
+    public void createRefund(){
+        final BigInteger id=getParaToBigInteger("id");
+        final String refundDesc=getPara("refundDesc");
+
+        if (id==null) {
+            renderAjaxResultForError("订单id不能为空");
+            return;
+        }
+        if (StringUtils.isBlank(refundDesc)) {
+            renderAjaxResultForError("申请售后原因不能为空");
+            return;
+        }
+        final Transaction transaction=TransactionQuery.me().findById(id);
+        if (transaction==null) {
+            renderAjaxResultForError("订单不存在");
+            return;
+        }
+        
+        if (DateUtils.getDayDiff(new Date(), transaction.getPayed()) > 5) { //订单支付超过5天后不允许退款
+            renderAjaxResultForError("订单支付超过5天后不允许退款，不允许退款");
+            return;
+        }
+        //一个订单只允许创建一个退款单
+        Refund refund = RefundQuery.me().findByOrderNo(transaction.getOrderNo());
+        if (refund == null) {
+            refund = new Refund();
+            refund.setAmount(transaction.getCashFee());//退款金额默认为订单总的现金支付金额（注意：如果退款成功，那么订单产生的奖金就是此笔订单亏损的钱）
+            refund.setOrderNo(transaction.getOrderNo());
+            refund.setRefundNo(RandomUtils.randomKey("2", transaction.getId().toString()));//退款单编号以2开头，以订单id结尾
+            refund.setStatus("退款申请成功");//退款单初始状态为'退款申请成功'
+            refund.setTradeNo(transaction.getTradeNo());
+        }
+        
+        if (!"退款申请成功".equals(refund.getStatus()) && !"退款失败".equals(refund.getStatus())) {
+            renderAjaxResultForError("退款进行中，不允许重复退款");
+            return;
+        }
+        refund.setDesc(refundDesc);
+        
+        if(!refund.saveOrUpdate()){
+            renderAjaxResultForError("退款单创建失败了");
             return;
         }
 
