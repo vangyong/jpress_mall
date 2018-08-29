@@ -103,7 +103,8 @@ public class ContentController extends BaseFrontController {
 		if (StringUtils.isNotBlank(content.getTitle())) {
 		    //setAttr(Consts.SHARE_TITLE, content.getTitle());
 		    //商品页的分享标题与默认的首页一样
-		    String share_title = OptionQuery.me().findValue("share_title");
+		    //String share_title = OptionQuery.me().findValue("share_title");
+		    String share_title = OptionQuery.me().findValue("web_title");
 		    setAttr(Consts.SHARE_TITLE, share_title);
 		}
 		if (StringUtils.isNotBlank(content.getTitle())) {

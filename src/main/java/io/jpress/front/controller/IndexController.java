@@ -159,7 +159,7 @@ public class IndexController extends BaseFrontController {
 		}
 		
 		//分享参数
-		String share_title = OptionQuery.me().findValue("share_title");
+		String share_title = OptionQuery.me().findValue("web_title");
 		String share_desc = OptionQuery.me().findValue("share_desc");
 		String share_img_url = OptionQuery.me().findValue("share_img_url");
 		if (StringUtils.isNotBlank(share_title)) {
