@@ -129,6 +129,7 @@ public class WechatMessageController extends MsgController {
                                 pUser = UserQuery.me().findById(currUser.getPid());
                             } else {
                                 currUser = new User();
+                                currUser.setCreated(new Date());
                             }
                             
                             boolean setPid = false;
@@ -153,7 +154,7 @@ public class WechatMessageController extends MsgController {
                             currUser.setFlag(User.FLAG_FRONT);
                             currUser.setCreateSource(User.SOURCE_WECHAT);
                             currUser.setOpenid(openid);
-                            currUser.setCreated(new Date());
+                            currUser.setLogged(new Date());
                             if (!currUser.saveOrUpdate()) {
                                 return false;
                             }
