@@ -16,6 +16,10 @@ for(var i =0;i<cookies.length;i++){
 		}
 }
 
+if (userId == null || userId =='') {
+	userId = "${userId!0}";
+}
+
 var old_url = window.location.href;
 var new_url;
 if(old_url.indexOf("?") !=-1){ //url中存在问号
@@ -31,7 +35,7 @@ if(old_url.indexOf("?") !=-1){ //url中存在问号
 
 new_url = new_url.replace('&amp;','&');
 new_url = new_url.split('&from=')[0];
-console.log("new_url:"+new_url);
+console.log("new_url:"+new_url + "uid:"+userId);
 /* 
 //修改链接，以供分享
 if (!!(window.history && history.pushState)){

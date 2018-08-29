@@ -25,12 +25,16 @@ import com.jfinal.core.Controller;
 import com.jfinal.log.Log;
 import com.jfinal.weixin.sdk.api.ApiConfig;
 import com.jfinal.weixin.sdk.api.ApiConfigKit;
+import com.jfinal.weixin.sdk.api.ApiResult;
 import com.jfinal.weixin.sdk.api.JsTicket;
 import com.jfinal.weixin.sdk.api.JsTicketApi;
 import com.jfinal.weixin.sdk.api.JsTicketApi.JsApiType;
 
 import io.jpress.Consts;
+import io.jpress.model.User;
 import io.jpress.model.query.OptionQuery;
+import io.jpress.model.query.UserQuery;
+import io.jpress.utils.CookieUtils;
 import io.jpress.utils.StringUtils;
 import io.jpress.wechat.utils.AuthJsApiUtils;
 
@@ -183,6 +187,9 @@ public class WechatUserInterceptor implements Interceptor {
 		String userJson = inv.getController().getSessionAttr(Consts.SESSION_WECHAT_USER);
 		
 		if (StringUtils.isNotBlank(userJson)) {
+		    String openid = new ApiResult(userJson).getStr("openid");
+		    User currUser = UserQuery.me().findByOpenId(openid);
+	        request.setAttribute("userId", currUser.getId());//缓存当前用户id
 			inv.invoke();
 			return;
 		}
