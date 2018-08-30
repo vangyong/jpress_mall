@@ -5,6 +5,16 @@
 <script src="${CPATH}/static/wechat/jweixin-1.2.0.js"></script>
 
 <script>
+$(document).ready(function(){
+    //防止页面后退滚动条不消失
+    history.pushState(null, null, document.URL);
+    window.addEventListener('popstate', function () {
+    		if (/(iPhone|iPad|iPod)/i.test(navigator.userAgent)) {             
+	            window.location.href = window.document.referrer;
+	    	} else { window.history.go("-1"); }
+    });
+});
+
 var userId=null;
 var cookies = document.cookie.split(";");
 for(var i =0;i<cookies.length;i++){
