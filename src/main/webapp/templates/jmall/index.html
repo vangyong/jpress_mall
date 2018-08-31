@@ -125,7 +125,7 @@ body, input, select, textarea{font-size:8pt}
             <#if page.getList()?size gt 0>
                 <#list page.getList() as content>
                     <article>
-                        <a href="${(content.url)!'#'}" style="color: black;">
+                        <a href="javascript:winLocation('${(content.url)!"#"}')" style="color: black;">
                             <span class="image"><img name="indexContent" class="indexImgLazy" data-original="${content.thumbnailByName('t1')!}" alt=""/></span>
                             <p class="indexImg_p" style="overflow:hidden; text-overflow:ellipsis;display:-webkit-box; -webkit-box-orient:vertical;-webkit-line-clamp:4;">
                             	${(content.title)!}

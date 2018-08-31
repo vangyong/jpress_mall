@@ -38,6 +38,7 @@ import io.jpress.ui.freemarker.tag.ShoppingCartPageTag;
 import io.jpress.ui.freemarker.tag.TransactionPageTag;
 import io.jpress.ui.freemarker.tag.UserAddressPageTag;
 import io.jpress.ui.freemarker.tag.UserAmountPageTag;
+import io.jpress.ui.freemarker.tag.UserCouponPageTag;
 import io.jpress.utils.CookieUtils;
 import io.jpress.utils.EncryptUtils;
 import io.jpress.utils.StringUtils;
@@ -277,6 +278,9 @@ public class UserController extends BaseFrontController {
 			setAttr("unpayed", TransactionQuery.me().findcount(getLoginedUser().getId(), Transaction.STATUS_1));
 			setAttr("unreceived", TransactionQuery.me().findcount(getLoginedUser().getId(), Transaction.STATUS_3));
 			setAttr("uncomment", TransactionQuery.me().findcount(getLoginedUser().getId(), Transaction.STATUS_4));
+			
+			//用户可用的优惠券数量
+            setAttr("userCouponAvailableNum", CouponQuery.me().findAvailableCountByUserId(getLoginedUser().getId()));
 		}
 		render("user_center.html");
 	}
@@ -480,7 +484,7 @@ public class UserController extends BaseFrontController {
 		setAttr(ShoppingCartPageTag.TAG_NAME, new ShoppingCartPageTag(getRequest(), pageNumber, ids, userId, null));
 		
 		//查询当前用户的优惠券信息
-        List<Coupon> couponList = CouponQuery.me().findListByUserId(1, 100, userId);
+        List<Coupon> couponList = CouponQuery.me().findAvailableByUserId(1, 100, userId);
         setAttr("couponList", couponList);
         if (couponList != null && !couponList.isEmpty()) {
             setAttr("couponDefault", couponList.get(0));
@@ -531,7 +535,7 @@ public class UserController extends BaseFrontController {
 		setAttr("quantity", quantity);
 		
 		//查询当前用户的优惠券信息
-		List<Coupon> couponList = CouponQuery.me().findListByUserId(1, 100, userId);
+		List<Coupon> couponList = CouponQuery.me().findAvailableByUserId(1, 100, userId);
 		setAttr("couponList", couponList);
 		if (couponList != null && !couponList.isEmpty()) {
 		    setAttr("couponDefault", couponList.get(0));
@@ -816,4 +820,54 @@ public class UserController extends BaseFrontController {
 		}
 	}
 
+    //用户所有优惠券列表
+    public void userCoupon(){
+        User currUser = getLoginedUser();
+        int pageNumber=getParaToInt("pageNumber", 1);
+        BigInteger userId=currUser.getId();
+        setAttr(UserCouponPageTag.TAG_NAME, new UserCouponPageTag(getRequest(), pageNumber, userId, null));
+        setAttr(Consts.ATTR_GLOBAL_WEB_TITLE, "我的优惠券");
+        render("user_coupon.html");
+    }
+    
+
+
+    /**
+     * <b>Description.用户分享成功后尝试领取优惠券:</b><br>
+     * <b>Author:jianb.jiang</b>
+     * <br><b>Date:</b> 2018年8月31日 下午8:57:25
+     */
+    public void getCouponWhenShare(){
+        final BigInteger userId=getLoginedUser().getId();
+        
+        //查找可用的优惠券
+        final Coupon coupon = CouponQuery.me().findFirstCanGetByUser(userId);
+        if (coupon == null) { //没有可领取的劵
+            renderAjaxResult("操作成功", 0, null);
+            return;
+        }
+        final StringBuilder sqlBuilder = new StringBuilder("UPDATE jp_coupon c SET c.free_num = c.free_num - 1 ");
+        sqlBuilder.append("WHERE c.id = ? AND c.invalid = 0 AND DATE(now()) <= c.last_date ");
+        sqlBuilder.append("AND NOT EXISTS ( SELECT 1 FROM jp_coupon_used cu WHERE c.id = cu.coupon_id AND cu.user_id = ?)");
+        boolean saved=Db.tx(new IAtom() {
+            @Override
+            public boolean run() throws SQLException {
+                if (Db.update(sqlBuilder.toString(), coupon.getId(), userId) > 0) { //抢券成功
+                    CouponUsed cu = new CouponUsed();
+                    cu.setCouponId(coupon.getId());
+                    cu.setUserId(userId);
+                    if (cu.save()) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
+
+        if(saved){
+            renderAjaxResult("操作成功", 0, coupon);
+            return;
+        }
+        renderAjaxResult("系统异常", Consts.ERROR_CODE_SYSTEM_ERROR, null);
+    }
 }
