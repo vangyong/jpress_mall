@@ -27,12 +27,15 @@ import io.jpress.utils.StringUtils;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 public class UserQuery extends JBaseQuery {
 	public static final User DAO = new User();
 	private static final UserQuery QUERY = new UserQuery();
+	private static final DateFormat DATEFORMAT = new java.text.SimpleDateFormat("yyyy-MM-dd");
 
 	public static UserQuery me() {
 		return QUERY;
@@ -94,6 +97,10 @@ public class UserQuery extends JBaseQuery {
 
 	public long findCount(String flag) {
 		return DAO.doFindCount(" flag = ? ", flag);
+	}
+	
+	public long findCount(String flag,Date createDay) {
+		return DAO.doFindCount(" flag = ? and DATE_FORMAT(created,'%Y-%m-%d') = ? ", flag,DATEFORMAT.format(createDay));
 	}
 
 	public long findAdminCount(String role, String flag) {

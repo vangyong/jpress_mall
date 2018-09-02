@@ -32,6 +32,8 @@ import com.jfinal.plugin.druid.DruidPlugin;
 import com.jfinal.plugin.ehcache.EhCachePlugin;
 import com.jfinal.render.ViewType;
 import com.jfinal.template.Engine;
+
+import cn.dreampie.quartz.QuartzPlugin;
 import io.jpress.Consts;
 import io.jpress.cache.JCachePlugin;
 import io.jpress.core.cache.ActionCacheHandler;
@@ -124,6 +126,11 @@ public abstract class JpressConfig extends JFinalConfig {
 
 			/*微信js检验*/
 			plugins.add(new JsapiTicketPlugin());
+			
+			 //定时任务
+	        QuartzPlugin quartz = new QuartzPlugin();
+	        quartz.setJobs("quartzJob.properties");
+	        plugins.add(quartz);
 		}
 	}
 

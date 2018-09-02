@@ -1,12 +1,17 @@
 package io.jpress.model.query;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.List;
+
 import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.plugin.ehcache.IDataLoader;
+
 import io.jpress.model.Transaction;
 import io.jpress.utils.StringUtils;
-
-import java.math.BigInteger;
-import java.util.List;
+import io.jpress.wechat.utils.CollectionUtil;
 
 /**
  * @author heguoliang
@@ -18,6 +23,8 @@ public class TransactionQuery extends JBaseQuery{
     protected static final Transaction DAO = new Transaction();
 
     private static final TransactionQuery QUERY = new TransactionQuery();
+    
+    private static DateFormat DATEFORMAT = new java.text.SimpleDateFormat("yyyy-MM-dd");
 
     public static TransactionQuery me() {
         return QUERY;
@@ -91,6 +98,32 @@ public class TransactionQuery extends JBaseQuery{
 
     public long findcount(BigInteger user_id, String status){
         return DAO.doFindCount("user_id = ? and status = ?", user_id, status);
+    }
+    
+    public long findCount(Integer status, Date createDay){
+        return DAO.doFindCount("status >= ? and DATE_FORMAT(created,'%Y-%m-%d') = ? ", status, DATEFORMAT.format(createDay));
+    }
+    
+    public long findCount(Integer status){
+        return DAO.doFindCount("status >= ? ", status);
+    }
+    
+    //当日订单金额
+    public BigDecimal findAmountOfDay(Date createDay){
+        StringBuilder sql = new StringBuilder();
+        sql.append(" SELECT SUM(t.totle_fee) AS totle_fee");
+        sql.append(" FROM transaction t ");
+        sql.append(" WHERE 1=1  AND DATE_FORMAT(created,'%Y-%m-%d') = ? ");
+        sql.append(" AND t.status >= 2 ");
+        BigDecimal total=new BigDecimal("0");
+        List list = DAO.find(sql.toString(),DATEFORMAT.format(createDay));
+        if(CollectionUtil.isNotEmpty(list)) {
+           Transaction map =(Transaction) list.get(0);
+           if(map.get("totle_fee")!=null) {
+        	   total= map.get("totle_fee");
+           }
+        }
+        return total;
     }
 
     //获取最近一个月的每天的订单金额

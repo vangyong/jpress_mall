@@ -189,6 +189,14 @@
 		    <artifactId>bcprov-ext-jdk16</artifactId>
 		    <version>1.45</version>
 		</dependency>
+		
+		<!-- 解密（微信退款结果通知数据解密） -->
+		<dependency>
+		    <groupId>cn.dreampie</groupId>
+		    <artifactId>jfinal-quartz</artifactId>
+		    <version>0.2</version>
+		</dependency>
+		
     </dependencies>
 
     <build>
