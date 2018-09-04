@@ -8,11 +8,14 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
 import com.jfinal.log.Log;
+import com.jfinal.weixin.sdk.api.ApiConfig;
+import com.jfinal.weixin.sdk.api.ApiConfigKit;
 import com.jfinal.weixin.sdk.api.ApiResult;
 import com.jfinal.weixin.sdk.api.TemplateData;
 import com.jfinal.weixin.sdk.api.TemplateMsgApi;
 
 import io.jpress.model.query.OptionQuery;
+import io.jpress.wechat.WechatApi;
 
 public class WeekStatisticJob implements Job {
 
@@ -20,11 +23,15 @@ public class WeekStatisticJob implements Job {
 
 	private static final String WECHAT_WEEK_STATISTIC_TEMPMSG_ID = OptionQuery.me().findValue("wechat_week_statistic_tempMsg_id");
 
+	private static final String managerOpenId = OptionQuery.me().findValue("managerOpenId");
+	
 	@Override
 	public void execute(JobExecutionContext arg0) throws JobExecutionException {
+		ApiConfig ac = WechatApi.getApiConfig();
+		ApiConfigKit.setThreadLocalApiConfig(ac);
 
 		final List<TemplateData> tempMsgList = new ArrayList<TemplateData>();
-		tempMsgList.add(TemplateData.New().setTouser("o-2OIxGnn9ul-XyN-rg8WrzWsv_0") // 消息接收者
+		tempMsgList.add(TemplateData.New().setTouser(managerOpenId) // 消息接收者
 				.setTemplate_id(WECHAT_WEEK_STATISTIC_TEMPMSG_ID) // 模板id
 				// 模板参数
 				.add("first", "本周销售统计如下:\n", "#999")

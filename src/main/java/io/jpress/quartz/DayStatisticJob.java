@@ -9,7 +9,11 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
+import com.jfinal.aop.Before;
+import com.jfinal.aop.Clear;
 import com.jfinal.log.Log;
+import com.jfinal.weixin.sdk.api.ApiConfig;
+import com.jfinal.weixin.sdk.api.ApiConfigKit;
 import com.jfinal.weixin.sdk.api.ApiResult;
 import com.jfinal.weixin.sdk.api.TemplateData;
 import com.jfinal.weixin.sdk.api.TemplateMsgApi;
@@ -17,7 +21,11 @@ import com.jfinal.weixin.sdk.api.TemplateMsgApi;
 import io.jpress.model.query.OptionQuery;
 import io.jpress.model.query.TransactionQuery;
 import io.jpress.model.query.UserQuery;
+import io.jpress.wechat.WechatApi;
+import io.jpress.wechat.WechatApiConfigInterceptor;
+import io.jpress.wechat.WechatUserInterceptor;
 
+//@Before({WechatApiConfigInterceptor.class})
 public class DayStatisticJob implements Job {
 
 	private static final Log log = Log.getLog(DayStatisticJob.class);
@@ -25,9 +33,10 @@ public class DayStatisticJob implements Job {
 	private static final String WECHAT_DAY_STATISTIC_TEMPMSG_ID = OptionQuery.me().findValue("wechat_day_statistic_tempMsg_id");
 
 	private static final String managerOpenId = OptionQuery.me().findValue("managerOpenId");
-	
 	@Override
 	public void execute(JobExecutionContext arg0) throws JobExecutionException {
+		ApiConfig ac = WechatApi.getApiConfig();
+		ApiConfigKit.setThreadLocalApiConfig(ac);
 		
 		long totalUser = UserQuery.me().findCount("front");
 		long todayUser = UserQuery.me().findCount("front",new Date());
@@ -36,7 +45,7 @@ public class DayStatisticJob implements Job {
 		BigDecimal dodayMoney = TransactionQuery.me().findAmountOfDay(new Date());
 
 		final List<TemplateData> tempMsgList = new ArrayList<TemplateData>();
-		tempMsgList.add(TemplateData.New().setTouser("o-2OIxGnn9ul-XyN-rg8WrzWsv_0") // 消息接收者
+		tempMsgList.add(TemplateData.New().setTouser(managerOpenId) // 消息接收者
 				.setTemplate_id(WECHAT_DAY_STATISTIC_TEMPMSG_ID) // 模板id
 				// 模板参数
 				.add("first", "当日销售统计如下:\n", "#999")
