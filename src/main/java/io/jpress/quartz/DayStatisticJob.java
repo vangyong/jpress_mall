@@ -24,6 +24,7 @@ import io.jpress.model.query.UserQuery;
 import io.jpress.wechat.WechatApi;
 import io.jpress.wechat.WechatApiConfigInterceptor;
 import io.jpress.wechat.WechatUserInterceptor;
+import io.jpress.wechat.utils.CollectionUtil;
 
 //@Before({WechatApiConfigInterceptor.class})
 public class DayStatisticJob implements Job {
@@ -45,17 +46,24 @@ public class DayStatisticJob implements Job {
 		BigDecimal dodayMoney = TransactionQuery.me().findAmountOfDay(new Date());
 
 		final List<TemplateData> tempMsgList = new ArrayList<TemplateData>();
-		tempMsgList.add(TemplateData.New().setTouser(managerOpenId) // 消息接收者
-				.setTemplate_id(WECHAT_DAY_STATISTIC_TEMPMSG_ID) // 模板id
-				// 模板参数
-				.add("first", "当日销售统计如下:\n", "#999")
-				.add("keyword1", "新增关注量:"+todayUser+"人", "#999")
-				.add("keyword2", "总关注量:"+totalUser+"人", "#999")
-				.add("keyword3", "新增订单量:"+todayOrder+"人", "#999")
-				.add("keyword4", "总订单量:"+totalOrder+"单", "#999")
-				.add("keyword5", "新增订单量额:"+dodayMoney+"元", "#999")
-				.add("remark", "祝您健康开心每一天!", "#999"));
-
+		
+		if(managerOpenId!=null) {
+			String[] openIds = managerOpenId.split(",");
+			if(openIds!=null&&openIds.length>0) {
+				for(String openId:openIds) {
+					tempMsgList.add(TemplateData.New().setTouser(openId) // 消息接收者
+							.setTemplate_id(WECHAT_DAY_STATISTIC_TEMPMSG_ID) // 模板id
+							// 模板参数
+							.add("first", "当日销售统计如下:\n", "#999")
+							.add("keyword1", "新增关注量:"+todayUser+"人", "#999")
+							.add("keyword2", "总关注量:"+totalUser+"人", "#999")
+							.add("keyword3", "新增订单量:"+todayOrder+"人", "#999")
+							.add("keyword4", "总订单量:"+totalOrder+"单", "#999")
+							.add("keyword5", "新增订单量额:"+dodayMoney+"元", "#999")
+							.add("remark", "祝您健康开心每一天!", "#999"));
+				}
+			}
+		}
 		// 推送模板消息
 		for (TemplateData templateData : tempMsgList) {
 			ApiResult result = TemplateMsgApi.send(templateData.build());

@@ -31,15 +31,22 @@ public class WeekStatisticJob implements Job {
 		ApiConfigKit.setThreadLocalApiConfig(ac);
 
 		final List<TemplateData> tempMsgList = new ArrayList<TemplateData>();
-		tempMsgList.add(TemplateData.New().setTouser(managerOpenId) // 消息接收者
-				.setTemplate_id(WECHAT_WEEK_STATISTIC_TEMPMSG_ID) // 模板id
-				// 模板参数
-				.add("first", "本周销售统计如下:\n", "#999")
-				.add("keyword1", "营业总额:"+12+"人", "#999")
-				.add("keyword2", "营业收入:"+12+"人", "#999")
-				.add("keyword3", "销售数量:"+12+"人", "#999")
-				.add("keyword4", "销售次数:"+12+"人", "#999")
-				.add("remark", "祝您周末愉快!", "#999"));
+		if(managerOpenId!=null) {
+			String[] openIds = managerOpenId.split(",");
+			if(openIds!=null&&openIds.length>0) {
+				for(String openId:openIds) {
+					tempMsgList.add(TemplateData.New().setTouser(openId) // 消息接收者
+							.setTemplate_id(WECHAT_WEEK_STATISTIC_TEMPMSG_ID) // 模板id
+							// 模板参数
+							.add("first", "本周销售统计如下:\n", "#999")
+							.add("keyword1", "营业总额:"+12+"人", "#999")
+							.add("keyword2", "营业收入:"+12+"人", "#999")
+							.add("keyword3", "销售数量:"+12+"人", "#999")
+							.add("keyword4", "销售次数:"+12+"人", "#999")
+							.add("remark", "祝您周末愉快!", "#999"));
+					}
+			}
+		}
 
 		// 推送模板消息
 		for (TemplateData templateData : tempMsgList) {
