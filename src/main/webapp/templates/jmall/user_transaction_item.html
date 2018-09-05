@@ -109,7 +109,9 @@
                 <div class="12u$">
                     <hr />
                     <h5>其他：</h5>
-                    <p>付款金额：￥${transaction.totle_fee!}</p>
+                    <p>订单总金额：￥${transaction.totle_fee!}</p>
+                    <p>优惠券抵扣：￥-${transaction.coupon_fee!}</p>
+                    <p>现金支付：￥${transaction.cash_fee!}</p>
                     <p>本地订单号：${transaction.order_no!}</p>
                     <p>支付类型：
                         <#if "alipay"==transaction.pay_type!>

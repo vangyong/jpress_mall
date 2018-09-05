@@ -65,7 +65,7 @@ public class TransactionQuery extends JBaseQuery{
     }
 
     public Page<Transaction> paginate(int pageNumber, int pageSize, BigInteger user_id, String status, String orderBy) {
-        String select = " SELECT t.id,t.status,t.created,SUM(ti.quantity*ti.price) AS price,SUM(ti.quantity) AS quantity,GROUP_CONCAT(c.thumbnail SEPARATOR ',') AS contentThumbnails,GROUP_CONCAT(c.title SEPARATOR ',') AS contentTitles,r.refund_no,r.status as refund_status ";
+        String select = " SELECT t.*,SUM(ti.quantity*ti.price) AS price,SUM(ti.quantity) AS quantity,GROUP_CONCAT(c.thumbnail SEPARATOR ',') AS contentThumbnails,GROUP_CONCAT(c.title SEPARATOR ',') AS contentTitles,r.refund_no,r.status as refund_status ";
         StringBuilder fromBuilder = new StringBuilder(" FROM transaction t LEFT JOIN refund r on t.order_no=r.order_no ");
         fromBuilder.append(" LEFT JOIN transactionitem ti ON ti.transaction_id=t.id ");
         fromBuilder.append(" LEFT JOIN content c ON ti.content_id=c.id ");
