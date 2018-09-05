@@ -98,7 +98,7 @@ public class CouponQuery extends JBaseQuery {
      */
     public Page<Coupon> findAllByUserId(int page, int pagesize, BigInteger userId) {
         StringBuilder selectBuilder = new StringBuilder("select c.*,cu.id as couponUsedId,case when c.invalid = 1 or DATE(now()) > c.last_date then 1 else 0 end as isValid ");
-        StringBuilder fromBuilder = new StringBuilder(" from coupon c,couponused cu where c.id = cu.coupon_id and cu.user_id = ?");
+        StringBuilder fromBuilder = new StringBuilder(" from coupon c,couponused cu where c.id = cu.coupon_id and cu.used = 0 and cu.user_id = ?");
         LinkedList<Object> params = new LinkedList<Object>();
 
         fromBuilder.append(" order by isValid,c.last_date,cu.modified_time");
