@@ -9,8 +9,6 @@ import org.quartz.Job;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
-import com.jfinal.aop.Before;
-import com.jfinal.aop.Clear;
 import com.jfinal.log.Log;
 import com.jfinal.weixin.sdk.api.ApiConfig;
 import com.jfinal.weixin.sdk.api.ApiConfigKit;
@@ -22,11 +20,7 @@ import io.jpress.model.query.OptionQuery;
 import io.jpress.model.query.TransactionQuery;
 import io.jpress.model.query.UserQuery;
 import io.jpress.wechat.WechatApi;
-import io.jpress.wechat.WechatApiConfigInterceptor;
-import io.jpress.wechat.WechatUserInterceptor;
-import io.jpress.wechat.utils.CollectionUtil;
 
-//@Before({WechatApiConfigInterceptor.class})
 public class DayStatisticJob implements Job {
 
 	private static final Log log = Log.getLog(DayStatisticJob.class);
@@ -67,6 +61,7 @@ public class DayStatisticJob implements Job {
 		// 推送模板消息
 		for (TemplateData templateData : tempMsgList) {
 			ApiResult result = TemplateMsgApi.send(templateData.build());
+			log.info("模版ID："+WECHAT_DAY_STATISTIC_TEMPMSG_ID);
 			log.info("用户(" + templateData.getTouser() + ")结算销售统计消息[" + templateData.build() + "]推送结果："
 					+ result.toString());
 		}
