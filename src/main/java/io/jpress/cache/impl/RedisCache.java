@@ -23,6 +23,7 @@ import com.jfinal.plugin.ehcache.IDataLoader;
 import com.jfinal.plugin.redis.Redis;
 
 import io.jpress.cache.ICache;
+import io.jpress.utils.StringUtils;
 
 /**
  * redis的缓存实现
@@ -56,8 +57,14 @@ public class RedisCache implements ICache {
 	    Redis.use("redis1").del(cacheName);
 	}
 
-	@Override
+	@SuppressWarnings("unchecked")
+    @Override
 	public <T> T get(String cacheName, Object key, IDataLoader dataLoader) {
-		return get(cacheName, key);
+	    Object data = get(cacheName, key);
+	    if (data == null) {
+	        data = dataLoader.load();
+            put(cacheName, key, data);
+	    } 
+		return (T)data;
 	}
 }

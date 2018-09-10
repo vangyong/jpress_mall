@@ -19,8 +19,8 @@ import java.math.BigInteger;
 
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Clear;
-import com.jfinal.plugin.ehcache.CacheKit;
 
+import io.jpress.cache.JCacheKit;
 import io.jpress.core.JBaseController;
 import io.jpress.router.RouterMapping;
 import io.jpress.router.RouterNotAllowConvert;
@@ -42,9 +42,9 @@ public class VisitorCounter extends JBaseController {
 			return;
 		}
 
-		Long visitorCount = CacheKit.get(CACHE_NAME, buildKey(id));
+		Long visitorCount = JCacheKit.get(CACHE_NAME, buildKey(id));
 		visitorCount = visitorCount == null ? 0 : visitorCount;
-		CacheKit.put(CACHE_NAME, buildKey(id), visitorCount + 1);
+		JCacheKit.put(CACHE_NAME, buildKey(id), visitorCount + 1);
 		renderJavascript("");
 	}
 
@@ -55,18 +55,18 @@ public class VisitorCounter extends JBaseController {
 			return;
 		}
 
-		Long visitorCount = CacheKit.get(CACHE_NAME, buildKey(id));
+		Long visitorCount = JCacheKit.get(CACHE_NAME, buildKey(id));
 		visitorCount = visitorCount == null ? 0 : visitorCount;
 		renderText(visitorCount + "");
 	}
 
 	public static long getVisitorCount(BigInteger id) {
-		Long visitorCount = CacheKit.get(CACHE_NAME, buildKey(id));
+		Long visitorCount = JCacheKit.get(CACHE_NAME, buildKey(id));
 		return visitorCount == null ? 0 : visitorCount;
 	}
 
 	public static void clearVisitorCount(BigInteger id) {
-		CacheKit.remove(CACHE_NAME, buildKey(id));
+	    JCacheKit.remove(CACHE_NAME, buildKey(id));
 	}
 
 	private static String buildKey(BigInteger id) {

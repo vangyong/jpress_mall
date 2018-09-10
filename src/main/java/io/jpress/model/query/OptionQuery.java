@@ -15,9 +15,9 @@
  */
 package io.jpress.model.query;
 
-import com.jfinal.plugin.ehcache.CacheKit;
 import com.jfinal.plugin.ehcache.IDataLoader;
 
+import io.jpress.cache.JCacheKit;
 import io.jpress.model.Option;
 import io.jpress.utils.StringUtils;
 
@@ -31,7 +31,7 @@ public class OptionQuery extends JBaseQuery {
 	}
 
 	public String findValue(final String key) {
-		String value = CacheKit.get(Option.CACHE_NAME, key, new IDataLoader() {
+		String value = JCacheKit.get(Option.CACHE_NAME, key, new IDataLoader() {
 			@Override
 			public Object load() {
 				Option option = DAO.doFindFirst("option_key =  ?", key);
