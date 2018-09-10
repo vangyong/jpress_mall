@@ -15,40 +15,49 @@
  */
 package io.jpress.cache.impl;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import com.jfinal.plugin.ehcache.IDataLoader;
+import com.jfinal.plugin.redis.Redis;
 
 import io.jpress.cache.ICache;
 
+/**
+ * redis的缓存实现
+ */
 public class RedisCache implements ICache {
 	@Override
 	public <T> T get(String cacheName, Object key) {
-		return null;
+		return Redis.use("redis1").hget(cacheName, key);
 	}
 
 	@Override
 	public void put(String cacheName, Object key, Object value) {
-
+	    Redis.use("redis1").hset(cacheName, key, value);
 	}
 
 	@Override
 	public List<?> getKeys(String cacheName) {
-		return null;
+	    Set<Object> set = Redis.use("redis1").hkeys(cacheName);
+	    String[] aa = new String[set.size()];
+        set.toArray(aa);
+	    return Arrays.asList(aa);
 	}
 
 	@Override
 	public void remove(String cacheName, Object key) {
-
+	    Redis.use("redis1").hdel(cacheName, key);
 	}
 
 	@Override
 	public void removeAll(String cacheName) {
-
+	    Redis.use("redis1").del(cacheName);
 	}
 
 	@Override
 	public <T> T get(String cacheName, Object key, IDataLoader dataLoader) {
-		return null;
+		return get(cacheName, key);
 	}
 }

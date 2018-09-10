@@ -30,6 +30,7 @@ import com.jfinal.plugin.activerecord.IDataSourceProvider;
 import com.jfinal.plugin.activerecord.Model;
 import com.jfinal.plugin.druid.DruidPlugin;
 import com.jfinal.plugin.ehcache.EhCachePlugin;
+import com.jfinal.plugin.redis.RedisPlugin;
 import com.jfinal.render.ViewType;
 import com.jfinal.template.Engine;
 
@@ -127,10 +128,14 @@ public abstract class JpressConfig extends JFinalConfig {
 			/*微信js检验*/
 			plugins.add(new JsapiTicketPlugin());
 			
-			 //定时任务
 	        QuartzPlugin quartz = new QuartzPlugin();
 	        quartz.setJobs("quartzJob.properties");
 	        plugins.add(quartz);
+	        
+	        //redis_session缓存
+//	        RedisPlugin rp = new RedisPlugin("redis1", "10.121.30.62", 20881, "111111");
+	        RedisPlugin rp = new RedisPlugin("redis1", "127.0.0.1", 6379, "yeyeredisyeye");
+	        plugins.add(rp);
 		}
 	}
 
