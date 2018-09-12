@@ -33,7 +33,7 @@ public class ActionCacheHandler extends Handler {
 
 	@Override
 	public void handle(String target, HttpServletRequest request, HttpServletResponse response, boolean[] isHandled) {
-
+	    target = StringUtils.urlDecode(target);
 		if (ActionCacheManager.isCloseActionCache()) {
 			next.handle(target, request, response, isHandled);
 			return;

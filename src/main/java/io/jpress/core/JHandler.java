@@ -28,6 +28,7 @@ import io.jpress.router.RouterManager;
 import io.jpress.template.TemplateManager;
 import io.jpress.ui.freemarker.tag.MenusTag;
 import io.jpress.utils.FileUtils;
+import io.jpress.utils.StringUtils;
 
 public class JHandler extends Handler {
 
@@ -36,7 +37,7 @@ public class JHandler extends Handler {
 		if (target.startsWith("/websocket")) {
 			return;
 		}
-		
+		target = StringUtils.urlDecode(target);
 		String CPATH = request.getContextPath();
 		request.setAttribute("REQUEST", request);
 		request.setAttribute("CPATH", CPATH);
