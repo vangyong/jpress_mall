@@ -2,8 +2,11 @@
 <!-- 微信js接口 -->
 <!-- <script src="https://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script> -->
 <!-- <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script> -->
-<script src="${CPATH}/static/wechat/jweixin-1.2.0.js"></script>
-
+<!-- jQuery 2.1.4 -->
+    <script src="${CPATH}/static/??wechat/jweixin-1.2.0.js,plugins/jquery/jquery-2.1.4.min.js,plugins/jquery/jquery.form.min.js,plugins/jquery/qrcode.min.js,plugins/jquery/jquery.lazyload.min.js"></script>
+    <script src="${CPATH}/templates/??jmall/assets/js/skel.min.js,jmall/assets/js/util.js,jmall/assets/js/main.js,jmall/assets/slick/slick.js,jmall/assets/touchspin/jquery.bootstrap-touchspin.min.js"></script>
+    <script src="${CPATH}/static/??layer/layer.js,layer/laydate.js"></script>
+	<script src="${CPATH}/static/layer/layer_mobile/layer.js"></script>
 <script>
 var userId=null;
 var cookies = document.cookie.split(";");
@@ -152,9 +155,10 @@ wx.ready(function(){
     <meta name="renderer" content="webkit">
     <!--[if lte IE 8]><script src="${CTPATH}/assets/js/ie/html5shiv.js"></script><![endif]-->
     <link rel="stylesheet" href="${CTPATH}/assets/css/main.css" />
-    <link rel="stylesheet" href="${CTPATH}/assets/slick/slick.css" />
+    <link rel="stylesheet" href="${CPATH}/templates/??jmall/assets/slick/slick.css,jmall/assets/touchspin/jquery.bootstrap-touchspin.min.css" />
     <link rel="stylesheet" href="${CTPATH}/assets/slick/slick-theme.css" />
-    <link rel="stylesheet" href="${CTPATH}/assets/touchspin/jquery.bootstrap-touchspin.min.css" />
+    
+    
     <!--[if lte IE 9]><link rel="stylesheet" href="${CTPATH}/assets/css/ie9.css" /><![endif]-->
     <!--[if lte IE 8]><link rel="stylesheet" href="${CTPATH}/assets/css/ie8.css" /><![endif]-->
     <link rel="icon" href="${CTPATH}/favicon.ico" mce_href="${CTPATH}/favicon.ico" type="image/x-icon">
@@ -204,21 +208,6 @@ wx.ready(function(){
 </div>
     <@script_import />
 
-    <!-- jQuery 2.1.4 -->
-    <script src="${CPATH}/static/plugins/jquery/jquery-2.1.4.min.js"></script>
-    <script src="${CPATH}/static/plugins/jquery/jquery.form.min.js"></script>
-	<script src="${CPATH}/static/plugins/jquery/qrcode.min.js"></script>
-	<!-- <script src="${CPATH}/static/plugins/jquery/jquery.unevent.js"></script> -->
-	<script src="${CPATH}/static/plugins/jquery/jquery.lazyload.min.js"></script>
-    <script src="${CTPATH}/assets/js/skel.min.js"></script>
-    <script src="${CTPATH}/assets/js/util.js"></script>
-    <!--[if lte IE 8]><script src="${CTPATH}/assets/js/ie/respond.min.js"></script><![endif]-->
-    <script src="${CTPATH}/assets/js/main.js"></script>
-    <script src="${CTPATH}/assets/slick/slick.js"></script>
-    <script src="${CTPATH}/assets/touchspin/jquery.bootstrap-touchspin.min.js"></script>
-    <script src="${CPATH}/static/layer/layer.js"></script>
-	<script src="${CPATH}/static/layer/laydate.js"></script>
-	<script src="${CPATH}/static/layer/layer_mobile/layer.js"></script>
     <script type="text/javascript">
         document.onkeydown=function(event){
             e = event ? event :(window.event ? window.event : null);
