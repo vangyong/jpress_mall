@@ -76,7 +76,7 @@ public class WechatUserInterceptor implements Interceptor {
         //当前url
         String currUrl = request.getScheme() + "://" + 
                 (request.getServerName().startsWith("1") ? request.getServerName()+":"+request.getServerPort() : request.getServerName()) + 
-                request.getContextPath() + toUrl;
+                request.getContextPath() + request.getRequestURI();//这个地址是浏览器的地址，用来签名的话，必须与浏览器保持一致，对中文是encode了的,jiangjb,20180914
         toUrl = StringUtils.urlEncode(toUrl);
 		
 		
