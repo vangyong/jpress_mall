@@ -68,7 +68,6 @@ public class WechatUserInterceptor implements Interceptor {
         String queryString = request.getQueryString();
         // 被拦截前的请求URL
         String toUrl = request.getRequestURI();
-        toUrl = StringUtils.urlDecode(toUrl);//解码，因为ng中设置的302跳转是编码后的(为了解决安卓微信浏览器不能自动跳转带？的302url),jiangjb,20180912
         if (StringUtils.isNotBlank(queryString)) {
             toUrl =  toUrl.concat("?").concat(queryString);
         }
@@ -76,7 +75,8 @@ public class WechatUserInterceptor implements Interceptor {
         //当前url
         String currUrl = request.getScheme() + "://" + 
                 (request.getServerName().startsWith("1") ? request.getServerName()+":"+request.getServerPort() : request.getServerName()) + 
-                request.getContextPath() + request.getRequestURI();//这个地址是浏览器的地址，用来签名的话，必须与浏览器保持一致，对中文是encode了的,jiangjb,20180914
+                request.getContextPath() + toUrl;//这个地址是浏览器的地址，用来签名的话，必须与浏览器保持一致，对中文是encode了的,jiangjb,20180914
+        toUrl = StringUtils.urlDecode(toUrl);//解码，因为ng中设置的302跳转是编码后的(为了解决安卓微信浏览器不能自动跳转带？的302url),jiangjb,20180912
         toUrl = StringUtils.urlEncode(toUrl);
 		
 		
