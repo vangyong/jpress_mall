@@ -50,30 +50,35 @@
 	function deleteShoppingCart(){
 		var shoppingCarts=$(".shoppingCartChecked:checked");
 		if(shoppingCarts.length > 0){
-			layer.confirm('确定删除选中的商品吗', {
-				btn: ['确定','取消']
-			}, function(){
-				var shoppingCartIds=new Array();
-				$.each(shoppingCarts,function(n,shoppingCart) {
-					shoppingCartIds.push(shoppingCart.value);
-				});
-				layermobile.open({
-		   		    type: 2
-		   		    ,content: '加载中'
-		   		  });
-				$.post('${CPATH}/user/doDeleteShoppingCart?ucode=${ucode!}&ids='+shoppingCartIds,function(data){
-					if(data.errorCode == 0){
-						location.reload();
-					}else if(data.errorCode == 2){
-						var goto=window.location.href;
-						var url="${CPATH}"+data.data+"?goto="+goto;
-						window.location.href=url;
-					}else{
-						layer.msg(data.message);
-						layermobile.closeAll();
-					}
-				});
-			});
+			layermobile.open({
+			    content: '您确定删除选中的商品吗？'
+			    ,btn: ['确定', '取消']
+			    ,yes: function(index){
+			      	var shoppingCartIds=new Array();
+					$.each(shoppingCarts,function(n,shoppingCart) {
+						if(shoppingCart.value > 0) {
+							shoppingCartIds.push(shoppingCart.value);
+						}
+					});
+					layermobile.closeAll();
+					layermobile.open({
+			   		    type: 2
+			   		    ,content: '加载中'
+			   		  });
+					$.post('${CPATH}/user/doDeleteShoppingCart?ucode=${ucode!}&ids='+shoppingCartIds,function(data){
+						if(data.errorCode == 0){
+							location.reload();
+						}else if(data.errorCode == 2){
+							var goto=window.location.href;
+							var url="${CPATH}"+data.data+"?goto="+goto;
+							window.location.href=url;
+						}else{
+							layer.msg(data.message);
+							layermobile.closeAll();
+						}
+					});
+			    }
+			  });
 		}else{
 			layer.msg('请选中商品');
 		}
@@ -205,7 +210,7 @@
 			</form>
 		</div>
 		<#if shoppingCarts?size gt 0>
-			<div  style="position: fixed;bottom: 50px;height: 2.9em;width: 100%;">
+			<div  style="position: fixed;bottom: 50px;height: 3.2em;width: 100%;">
 				<div  style="display: flex;justify-content:space-between;align-items:center;background-color:rgba(255,255,255,0.95);margin-left:-2.2em;margin-right: 2.3em">
 					<!-- <li><a href="javascript:void(0)" class="button fit" onclick="clearShoppingCart()">清空</a></li>
 					<li ><a href="javascript:void(0)" class="button fit" onclick="deleteShoppingCart()">删除</a></li> -->
@@ -216,7 +221,8 @@
 					</div>
 					<div class="right" style="display: flex;justify-content:space-between;align-items:center;">
 						<span class="right" style="margin-top:0.5em;color: #f5696a;padding-right: 10px" id="totalSpan">合计：￥</span>
-						<div><a href="javascript:void(0)" class="button Modelspecial right" onclick="userShoppingCartSettlement()">去结算</a></div>
+						<div style="margin-right: 2px"><a href="javascript:void(0)" class="button Modelspecial right" style="width:60px" onclick="deleteShoppingCart()">删除</a></div>
+						<div style="margin-left: 2px"><a href="javascript:void(0)" class="button Modelspecial right" style="width:60px" onclick="userShoppingCartSettlement()">去结算</a></div>
 					</div>
 				</div>
 			</div>
