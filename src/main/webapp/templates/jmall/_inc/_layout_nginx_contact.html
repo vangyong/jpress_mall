@@ -1,0 +1,358 @@
+<#macro script_import>
+<!-- 微信js接口 -->
+<!-- <script src="https://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script> -->
+<!-- <script src="http://res.wx.qq.com/open/js/jweixin-1.0.0.js"></script> -->
+<!-- jQuery 2.1.4 -->
+    <script src="${CPATH}/static/??wechat/jweixin-1.2.0.js,plugins/jquery/jquery-2.1.4.min.js,plugins/jquery/jquery.form.min.js,plugins/jquery/qrcode.min.js,plugins/jquery/jquery.lazyload.min.js"></script>
+    <script src="${CPATH}/templates/??jmall/assets/js/skel.min.js,jmall/assets/js/util.js,jmall/assets/js/main.js,jmall/assets/slick/slick.js,jmall/assets/touchspin/jquery.bootstrap-touchspin.min.js"></script>
+    <script src="${CPATH}/static/??layer/layer.js,layer/laydate.js"></script>
+	<script src="${CPATH}/static/layer/layer_mobile/layer.js"></script>
+<script>
+var userId=null;
+var cookies = document.cookie.split(";");
+for(var i =0;i<cookies.length;i++){
+		var cookie = cookies[i];
+		var key= cookie.split("=")[0];
+		var value = cookie.split("=")[1];
+		if(key=='jp_user'){
+			userId = value.substr(value.lastIndexOf('#')+1,value.length);
+		}
+}
+
+if (userId == null || userId =='') {
+	userId = "${userId!0}";
+}
+
+var old_url = window.location.href;
+var new_url;
+if(old_url.indexOf("?") !=-1){ //url中存在问号
+	if((old_url.indexOf("uid")!=-1)){//url中存在uid参数
+		var re=eval('/(uid=)([^&]*)/gi');  
+	    new_url = old_url.replace(re,'uid='+userId);  
+	}else{
+		new_url = old_url+'&uid='+userId;
+	}
+}else{ //url中不存在问号
+	new_url = old_url+'?uid='+userId;
+}
+
+new_url = new_url.replace('&amp;','&');
+new_url = new_url.split('&from=')[0];
+console.log("new_url:"+new_url + "uid:"+userId);
+/* 
+//修改链接，以供分享
+if (!!(window.history && history.pushState)){
+	  // 支持History API
+	  history.pushState(null,null,new_url);
+	} else {
+	  // 不支持
+	  console.log("不支持History API");
+	} */
+	
+	var url = location.href.split('#').toString();	
+	
+	var share_title ='${share_title!"语味特餐馆"}';
+    var share_desc ='${share_desc!WEB_TITLE!"健康生活从这里开始"}';
+    var share_img_url ='${share_img_url!WEBDOMAIN+"/attachment/logo/sharelogo.png"}';
+	var wxShare = {
+			shareData: {
+				title:share_title,
+				desc:share_desc,
+				link:new_url,
+				img_url:share_img_url
+			}
+		}
+	/* var wxShare = {
+			shareData: {
+				title:'语味果业',
+				desc:'健康生活从这里开始……',
+				link:new_url,
+				img_url:'${OPTION("web_domain")!}/attachment/logo/sharelogo.png'
+			}
+		} */
+	
+	
+wx.config({
+    //debug: true, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+    appId: '${OPTION("wechat_appid")!}', // 必填，公众号的唯一标识
+    timestamp:'${timestamp!}', // 必填，生成签名的时间戳
+    nonceStr: '${nonceStr!}', // 必填，生成签名的随机串
+    signature: '${signature!}',// 必填，签名，见附录1
+    jsApiList: ['checkJsApi','openLocation','getLocation','onMenuShareTimeline','onMenuShareAppMessage','getLocation','openAddress'] // 必填，需要使用的JS接口列表，所有JS接口列表见附录2
+}); 
+
+wx.ready(function(){
+    	// config信息验证后会执行ready方法，所有接口调用都必须在config接口获得结果之后，config是一个客户端的异步操作，
+    	// 所以如果需要在页面加载时就调用相关接口，则须把相关接口放在ready函数中调用来确保正确执行。
+    	// 对于用户触发时才调用的接口，则可以直接调用，不需要放在ready函数中。
+	//分享到朋友圈
+	wx.onMenuShareTimeline({
+	    title: wxShare.shareData.title, // 分享标题
+	    desc: wxShare.shareData.desc,
+	    link: wxShare.shareData.link, // 分享链接
+	    imgUrl: wxShare.shareData.img_url, // 分享图标
+	    data_url: wxShare.shareData.link,
+	    	img_url: wxShare.shareData.img_url,
+	    trigger: function (res) {
+            //alert('用户点击分享到朋友圈');
+            wxShare.shareData.link = window.location.href+'?uid='+userId;
+        },
+        success: function (res) {
+            //alert('已分享');
+            getCouponWhenShare();
+        },
+        cancel: function (res) {
+            //alert('已取消');
+        },
+        fail: function (res) {
+            //alert(JSON.stringify(res));
+        }
+	 });
+    	
+	wx.onMenuShareAppMessage({
+		title: wxShare.shareData.title, // 分享标题
+		desc: wxShare.shareData.desc, // 分享描述
+		link: wxShare.shareData.link,// 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+		imgUrl: wxShare.shareData.img_url, // 分享图标
+		data_url: wxShare.shareData.link,
+	    	img_url: wxShare.shareData.img_url,
+		trigger: function (res) {
+			wxShare.shareData.link = window.location.href+'?uid='+userId;
+        },
+        success: function (res) {
+            //alert('已分享');
+            getCouponWhenShare();
+        },
+        cancel: function (res) {
+            //alert('已取消');
+        },
+        fail: function (res) {
+            //alert(JSON.stringify(res));
+        }
+	});
+	
+});
+
+</script>
+
+
+</#macro> 
+<#macro script>
+</#macro> 
+<#macro css_import>
+</#macro> 
+<#macro css>
+</#macro> 
+<#macro layout>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>${WEB_TITLE!'商城'}</title>
+    <meta name="keywords" content="${META_KEYWORDS!}">
+    <meta name="description" content="${META_DESCRIPTION!}">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <meta name="renderer" content="webkit">
+    <!--[if lte IE 8]><script src="${CTPATH}/assets/js/ie/html5shiv.js"></script><![endif]-->
+    <link rel="stylesheet" href="${CTPATH}/assets/css/main.css" />
+    <link rel="stylesheet" href="${CPATH}/templates/??jmall/assets/slick/slick.css,jmall/assets/touchspin/jquery.bootstrap-touchspin.min.css" />
+    <link rel="stylesheet" href="${CTPATH}/assets/slick/slick-theme.css" />
+    
+    
+    <!--[if lte IE 9]><link rel="stylesheet" href="${CTPATH}/assets/css/ie9.css" /><![endif]-->
+    <!--[if lte IE 8]><link rel="stylesheet" href="${CTPATH}/assets/css/ie8.css" /><![endif]-->
+    <link rel="icon" href="${CTPATH}/favicon.ico" mce_href="${CTPATH}/favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="${CTPATH}/favicon.ico" mce_href="${CTPATH}/favicon.ico" type="image/x-icon">
+    <@css_import />
+    <#if css ??>
+  	    <style type="text/css">
+  	        <@css />
+  	    </style>
+    </#if>
+</head>
+<body>
+<!-- Wrapper -->
+<div id="wrapper">
+    <!-- Main -->
+    <div id="main">
+        <div class="inner">
+            <!-- Header -->
+           <#include "_header.html"/>
+
+            <#nested>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="inactive">
+        <div class="inner">
+            <!-- Search -->
+            <#include "_search_box.html"/>
+
+            <!-- Menu -->
+            <#include "_menu.html"/>
+
+            <!-- Content Box -->
+            <#include "_content_box.html"/>
+
+            <!-- Footer -->
+            <#include "_foot.html"/>
+        </div>
+    </div>
+</div>
+
+    
+<div id="couponWhenShare_div" style="width: 327px;height:234px;margin: auto;text-align: center;display:none;">
+	<img src="/templates/jmall/assets/images/userShareTips.png" style="width:100%;height:100%;position:absolute;top:0;left:0;"/>
+	<span id="couponWhenShare_span" style="position:absolute;color:#ffaf66;font-size: 45px;font-weight: bolder;top:115px;left:66px;"></span>
+</div>
+    <@script_import />
+
+    <script type="text/javascript">
+        document.onkeydown=function(event){
+            e = event ? event :(window.event ? window.event : null);
+            if(e.keyCode==13){
+                document.getElementById("searchBoxForm").submit();
+            }
+        }
+        
+        var t_img; // 定时器
+    	var isLoad = true; // 控制变量
+    	
+    	// 判断图片加载的函数
+       	function isImgLoad(callback){
+       	    // 查找所有封面图，迭代处理
+       	    $('img').each(function(){
+       	        // 找到为0就将isLoad设为false，并退出each
+       	        if(this.height === 0){
+       	            isLoad = false;
+       	            return false;
+       	        }
+       	    });
+       	    // 为true，没有发现为0的。加载完毕
+       	    if(isLoad){
+       	        clearTimeout(t_img); // 清除定时器
+       	        // 回调函数
+       	        callback();
+       	    // 为false，因为找到了没有加载完成的图，将调用定时器递归
+       	    }else{
+       	        isLoad = true;
+       	        t_img = setTimeout(function(){
+       	            isImgLoad(callback); // 递归扫描
+       	        },500); // 我这里设置的是500毫秒就扫描一次，可以自己调整
+       	    }
+       	}
+        
+    	var sidebarTipsTimer;
+        // 判断图片加载状况，加载完成后回调
+    	isImgLoad(function(){
+    	    // 加载完成
+        	sidebarTipsTimer = setTimeout("showSideBarTips()","3000");
+    	});
+     
+        function showSideBarTips() {
+        	sidebarTips();
+        	$(window).scroll(function() {
+        		clearTimeout(sidebarTipsTimer);
+        		layer.closeAll('tips'); 
+        		sidebarTips();
+       		});
+        }
+        
+    	function sidebarTips() {
+    		layer.tips('敢戳我试试^_^', '#sidebar_a', {
+    		  tips: [2, '#78BA32']
+    		});
+    	}
+    	
+    	function winLocation(url) {
+    		if (url.indexOf("javascript") < 0) {
+	    		layermobile.open({
+	    		    type: 2
+	    		    ,content: '加载中'
+	    		    ,time:5
+	    		  });
+	    		window.location.href=url;
+    		}
+    	}
+    	
+    	function scrollTo(ele, speed){
+    		if(!speed) speed = 300;
+    		if(!ele){
+    			$("html,body").animate({scrollTop:0},speed);
+    		}else{
+    			if(ele.length>0) $("html,body").animate({scrollTop:$(ele).offset().top},speed);
+    		}
+    		return false;
+    	}
+    	
+    	//滚动停止事件（250毫秒没有滚动发生时）
+    	//$(window).on('scroll', function(e) {
+    		//do something
+    	//}, 250);
+    	
+       	$("img.sidebarImgLazy").lazyload({
+   		    effect : "fadeIn",
+   		    event : "sporty"
+   		});
+       	
+       	$(window).bind("load", function() {
+       	    var timeout = setTimeout(function(){$("img.sidebarImgLazy").trigger("sporty")},500);//2秒后自动加载图片
+       	});
+       	
+        $(document).ready(function(){
+        	//防止页面后退滚动条不消失
+            history.pushState(null, null, document.URL);
+            window.addEventListener('popstate', function () {
+            		if (/(iPhone|iPad|iPod)/i.test(navigator.userAgent)) {             
+        	            window.location.href = window.document.referrer;
+        	    	} else { window.history.go("-1"); }
+            });
+            
+            $('.autoplay').slick({
+                dots: true,
+                slidesToShow: 1,
+                slidesToScroll: 1,
+                autoplay: true,
+                autoplaySpeed: 2000,
+                prevArrow:'',
+                nextArrow:'',
+            });
+        });
+
+
+        function getCouponWhenShare() {
+        	$.ajax({
+        		type: "POST",
+        		traditional: true,
+        		url: "${CPATH}/user/getCouponWhenShare",
+        		data: {},
+        		success: function(data){
+        			if(data.errorCode == 0){
+        				var couponWhenShare = data.data;
+        				if (couponWhenShare == null || couponWhenShare == 'null' || couponWhenShare == '') {
+        					layer.msg('优惠券被抢光啦！下一批优惠券即将放送，关注公众号可以及时收到优惠券发放通知哦^_^',{time: 5000});
+        				} else {
+	        				var amount = 0;
+	        				if (couponWhenShare.amount != null && couponWhenShare.amount != undefined && couponWhenShare.amount != 'undefined') {
+	        					amount = couponWhenShare.amount;
+	        				}
+	                        $('#couponWhenShare_span').html(amount + "元");
+	                        layer.open({
+	        				  type: 1,
+	        				  title: false,
+	        				  closeBtn: 0,
+	        				  shadeClose: true,
+	        				  content: $('#couponWhenShare_div')
+	        				});
+        				}
+        			}
+        		}
+        	});
+        }
+        
+        <@script />
+    </script>
+</body>
+</html>
+</#macro>
