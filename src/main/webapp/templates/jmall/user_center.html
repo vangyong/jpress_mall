@@ -92,7 +92,9 @@
                     <li><img class="litter-avatar" src="${CPATH}${USER.avatar!TPATH+'/images/avatar.jpg'}"/></li>
                 </ul> -->
                 <ul class="actions">
-                		<li style="margin-right: 3em" onclick="makeqrcode()"><img src="/templates/jmall/assets/images/myQRcode.png" style="width: 35px"/></li>
+                		<li style="margin-right: 3em" onclick="winLocation('${CPATH}/user/userQRCode')">
+                			<img src="/templates/jmall/assets/images/myQRcode.png" style="width: 35px"/>
+                		</li>
                     <li>
                     	<img class="litter-avatar" src="${CPATH}${USER.avatar!TPATH+'/images/avatar11.jpg'}" style="width:7em;height:7em"/>
                     	<p style="color: #FFFFFF;margin-top: 1em"> ${USER.username!}</p>

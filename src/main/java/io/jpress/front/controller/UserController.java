@@ -18,6 +18,7 @@ package io.jpress.front.controller;
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Clear;
 import com.jfinal.core.ActionKey;
+import com.jfinal.kit.PropKit;
 import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.IAtom;
@@ -41,6 +42,8 @@ import io.jpress.ui.freemarker.tag.UserAmountPageTag;
 import io.jpress.ui.freemarker.tag.UserCouponPageTag;
 import io.jpress.utils.CookieUtils;
 import io.jpress.utils.EncryptUtils;
+import io.jpress.utils.FileUtils;
+import io.jpress.utils.QRCodeUtils;
 import io.jpress.utils.StringUtils;
 
 import java.math.BigDecimal;
@@ -870,4 +873,53 @@ public class UserController extends BaseFrontController {
         }
         renderAjaxResult("系统异常", Consts.ERROR_CODE_SYSTEM_ERROR, null);
     }
+    
+    
+    //用户二维码
+  	public void userQRCode(){
+  	    String from = getPara("from");
+  		BigInteger userId=getLoginedUser().getId();
+  		User user = UserQuery.me().findById(userId);
+  		
+  		Attachment attachment = AttachmentQuery.me().findFirst(userId, userId, null, null, null, null, null, null);
+  		
+  		if(attachment==null) {
+  			//生成推销二维码
+  	  		String webDomain = OptionQuery.me().findValue("web_domain");
+  	  		String fileLocalPath = PropKit.get("fileLocalPath");
+  	  		StringBuffer text = new StringBuffer();
+  	  		text.append(webDomain);
+  	  		text.append("/uid=");
+  	  		text.append(userId);
+  	  		StringBuffer fileName = new StringBuffer();
+  	  		fileName.append(fileLocalPath);
+  	  		fileName.append("qcode/");
+  	  		fileName.append(userId);
+  	  		fileName.append(".png");
+  	  		QRCodeUtils.createQRCode(text.toString(), fileName.toString(), 600, 600, 2);
+  	  		StringBuffer img2 = new StringBuffer();
+  	  		img2.append(fileLocalPath);
+  	  		img2.append("bottom.png");
+  	  		StringBuffer outImg = new StringBuffer();
+  	  		outImg.append(fileLocalPath);
+  	  		outImg.append("promotion/");
+  	  		outImg.append(userId);
+  	  		outImg.append(".png");
+  	  		QRCodeUtils.mergeImage(fileName.toString(), img2.toString(), outImg.toString());
+	  	  	attachment = new Attachment();
+			attachment.setModule("qcode");
+			attachment.setUserId(userId);
+			attachment.setContentId(userId);
+			attachment.setCreated(new Date());
+			attachment.setTitle(user.getUsername()+"_推广二维码");
+			attachment.setPath("/attachment/promotion/"+userId+".png");
+			attachment.setSuffix("png");
+			attachment.setMimeType("image/png");
+			attachment.save();
+  		}
+		setAttr("qcode",getRequest().getContextPath() + attachment.getPath());
+  		setAttr("user", user);
+  		setAttr("from",from);
+  		render("user_qrcode.html");
+  	}
 }
