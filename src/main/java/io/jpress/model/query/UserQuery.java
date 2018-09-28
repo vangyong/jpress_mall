@@ -80,8 +80,8 @@ public class UserQuery extends JBaseQuery {
 		fromBuilder.append(" where 1=1 ");
 		if(StringUtils.isNotBlank(keyword)){
             fromBuilder.append(" AND ( ");
-            fromBuilder.append(" u.username like " +"%'" + keyword + "'%");
-            fromBuilder.append(" OR u.realname like " +"%'" + keyword + "'%");
+            fromBuilder.append(" u.username like " +"'%" + keyword + "%'");
+            fromBuilder.append(" OR u.realname like " +"'%" + keyword + "%'");
             fromBuilder.append(" ) ");
         }
 		if(StringUtils.isNotBlank(flag)){
