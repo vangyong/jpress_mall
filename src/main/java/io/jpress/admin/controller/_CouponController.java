@@ -16,20 +16,27 @@
 package io.jpress.admin.controller;
 
 import com.jfinal.aop.Before;
+import com.jfinal.kit.PropKit;
 import com.jfinal.plugin.activerecord.Page;
 import io.jpress.core.JBaseCRUDController;
 import io.jpress.core.interceptor.ActionCacheClearInterceptor;
+import io.jpress.model.Attachment;
 import io.jpress.model.Comment;
 import io.jpress.model.Coupon;
 import io.jpress.model.User;
+import io.jpress.model.query.AttachmentQuery;
 import io.jpress.model.query.CommentQuery;
 import io.jpress.model.query.CouponQuery;
+import io.jpress.model.query.OptionQuery;
 import io.jpress.model.query.UserQuery;
 import io.jpress.router.RouterMapping;
 import io.jpress.router.RouterNotAllowConvert;
 import io.jpress.template.TemplateManager;
+import io.jpress.utils.QRCodeUtils;
 import io.jpress.utils.RandomUtils;
+import io.jpress.utils.StringUtils;
 
+import java.io.File;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.HashMap;
@@ -136,4 +143,43 @@ public class _CouponController extends JBaseCRUDController<Coupon> {
         }
     }
 
+    public void couponQRCode(){
+        final String couponCode=getPara("cp_code");
+        if (StringUtils.isBlank(couponCode) || !couponCode.startsWith("Coupon")) {
+            renderAjaxResult("操作成功", 0, "");
+            return;
+        }
+        
+        //生成推销二维码
+        String webDomain = OptionQuery.me().findValue("web_domain");
+        String fileLocalPath = PropKit.get("fileLocalPath");
+        StringBuffer text = new StringBuffer();
+        text.append(webDomain);
+        text.append("/?uid=2&cp_code=");
+        text.append(couponCode);
+        StringBuffer fileName = new StringBuffer();
+        File dir = new File(fileLocalPath + "qcode/");
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+        fileName.append(fileLocalPath);
+        fileName.append("qcode/");
+        fileName.append(couponCode);
+        fileName.append(".png");
+        QRCodeUtils.createQRCode(text.toString(), fileName.toString(), 600, 600, 2);
+        StringBuffer img2 = new StringBuffer();
+        img2.append(fileLocalPath);
+        img2.append("bottom.png");
+        StringBuffer outImg = new StringBuffer();
+        File dir2 = new File(fileLocalPath + "promotion/");
+        if (!dir2.exists()) {
+            dir2.mkdirs();
+        }
+        outImg.append(fileLocalPath);
+        outImg.append("promotion/");
+        outImg.append(couponCode);
+        outImg.append(".png");
+        QRCodeUtils.mergeImage(fileName.toString(), img2.toString(), outImg.toString());
+        renderAjaxResult("操作成功", 0, getRequest().getContextPath() + "/attachment/promotion/"+couponCode+".png");
+    }
 }

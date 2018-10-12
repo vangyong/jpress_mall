@@ -889,7 +889,7 @@ public class UserController extends BaseFrontController {
   	  		String fileLocalPath = PropKit.get("fileLocalPath");
   	  		StringBuffer text = new StringBuffer();
   	  		text.append(webDomain);
-  	  		text.append("/uid=");
+  	  		text.append("/?uid=");
   	  		text.append(userId);
   	  		StringBuffer fileName = new StringBuffer();
   	  		fileName.append(fileLocalPath);
