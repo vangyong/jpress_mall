@@ -917,7 +917,7 @@ public class UserController extends BaseFrontController {
 			attachment.setMimeType("image/png");
 			attachment.save();
   		}
-		setAttr("qcode",getRequest().getContextPath() + attachment.getPath());
+		setAttr("qcode",getRequest().getContextPath() + attachment.getPath() + "?v=" + System.currentTimeMillis());
   		setAttr("user", user);
   		setAttr("from",from);
   		render("user_qrcode.html");
