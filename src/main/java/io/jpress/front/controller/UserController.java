@@ -742,18 +742,19 @@ public class UserController extends BaseFrontController {
 			renderAjaxResultForError("提现金额不能为空");
 			return;
 		}
-		if(extractUnavailableAmount.compareTo(BigDecimal.valueOf(0)) < 0 ||
-                extractAvailableAmount.compareTo(BigDecimal.valueOf(0)) < 0 || 
-                extract.getExtractMoney().compareTo(BigDecimal.valueOf(0)) <= 0){
-            renderAjaxResultForError("您目前没有可提现金额噢，赶紧推荐给小伙伴赚取奖金吧^_^");
-            return;
-        }
 		if(extract.getExtractMoney().compareTo(extractAvailableAmount)<=0) {
 			extract.setExtractMoney(extract.getExtractMoney());
 		}else {
 			extract.setExtractMoney(extractAvailableAmount);
 		}
 		//extract.setExtractMoney(extractAvailableAmount);//可提现金额设置为当前实时查询的金额，避免极端情况出现的申请的可提现金额出现变化
+		
+		if(extractUnavailableAmount.compareTo(BigDecimal.valueOf(0)) < 0 ||
+                extractAvailableAmount.compareTo(BigDecimal.valueOf(0)) < 0 || 
+                extract.getExtractMoney().compareTo(BigDecimal.valueOf(0)) <= 0){
+            renderAjaxResultForError("您目前没有可提现金额噢，赶紧推荐给小伙伴赚取奖金吧^_^");
+            return;
+        }
 		
         Page<Extract> page=ExtractQuery.me().paginate(1, Integer.MAX_VALUE, userId, "");
         List<Extract> list = page.getList();
