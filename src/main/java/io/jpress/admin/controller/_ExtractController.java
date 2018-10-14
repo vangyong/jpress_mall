@@ -19,6 +19,7 @@ import io.jpress.core.interceptor.ActionCacheClearInterceptor;
 import io.jpress.model.Extract;
 import io.jpress.model.ExtractPay;
 import io.jpress.model.User;
+import io.jpress.model.query.ExtractPayQuery;
 import io.jpress.model.query.ExtractQuery;
 import io.jpress.model.query.OptionQuery;
 import io.jpress.model.query.UserQuery;
@@ -96,6 +97,10 @@ public class _ExtractController extends JBaseCRUDController<Extract> {
 				BigInteger userId = extract.getUserId();
 				User user = UserQuery.me().findById(userId);
 				setAttr("user", user);
+				
+				//支付信息
+				ExtractPay extractPay = ExtractPayQuery.me().findByExtractId(id);
+				setAttr("extractPay", extractPay);
 			}
 			setAttr("extract", extract);
 		}

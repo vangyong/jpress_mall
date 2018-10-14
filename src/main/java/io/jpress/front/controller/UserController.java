@@ -748,8 +748,12 @@ public class UserController extends BaseFrontController {
             renderAjaxResultForError("您目前没有可提现金额噢，赶紧推荐给小伙伴赚取奖金吧^_^");
             return;
         }
-		
-		extract.setExtractMoney(extractAvailableAmount);//可提现金额设置为当前实时查询的金额，避免极端情况出现的申请的可提现金额出现变化
+		if(extract.getExtractMoney().compareTo(extractAvailableAmount)<=0) {
+			extract.setExtractMoney(extract.getExtractMoney());
+		}else {
+			extract.setExtractMoney(extractAvailableAmount);
+		}
+		//extract.setExtractMoney(extractAvailableAmount);//可提现金额设置为当前实时查询的金额，避免极端情况出现的申请的可提现金额出现变化
 		
         Page<Extract> page=ExtractQuery.me().paginate(1, Integer.MAX_VALUE, userId, "");
         List<Extract> list = page.getList();
