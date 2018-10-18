@@ -132,7 +132,10 @@ public class _ExtractController extends JBaseCRUDController<Extract> {
 		boolean saved = Db.tx(new IAtom() {
 			@Override
 			public boolean run() throws SQLException {
-				
+				if (Db.update("update jp_extract set status = ? where status = 1 and id = ?", Extract.STATUS_PAYED, extract.getId()) <= 0) {
+					log.info("次提现申请已经支付过了。。。");
+	                return false;
+	            }
 				//本地保存支付明细,更新提现申请支付状态
 //				extract.setPayedMoney(extract.getPayedMoney()==null ? new BigDecimal("0").add(extractPay.getPayMoney()) : extract.getPayedMoney().add(extractPay.getPayMoney()));
 			    extract.setPayedMoney(extractPay.getPayMoney());
