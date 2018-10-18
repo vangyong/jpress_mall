@@ -69,6 +69,19 @@
 #sidebar .toggle{
 	top:0px
 }
+.notice {
+    width:20px;
+    height:20px;
+    line-height:20px;
+    font-size:10px;
+    color:#fff;
+    text-align:center;
+    background-color:#f00;
+    border-radius:50%;
+    position:absolute;
+    right:-10px;
+    top:-10px;
+}
 </style>
 <section>
 
@@ -79,7 +92,9 @@
                     <li><img class="litter-avatar" src="${CPATH}${USER.avatar!TPATH+'/images/avatar.jpg'}"/></li>
                 </ul> -->
                 <ul class="actions">
-                		<li style="margin-right: 3em" onclick="makeqrcode()"><img src="/templates/jmall/assets/images/myQRcode.png" style="width: 35px"/></li>
+                		<li style="margin-right: 3em" onclick="winLocation('${CPATH}/user/userQRCode')">
+                			<img src="/templates/jmall/assets/images/myQRcode.png" style="width: 35px"/>
+                		</li>
                     <li>
                     	<img class="litter-avatar" src="${CPATH}${USER.avatar!TPATH+'/images/avatar11.jpg'}" style="width:7em;height:7em"/>
                     	<p style="color: #FFFFFF;margin-top: 1em"> ${USER.username!}</p>
@@ -127,7 +142,7 @@
 				<li style="width: 25%;padding:0;margin-left:-1em" onclick="winLocation('${CPATH}/user/userUnreceived')">
 					<img src="/templates/jmall/assets/images/userUnreceived.png" style="width:50px;height:50px"/>
 				</li>
-				<li style="width: 25%;padding:0;margin-left:-1em" >
+				<li style="width: 25%;padding:0;margin-left:-1em" onclick="winLocation('https://mp.weixin.qq.com/mp/profile_ext?action=home&__biz=MzI5NzI3MjgyNw==&scene=124#wechat_redirect')">
 					<img src="/templates/jmall/assets/images/userService.png" style="width:50px;height:50px"/>
 				</li>
 			</ul>
@@ -141,13 +156,18 @@
 				<!-- <li style="width: 25%;padding:0;margin-left:-1em" onclick="winLocation('${CPATH}/user/userSetting')">
 					<img src="/templates/jmall/assets/images/userSetup.png" style="width:50px;height:50px"/>
 				</li> -->
-				<!-- <li style="width: 25%;padding:0;margin-left:-1em" >
-					<img src="/templates/jmall/assets/images/userSetting.png" style="width:50px;height:50px"/>
-				</li> -->
+				<li style="width: 15%;padding:0;margin-left:-1em" onclick="winLocation('${CPATH}/user/userCoupon')">
+					<div style="width:50px;position:relative;">
+					<img src="/templates/jmall/assets/images/userCoupon.png" style="width:50px;height:50px;border:0px solid #000;"/>
+					<#if userCouponAvailableNum gt 0>
+					<div class="notice">${userCouponAvailableNum!0}</div>
+					</#if>
+				</li>
 			</ul>
-			<div style="text-align: center;margin: 2em 0 2em 0">
+			
+			<!-- <div style="text-align: center;margin: 2em 0 2em 0">
 				<img src="/templates/jmall/assets/images/userBeing.png" onclick="winLocation('${CPATH}/user/userBeing')" style="width:177px;height:41px"/>
-			</div>
+			</div> -->
         </div>
     </div>
     <div id="qrcode" style="width:200px; height:200px; display: none"></div>

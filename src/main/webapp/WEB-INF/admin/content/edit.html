@@ -50,7 +50,7 @@
 		var id=this.value;
 		if($(this).prop('checked')){
 			var text=$.trim($(this).parent().text());
-			var html="<td>"+text+"</td><td><input name='price"+id+"' type='input'></td><td><input name='stock"+id+"' type='input'></td>";
+			var html="<td>"+text+"</td><td><input name='price"+id+"' type='input'></td><td><input name='stock"+id+"' type='input'></td><td><input name='limitPerUser"+id+"' type='input'></td>";
 			$("#itemTable").find('tbody').append("<tr id='itemTr"+id+"' >"+html+"</tr>");
 		}else{
 			$("#itemTr"+id+"").remove();

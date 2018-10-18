@@ -1,6 +1,7 @@
 package io.jpress.model.query;
 
 import java.math.BigInteger;
+import java.util.List;
 
 import io.jpress.model.Bonus;
 
@@ -22,7 +23,7 @@ public class BonusQuery extends JBaseQuery {
         return DAO.doDelete("transaction_id = ?", transaction_id);
     }
 	
-	public Bonus findByTransactionId(BigInteger transaction_id){
+	public Bonus findFirstByTransactionId(BigInteger transaction_id){
         StringBuilder sql = new StringBuilder();
         sql.append(" SELECT t.* ");
         sql.append(" FROM bonus t ");
@@ -30,6 +31,16 @@ public class BonusQuery extends JBaseQuery {
         sql.append(" AND t.transaction_id = "+transaction_id);
         sql.append(" ORDER BY t.bonus_time DESC ");
         return DAO.findFirst(sql.toString());
+    }
+    
+    public List<Bonus> findByTransactionId(BigInteger transaction_id){
+        StringBuilder sql = new StringBuilder();
+        sql.append(" SELECT t.* ");
+        sql.append(" FROM bonus t ");
+        sql.append(" WHERE 1=1 ");
+        sql.append(" AND t.transaction_id = "+transaction_id);
+        sql.append(" ORDER BY t.bonus_time DESC ");
+        return DAO.find(sql.toString());
     }
     
     public Bonus findByUserId(BigInteger userId){

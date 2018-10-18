@@ -31,6 +31,43 @@
             }
         });
     }
+    
+    function createRefund(id){
+    	if(!id){
+            layer.msg("id为空");
+            return;
+        }
+        layer.open({
+            type: 1,
+            skin: 'layui-layer-rim',
+            area: ['90%', 'auto'],
+            content: '<form id="commentForm" action="${CPATH}/transaction/createRefund" method="post"><input type="hidden" name="ucode" value="${ucode}"><input type="hidden" name="id" value="'+id+'"><textarea id="refundDesc" name="refundDesc" placeholder="说说申请退款原因吧..." rows="3"></textarea></form>',
+            btn: ['确定','取消'],
+            yes: function(index){
+                $("#commentForm").ajaxSubmit({
+                    type : "post",
+                    dataType : "json",
+                    success : function(data) {
+                        if(data.errorCode == 0){
+                            layer.close(index);
+                            alert('退款申请成功，审核通过后款项将2天内返回用户支付账户');
+                            location.reload();
+                        }else if(data.errorCode == 2){
+                            layer.close(index);
+                            var goto=window.location.href;
+                            var url="${CPATH}"+data.data+"?goto="+goto;
+                            window.location.href=url;
+                        }else{
+                            layer.msg(data.message);
+                        }
+                    },
+                    error : function() {
+                        layer.msg("信息提交错误");
+                    }
+                });
+            }
+        });
+    }
 </#macro>
 <@layout>
 <style>
@@ -58,6 +95,10 @@
                         <#elseif "5"==transaction.status!>
 							完成
                         </#if>
+                        <#if "" != transaction.refundStatus!>
+                        <br/>
+						<span style="font-size: 11px;color: blue;border: 2">[${(transaction.refundStatus)!}]</span>
+						</#if>
                     </p>
                 </div>
                 <div class="12u$">
@@ -68,7 +109,9 @@
                 <div class="12u$">
                     <hr />
                     <h5>其他：</h5>
-                    <p>付款金额：￥${transaction.totle_fee!}</p>
+                    <p>订单总金额：￥${transaction.totle_fee!}</p>
+                    <p>优惠券抵扣：￥-${transaction.coupon_fee!}</p>
+                    <p>现金支付：￥${transaction.cash_fee!}</p>
                     <p>本地订单号：${transaction.order_no!}</p>
                     <p>支付类型：
                         <#if "alipay"==transaction.pay_type!>
@@ -105,6 +148,14 @@
                                     <a href="javascript:void(0)" class="button special small" style="float: right;" onclick="comment('${transaction.id!}','${transactionItem.content_id!}')" >立即评价</a>
                                 </td>
                             </tr>
+                        <#elseif "2"==transaction.status! || "3"==transaction.status!>
+                        	<#if "退款申请成功" != transaction.refundStatus! && "退款中" != transaction.refundStatus! && "退款成功" != transaction.refundStatus!>
+	                            <tr>
+	                                <td colspan="2">
+	                                    <a href="javascript:void(0)" class="button special small" style="float: right;" onclick="createRefund('${transaction.id!}')" >申请售后</a>
+	                                </td>
+	                            </tr>
+							</#if>
                         </#if>
                     </#list>
                 </tbody>

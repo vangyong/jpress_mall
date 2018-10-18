@@ -100,6 +100,7 @@
 										<th>规格值</th>
 										<th>价格</th>
 										<th>库存</th>
+										<th>每人限购份数</th>
 									</tr>
 								</thead>
 								<tbody>
@@ -109,6 +110,7 @@
 												<td>${(bean.value)!}</td>
 												<td><input type="input" name="price${(bean.id)!}" value="${bean.getContentSpecItem(content.id!).price!}" ></td>
 												<td><input type="input" name="stock${(bean.id)!}" value="${bean.getContentSpecItem(content.id!).stock!}" ></td>
+												<td><input type="input" name="limitPerUser${(bean.id)!}" value="${bean.getContentSpecItem(content.id!).limitPerUser!}" ></td>
 											<tr>
 										</#list>
 									</#if>

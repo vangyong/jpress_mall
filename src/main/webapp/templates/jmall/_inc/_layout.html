@@ -16,6 +16,10 @@ for(var i =0;i<cookies.length;i++){
 		}
 }
 
+if (userId == null || userId =='') {
+	userId = "${userId!0}";
+}
+
 var old_url = window.location.href;
 var new_url;
 if(old_url.indexOf("?") !=-1){ //url中存在问号
@@ -31,7 +35,7 @@ if(old_url.indexOf("?") !=-1){ //url中存在问号
 
 new_url = new_url.replace('&amp;','&');
 new_url = new_url.split('&from=')[0];
-console.log("new_url:"+new_url);
+console.log("new_url:"+new_url + "uid:"+userId);
 /* 
 //修改链接，以供分享
 if (!!(window.history && history.pushState)){
@@ -92,6 +96,7 @@ wx.ready(function(){
         },
         success: function (res) {
             //alert('已分享');
+            getCouponWhenShare();
         },
         cancel: function (res) {
             //alert('已取消');
@@ -113,6 +118,7 @@ wx.ready(function(){
         },
         success: function (res) {
             //alert('已分享');
+            getCouponWhenShare();
         },
         cancel: function (res) {
             //alert('已取消');
@@ -123,7 +129,7 @@ wx.ready(function(){
 	});
 	
 });
- 
+
 </script>
 
 
@@ -191,6 +197,11 @@ wx.ready(function(){
     </div>
 </div>
 
+    
+<div id="couponWhenShare_div" style="width: 327px;height:234px;margin: auto;text-align: center;display:none;">
+	<img src="/templates/jmall/assets/images/userShareTips.png" style="width:100%;height:100%;position:absolute;top:0;left:0;"/>
+	<span id="couponWhenShare_span" style="position:absolute;color:#ffaf66;font-size: 45px;font-weight: bolder;top:115px;left:66px;"></span>
+</div>
     <@script_import />
 
     <!-- jQuery 2.1.4 -->
@@ -270,6 +281,7 @@ wx.ready(function(){
 	    		layermobile.open({
 	    		    type: 2
 	    		    ,content: '加载中'
+	    		    ,time:5
 	    		  });
 	    		window.location.href=url;
     		}
@@ -300,7 +312,14 @@ wx.ready(function(){
        	});
        	
         $(document).ready(function(){
-        	
+        	//防止页面后退滚动条不消失
+            history.pushState(null, null, document.URL);
+            window.addEventListener('popstate', function () {
+            		if (/(iPhone|iPad|iPod)/i.test(navigator.userAgent)) {             
+        	            window.location.href = window.document.referrer;
+        	    	} else { window.history.go("-1"); }
+            });
+            
             $('.autoplay').slick({
                 dots: true,
                 slidesToShow: 1,
@@ -312,6 +331,37 @@ wx.ready(function(){
             });
         });
 
+
+        function getCouponWhenShare() {
+        	$.ajax({
+        		type: "POST",
+        		traditional: true,
+        		url: "${CPATH}/user/getCouponWhenShare",
+        		data: {},
+        		success: function(data){
+        			if(data.errorCode == 0){
+        				var couponWhenShare = data.data;
+        				if (couponWhenShare == null || couponWhenShare == 'null' || couponWhenShare == '') {
+        					layer.msg('优惠券被抢光啦！下一批优惠券即将放送，关注公众号可以及时收到优惠券发放通知哦^_^',{time: 5000});
+        				} else {
+	        				var amount = 0;
+	        				if (couponWhenShare.amount != null && couponWhenShare.amount != undefined && couponWhenShare.amount != 'undefined') {
+	        					amount = couponWhenShare.amount;
+	        				}
+	                        $('#couponWhenShare_span').html(amount + "元");
+	                        layer.open({
+	        				  type: 1,
+	        				  title: false,
+	        				  closeBtn: 0,
+	        				  shadeClose: true,
+	        				  content: $('#couponWhenShare_div')
+	        				});
+        				}
+        			}
+        		}
+        	});
+        }
+        
         <@script />
     </script>
 </body>

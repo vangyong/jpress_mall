@@ -1,0 +1,73 @@
+<#include "_inc/_layout.html"/>
+<#macro script>
+	$(document).ready(function(){
+		 $("#main").css("background-color","#EEEEEE");//先把背景置灰
+     });
+</#macro>
+<@layout>
+<style>
+p{margin: 0px;padding: 0px}
+.accountDeta{display: flex;justify-content:space-between;border: 0px solid #bdbbb7;margin: 1em 1em 0em 1em;padding: 10px 20px 10px 20px;align-items:center}
+.accountDeta div:first-child p:first-child{font-size: 16px;font-weight: bold;}
+.accountDeta div:first-child p:last-child{font-size: 13px;color:#898989;}
+.accountDeta div:last-child{color: #fe7a78;font-size: 22px;font-weight: bold}
+#sidebar .toggle{
+	top:0px
+}
+</style>
+<section>
+ <@jp.userCouponPage pageSize="10"> 
+					<div style="margin: 0 0 50px 0">
+					<#if userCouponList?size gt 0>
+		 				<#list userCouponList as userCoupon> 
+		 				<#if userCoupon.isValid == 0>
+		 				<div class="accountDeta" style="background-color: #FFFFFF;background: radial-gradient(circle at top left, transparent 12px, #FFFFFF 0) top left">
+								<div>
+									<p>${userCoupon.name!}</p>
+									<p>有效期至：${userCoupon.lastDate!}</p>
+								</div>
+								<div>
+									<#if userCoupon.amount gt 0>
+									<p style="color: red;font-size: 22px;font-weight: bold">￥${userCoupon.amount!}</p>
+				 					<p style="border-top: 1px solid #bdbbb7;color: #767676;font-size: 6px;font-weight:normal;">全场通用</p>
+									</#if>
+								</div>
+						</div>
+						</#if>
+						<#if userCoupon.isValid == 1>
+		 				<div class="accountDeta" style="background:#FEFEFE;background: radial-gradient(circle at top left, transparent 12px, #FEFEFE 0) top left;">
+								<div>
+									<p style="color:#BEBEBE;">${userCoupon.name!}</p>
+									<p style="color:#C2C2C2;">有效期至：${userCoupon.lastDate!}</p>
+								</div>
+								<div>
+									<#if userCoupon.amount gt 0>
+									<p style="color: #BEBEBE;font-size: 22px;font-weight: bold">￥${userCoupon.amount!}</p>
+				 					<p style="border-top: 1px solid #C2C2C2;color: #C2C2C2;font-size: 6px;font-weight: lighter;">&nbsp;&nbsp;已失效</p>
+									</#if>
+								</div>
+						</div>
+						</#if>
+						</#list> 
+						<div class="box alt bottom" style="padding-top: 12px;margin-left: 1em">
+				                <div class="row uniform">
+				                    <div class="12u$">
+				                        <ul class="pagination">
+				                            <@pagination>
+				                                <#list pages as page>
+				                                    <li class="${(page.style)!}">
+				                                        <a class="page" href="${(page.url)!}">${(page.text)!}</a>
+				                                    </li>
+				                                </#list>
+				                            </@pagination>
+				                        </ul>
+				                    </div>
+				                </div>
+				            </div> 
+					<#else>
+						<p style="margin-top: 20px;text-align: center;">优惠券空空如也...</p>
+					</#if>
+ </@jp.userCouponPage>	 			
+	<#include "_inc/_user_bottom_bar.html"/>
+</section>
+</@layout>

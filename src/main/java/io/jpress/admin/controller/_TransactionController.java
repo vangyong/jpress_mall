@@ -10,7 +10,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -24,12 +26,15 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.CellRangeAddress;
 
 import com.jfinal.aop.Before;
+import com.jfinal.kit.PropKit;
+import com.jfinal.kit.StrKit;
 import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.IAtom;
 import com.jfinal.plugin.activerecord.Page;
 import com.jfinal.upload.UploadFile;
 import com.jfinal.weixin.sdk.api.ApiResult;
+import com.jfinal.weixin.sdk.api.PaymentApi;
 import com.jfinal.weixin.sdk.api.TemplateData;
 import com.jfinal.weixin.sdk.api.TemplateMsgApi;
 
@@ -37,10 +42,13 @@ import io.jpress.Consts;
 import io.jpress.core.JBaseCRUDController;
 import io.jpress.core.interceptor.ActionCacheClearInterceptor;
 import io.jpress.front.controller.WechatpayController;
+import io.jpress.interceptor.UCodeInterceptor;
+import io.jpress.model.Refund;
 import io.jpress.model.Transaction;
 import io.jpress.model.TransactionItem;
 import io.jpress.model.User;
 import io.jpress.model.query.OptionQuery;
+import io.jpress.model.query.RefundQuery;
 import io.jpress.model.query.TransactionItemQuery;
 import io.jpress.model.query.TransactionQuery;
 import io.jpress.model.query.UserQuery;
@@ -49,6 +57,7 @@ import io.jpress.router.RouterNotAllowConvert;
 import io.jpress.template.TemplateManager;
 import io.jpress.utils.DateUtils;
 import io.jpress.utils.ExcelKit;
+import io.jpress.utils.RandomUtils;
 import io.jpress.utils.StringUtils;
 import io.jpress.wechat.WechatApiConfigInterceptor;
 
@@ -64,7 +73,12 @@ public class _TransactionController extends JBaseCRUDController<Transaction>{
 
     private static final Log log = Log.getLog(_TransactionController.class);
     
+    private static final String SUCCESS = "SUCCESS";
     private static final String EXPRESS_NOTICE_TEMP_ID = OptionQuery.me().findValue("wechat_waybill_tempMsg_id");
+    private static final String appid = OptionQuery.me().findValue("wechat_appid");
+    private static final String partner = OptionQuery.me().findValue("wechat_partner");
+    private static final String paternerKey = OptionQuery.me().findValue("wechat_paternerKey");
+    private static final String refundNotifyUrl = PropKit.get("wechat_refund_notify_url");
     
     String web_domain = OptionQuery.me().findValue("web_domain");
     
@@ -128,6 +142,156 @@ public class _TransactionController extends JBaseCRUDController<Transaction>{
             renderAjaxResultForError("操作失败");
         }
     }
+
+    //退款申请-审核
+    public void checkRefund() {
+        try {
+            final BigInteger id=getParaToBigInteger("id");
+            final String checkResult=getPara("checkResult");
+
+            if (id==null) {
+                renderAjaxResultForError("订单id不能为空");
+                return;
+            }
+            if (StringUtils.isBlank(checkResult)) {
+                renderAjaxResultForError("退款审核理由不能为空");
+                return;
+            }
+            final Transaction transaction=TransactionQuery.me().findById(id);
+            if (transaction==null) {
+                renderAjaxResultForError("订单不存在");
+                return;
+            }
+            Refund refund = RefundQuery.me().findByOrderNo(transaction.getOrderNo());
+            if (refund == null) {
+                renderAjaxResultForError("退款单不存在");
+                return;
+            }
+            
+            if (!"退款申请成功".equals(refund.getStatus()) && !"退款失败".equals(refund.getStatus())) {
+                renderAjaxResultForError("退款进行中，不允许重复退款");
+                return;
+            }
+            
+            if ("ok".equals(checkResult)) { //审核通过。
+                String jsonStr = wechartPreRefund(transaction, refund.getRefundNo(), refund.getDesc());
+                if (StringUtils.isBlank(jsonStr)) {
+                    renderAjaxResultForError("调起微信退款申请接口失败了");
+                    return;
+                }
+                log.info(jsonStr);
+                renderAjaxResult("操作成功", 0, jsonStr);
+            } else {
+                refund.setStatus("退款失败");
+                refund.setDesc(refund.getDesc() + "【审核失败："+checkResult+"】");
+                refund.saveOrUpdate();
+                renderAjaxResult("操作成功", 0, refund.getDesc());
+            }
+            
+        } catch (Exception e) {
+            log.error("系统异常:",e);
+            renderAjaxResult("系统异常", Consts.ERROR_CODE_SYSTEM_ERROR, null);
+        }
+    }
+
+    //退款申请-微信
+    public void prerefund() {
+        try {
+            final BigInteger id=getParaToBigInteger("id");
+            final String refundDesc=getPara("refundDesc");
+
+            if (id==null) {
+                renderAjaxResultForError("订单id不能为空");
+                return;
+            }
+            if (StringUtils.isBlank(refundDesc)) {
+                renderAjaxResultForError("退款原因不能为空");
+                return;
+            }
+            final Transaction transaction=TransactionQuery.me().findById(id);
+            if (transaction==null) {
+                renderAjaxResultForError("订单不存在");
+                return;
+            }
+            
+            if (DateUtils.getDayDiff(new Date(), transaction.getPayed()) > 5) { //订单支付超过5天后不允许退款
+                renderAjaxResultForError("订单支付超过5天后不允许退款，不允许退款");
+                return;
+            }
+            //一个订单只允许创建一个退款单
+            Refund refund = RefundQuery.me().findByOrderNo(transaction.getOrderNo());
+            if (refund == null) {
+                refund = new Refund();
+                refund.setAmount(transaction.getCashFee());//退款金额默认为订单总的现金支付金额（注意：如果退款成功，那么订单产生的奖金就是此笔订单亏损的钱）
+                refund.setOrderNo(transaction.getOrderNo());
+                refund.setRefundNo(RandomUtils.randomKey("2", transaction.getId().toString()));//退款单编号以2开头，以订单id结尾
+                refund.setStatus("退款申请成功");//退款单初始状态为'退款申请成功'
+                refund.setTradeNo(transaction.getTradeNo());
+            }
+            
+            if (!"退款申请成功".equals(refund.getStatus()) && !"退款失败".equals(refund.getStatus())) {
+                renderAjaxResultForError("退款进行中，不允许重复退款");
+                return;
+            }
+            refund.setDesc(refundDesc);
+            
+            if(!refund.saveOrUpdate()){
+                renderAjaxResultForError("退款单创建失败了");
+                return;
+            }
+            
+            String jsonStr = wechartPreRefund(transaction, refund.getRefundNo(), refundDesc);
+            if (StringUtils.isBlank(jsonStr)) {
+                renderAjaxResultForError("调起微信退款申请接口失败了");
+                return;
+            }
+            refund.setStatus("退款中");
+            refund.saveOrUpdate();
+            
+            log.info(jsonStr);
+            renderAjaxResult("操作成功", 0, jsonStr);
+        } catch (Exception e) {
+            log.error("系统异常:",e);
+            renderAjaxResult("系统异常", Consts.ERROR_CODE_SYSTEM_ERROR, null);
+        }
+    }
+    
+    private String wechartPreRefund(Transaction transaction,String refundNo, String refundDesc) {
+            String returnMsg = "退款申请成功，款项将2天内返回用户支付账户";
+            // 退款申请文档地址：https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_4
+            Map<String, String> params = new HashMap<>();
+            params.put("appid", appid);
+            params.put("mch_id", partner);
+            params.put("out_trade_no", transaction.getOrderNo());
+            params.put("out_refund_no", refundNo);
+            String totalFee = Integer.toString(transaction.getCashFee().setScale(2, BigDecimal.ROUND_DOWN).multiply(BigDecimal.valueOf(100.00)).intValue());
+            params.put("total_fee", totalFee);
+            params.put("refund_fee", totalFee);
+            params.put("refund_desc", refundDesc);
+            params.put("notify_url", refundNotifyUrl);
+            String certPath = getSession().getServletContext().getRealPath("/") +"apiclient_cert.p12";
+            log.info("微信退款申请输入参数：" + params + "。证书路径：" + certPath);
+            // 申请退款，内部添加了随机字符串nonce_str和签名sign
+            Map<String, String> result = PaymentApi.refund(params, paternerKey, certPath);
+            
+            log.info("微信退款申请返回参数：" + result);
+            
+            String returnCode = result.get("return_code");
+            returnMsg = result.get("return_msg");
+            if (StrKit.isBlank(returnCode) || !SUCCESS.equals(returnCode)) {
+                log.error(returnMsg);
+                renderAjaxResult("系统异常", Consts.ERROR_CODE_SYSTEM_ERROR, null);
+                return "";
+            }
+            String resultCode = result.get("result_code");
+            if (StrKit.isBlank(resultCode) || !SUCCESS.equals(resultCode)) {
+                log.error(returnMsg);
+                renderAjaxResult("系统异常", Consts.ERROR_CODE_SYSTEM_ERROR, null);
+                return "";
+            }
+        
+        return returnMsg;
+    }
     
     
     public void exportExcel(){
@@ -189,6 +353,7 @@ public class _TransactionController extends JBaseCRUDController<Transaction>{
         sheet.setColumnWidth(5, 250 * 30);
         sheet.setColumnWidth(6, 256 * 30);
         sheet.setColumnWidth(7, 256 * 30);
+        sheet.setColumnWidth(8, 500 * 30);
 
         // 创建报表头部  
         HSSFRow row0 = sheet.createRow(0);
@@ -236,7 +401,11 @@ public class _TransactionController extends JBaseCRUDController<Transaction>{
         //第一行第8列  
         cell1 = row1.createCell(7);  
         cell1.setCellStyle(cellStyleTitle);  
-        cell1.setCellValue(new HSSFRichTextString("快递信息（快递公司等）"));   
+        cell1.setCellValue(new HSSFRichTextString("快递信息（快递公司等）"));
+        //第一行第9列  
+        cell1 = row1.createCell(8);  
+        cell1.setCellStyle(cellStyleTitle);  
+        cell1.setCellValue(new HSSFRichTextString("收货地址"));   
 
         String keyword=getPara("k", "").trim();
         String pay_type=getPara("pay_type");
@@ -294,7 +463,11 @@ public class _TransactionController extends JBaseCRUDController<Transaction>{
             
             cell = row.createCell(5);  
             cell.setCellStyle(cellStyle);  
-            cell.setCellValue(new HSSFRichTextString(DateUtils.format(z.getCreated())));        
+            cell.setCellValue(new HSSFRichTextString(DateUtils.format(z.getCreated())));    
+            
+            cell = row.createCell(8);  
+            cell.setCellStyle(cellStyle);  
+            cell.setCellValue(new HSSFRichTextString(z.getUserAddress()));       
         }
         try {  
             bufferedOutPut.flush();  
@@ -325,13 +498,14 @@ public class _TransactionController extends JBaseCRUDController<Transaction>{
                             String expressInfo = strings[7];
                             if (StringUtils.isNotBlank(orderNo) && StringUtils.isNotBlank(expressNo)) {
                                 Transaction transaction = TransactionQuery.me().findByOrderNo(orderNo);
-                                if (transaction != null && "2".equals(transaction.getStatus())) {
+                                if (transaction != null) {
                                     String oldExpressNo = transaction.getExpressNo();
+                                    String oldStatus = transaction.getStatus();
                                     transaction.setExpressNo(expressNo);  
                                     transaction.setExpress(expressInfo);
                                     transaction.setStatus("3"); //订单状态修改为已经发货
                                     if(transaction.update()) {
-                                        if (StringUtils.isBlank(oldExpressNo)) {//已经导入过快递信息的订单不再发送消息通知
+                                        if (StringUtils.isBlank(oldExpressNo) && "2".equals(oldStatus)) {//已经导入过快递信息的订单不再发送消息通知
                                             User user = UserQuery.me().findById(transaction.getUserId());
                                             if (user != null) {
                                                 tempMsgList.add(TemplateData.New()

@@ -57,22 +57,22 @@ public class JBaseModelGenerator extends BaseModelGenerator {
 				
 				+ "\tpublic void removeCache(Object key){%n"
 				+ "\t\tif(key == null) return;%n"
-				+ "\t\tCacheKit.remove(CACHE_NAME, key);%n"
+				+ "\t\tJCacheKit.remove(CACHE_NAME, key);%n"
 				+ "\t}%n%n"
 				
 				
 				+ "\tpublic void putCache(Object key,Object value){%n"
-				+ "\t\tCacheKit.put(CACHE_NAME, key, value);%n"
+				+ "\t\tJCacheKit.put(CACHE_NAME, key, value);%n"
 				+ "\t}%n%n"
 				
 				
 				+ "\tpublic M getCache(Object key){%n"
-				+ "\t\treturn CacheKit.get(CACHE_NAME, key);%n"
+				+ "\t\treturn JCacheKit.get(CACHE_NAME, key);%n"
 				+ "\t}%n%n"
 				
 				
 				+ "\tpublic M getCache(Object key,IDataLoader dataloader){%n"
-				+ "\t\treturn CacheKit.get(CACHE_NAME, key, dataloader);%n"
+				+ "\t\treturn JCacheKit.get(CACHE_NAME, key, dataloader);%n"
 				+ "\t}%n%n"
 				
 		
@@ -170,7 +170,7 @@ public class JBaseModelGenerator extends BaseModelGenerator {
 				+ "import io.jpress.model.query.MetaDataQuery;%n"
 				+ "import java.math.BigInteger;%n%n"
 				+ "import com.jfinal.plugin.activerecord.IBean;%n"
-				+ "import com.jfinal.plugin.ehcache.CacheKit;%n"
+				+ "import io.jpress.cache.JCacheKit;%n"
 				+ "import com.jfinal.plugin.ehcache.IDataLoader;%n%n";
 		
 

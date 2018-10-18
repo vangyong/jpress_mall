@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.alipay.api.domain.AlipayTradeWapPayModel;
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Clear;
 import com.jfinal.kit.HttpKit;
@@ -33,18 +34,22 @@ import io.jpress.model.Bonus;
 import io.jpress.model.Content;
 import io.jpress.model.ContentSpecItem;
 import io.jpress.model.Coupon;
+import io.jpress.model.Refund;
 import io.jpress.model.ShoppingCart;
 import io.jpress.model.Transaction;
 import io.jpress.model.TransactionItem;
 import io.jpress.model.User;
+import io.jpress.model.query.BonusQuery;
 import io.jpress.model.query.ContentQuery;
 import io.jpress.model.query.ContentSpecItemQuery;
 import io.jpress.model.query.CouponQuery;
 import io.jpress.model.query.OptionQuery;
+import io.jpress.model.query.RefundQuery;
 import io.jpress.model.query.ShoppingCartQuery;
 import io.jpress.model.query.TransactionQuery;
 import io.jpress.model.query.UserQuery;
 import io.jpress.router.RouterMapping;
+import io.jpress.utils.AES256EncryptionUtil;
 import io.jpress.utils.DateUtils;
 import io.jpress.utils.RandomUtils;
 import io.jpress.utils.StringUtils;
@@ -79,6 +84,7 @@ public class WechatpayController extends BaseFrontController {
     private static final String partner = OptionQuery.me().findValue("wechat_partner");
     private static final String paternerKey = OptionQuery.me().findValue("wechat_paternerKey");
     private static final String notifyUrl = PropKit.get("wechat_notify_url");
+    private static final String refundNotifyUrl = PropKit.get("wechat_refund_notify_url");
     private static final String web_domain = OptionQuery.me().findValue("web_domain");
   
     //待支付-微信支付
@@ -111,7 +117,7 @@ public class WechatpayController extends BaseFrontController {
             renderAjaxResult("系统异常", Consts.ERROR_CODE_SYSTEM_ERROR, null);
         }
     }
-
+    
     private String wechartPrePay(String openId, String orderNo, BigDecimal cashFee) {
         // 统一下单文档地址：https://pay.weixin.qq.com/wiki/doc/api/jsapi.php?chapter=9_1
         
@@ -282,6 +288,138 @@ public class WechatpayController extends BaseFrontController {
         }
     }
     
+    @Clear({WechatUserInterceptor.class})
+    @Before({WechatApiConfigInterceptor.class})
+    public void refund() {
+        try {
+            String xmlMsg = HttpKit.readData(getRequest());
+            log.info("退款结果通知=" + xmlMsg);
+//            xmlMsg = "<xml><return_code>SUCCESS</return_code><appid><![CDATA[wxd0b33231fc543b7b]]></appid><mch_id><![CDATA[1337083401]]></mch_id><nonce_str><![CDATA[1156fd7d54572ccda5093b95753e6584]]></nonce_str><req_info><![CDATA[9yyDBycNPn5AZki1smWGfu40/kJOg7DeuyFDSppYiGTgKPb4SlohDpma17EjMQq7PtUr75vIihQUCD5JB5fEtiFlB/KQ+TY6mnwujLmlCNgb3cT+24HZysarfdNkXnCwy94WPGbyrRbyp01NZsiAc5aasyMUBNT6qaGYs8sEan9iRGcgmt/7S2B3gmqiVBZ/1DQ2hA6fWJgGVoup1+vpMAoHU/jdj10E69zrkVbmljaZin2k+xXTZn8sXM5dZ3sTr1lUsXMF2j27BSL2MRwYEONO1E4iZEG5hyrY/ZheTneTVRLxNLEnyHFBfBFeB0ty1bi/EgAoDgE7z2pqSh4OlIqcn3Q3qHjJZkSoLC/C0wrjsg4kVcRbb9T/Hp2QvHIjM/BnjBB7TfnMdYub+XRFSkQvptr8OuTtc/kEQ4vFCayLphY59K2j0Fxi7wV96vJk3Hr3MCAs3DbSzGDQkfzB/WXHng85SDZ1tclXgk/5Z7vNAw+d+0JGbqxdQgRfEIgW+4eZR/VJvwGGCfqPAAAkW6z2EUbz9W0rFu0iyx75huv2UMnZMt9EEWZunJcWmIEcI/K32ZvCDfxqdD1xBp6KHDHjxo4pKGTdGKb+xwmloxDz1XT1EkDd9aClUhzKewArEWjWL1h/chqdYkAEk4fzWzNzOVp6CQ0XjlGdxC8IOFBLNEwcl2AXGy8u6eNg4ec/Rk9TS3zbHihoBtLUVpcM9BuklE49oOs66c6z+PhMhyCBXq+lWFKEyj/KvC+237CMj5RPcYLxf2TwQ33NvKzDJDhtOFRh5JPK4BG1Jd+el+NNoRtqr31j3RJKFrtMSg20hN0pkEPWTG5JqZAYXc/cryGrk8LSsJvlvDlzaPX+negfSOa3ryCpQ6kplaxdBXhX/PU3NPlLRm+MDF8gsuFF6YJW+0yYSJ4tI3jm+DROFs5u+hGsx87INmeJqYULABiXxf8HjzDOSp6AGCOXkUdFSqk36EfPp4PPHWgA6eMf8pHDYswp3P/58n55UTsrjo4KK9pBwMxw7ifYKD4qVx53YlTstUEGnE30KQdfQJ8iDic=]]></req_info></xml>";
+            Map<String, String> params = PaymentKit.xmlToMap(xmlMsg);
+            String returnCode = params.get("return_code");
+            String returnMsg = params.get("return_msg");
+            if (!SUCCESS.equals(returnCode)) {
+                log.error("微信退款结果通知错误：returnMsg：" + returnMsg);
+                return;
+            }
+            String reqInfoSec = params.get("req_info");//需要解密的信息
+            String reqInfoXml = AES256EncryptionUtil.decryptData(reqInfoSec, paternerKey);//解密
+//            if (true) { //--test
+            if (StringUtils.isNotBlank(reqInfoXml)) {
+                log.info("退款结果通知解密=" + reqInfoXml);
+                Map<String, String> reqInfo = PaymentKit.xmlToMap(reqInfoXml);//将解密后的xml解析成map
+                //-----------test-----------------------
+//                Map<String, String> reqInfo = new HashMap<>();
+//                reqInfo.put("result_code", "SUCCESS");
+//                reqInfo.put("settlement_refund_fee", "100");
+//                reqInfo.put("out_trade_no", "18072617130566285420");
+//                reqInfo.put("out_refund_no", "312312d");
+//                reqInfo.put("refund_id", "wx_fdskfsalkfalsjdl11");
+                //-----------test-----------------------
+                
+                
+                
+                String resultStatus = reqInfo.get("refund_status");
+                // 退款总金额
+                String refundFeeStr = reqInfo.get("settlement_refund_fee");
+                // 商户订单号
+                String orderNo = reqInfo.get("out_trade_no");
+                // 商户退款单号
+                String refundNo = reqInfo.get("out_refund_no");
+                // 微信退款单号
+                String tradeRefundNo = reqInfo.get("refund_id");
+    
+                // 注意重复通知的情况，同一订单号可能收到多次通知，请注意一定先判断订单状态
+                // 避免已经成功、关闭、退款的订单被再次更新
+                if (SUCCESS.equals(resultStatus)) {
+                    final Transaction transaction = new Transaction().findFirst("select * from jp_transaction where order_no = ?", orderNo);
+                    if (transaction == null) { //订单不存在
+                        log.error("微信退款结果通知错误：transaction [" + orderNo + "] is not exists!reqInfo = []" + reqInfo);
+                        return;
+                    }
+                    //更新订单信息
+                    final Refund refund = new Refund().findFirst("select * from jp_refund where refund_no = ?", refundNo);
+                    if (refund == null) { //退款单不存在
+                        log.error("微信退款结果通知错误：refund [" + refundNo + "] is not exists!reqInfo = []" + reqInfo);
+                        return;
+                    }
+                    if ("退款成功".equals(refund.getStatus())) {//退款单已经被处理过，直接返回成功
+                        log.error("微信退款结果通知错误：refund status[" + refund.getStatus() + "] 已经被处理，不用重复处理!reqInfo = []" + reqInfo);
+                        Map<String, String> xml = new HashMap<>();
+                        xml.put("return_code", SUCCESS);
+                        xml.put("return_msg", "OK");
+                        renderText(PaymentKit.toXml(xml));
+                    }
+                    if (!"退款中".equals(refund.getStatus())) {//退款单状态不对
+                        log.error("微信退款结果通知错误：refund status[" + refund.getStatus() + "] is error!reqInfo = []" + reqInfo);
+                        return;
+                    }
+                    BigDecimal refundFee = new BigDecimal(refundFeeStr).divide(new BigDecimal("100"));
+                    if (refund.getAmount().setScale(2, BigDecimal.ROUND_DOWN).compareTo(refundFee.setScale(2, BigDecimal.ROUND_DOWN)) != 0) { //退款金额与实际支付金额不相等
+                        log.error("微信退款结果通知错误：refundAmount[" + refund.getAmount() + "] <> refundFee[" + refundFee + "]!reqInfo = []" + reqInfo);
+                        return;
+                    }
+                    refund.setTradeRefundNo(tradeRefundNo);
+                    refund.setStatus("退款成功");//退款单状态修改为退款成功
+                    
+                    
+                    boolean res = Db.tx(new IAtom() {
+                        @Override
+                        public boolean run() throws SQLException {
+
+                            if (!refund.update()) { //跟新退款单状态
+                                return false;
+                            }
+
+                            //扣除此订单产生的所有奖金
+                            List<Bonus> bonus = BonusQuery.me().findByTransactionId(transaction.getId());
+                            for (Bonus b : bonus) {
+                                if (b.getBonusType() == 1 || b.getBonusType() == 2 || b.getBonusType() == 3) {
+                                    Bonus vb = new Bonus();
+                                    vb.setBonusType(6L);//订单退款扣减
+                                    vb.setAmount(b.getAmount().negate());//负数
+                                    vb.setBonusTime(new Date());//退款完成时间
+                                    vb.setBonusCycle(b.getBonusCycle());
+                                    vb.setTransactionId(b.getTransactionId());
+                                    vb.setUserId(b.getUserId());
+                                    if (!vb.save()) { //保存奖金扣减数据
+                                        return false;
+                                    }
+                                    
+                                    //扣减用户的账户余额
+                                    if (Db.update("update jp_user set amount = amount + ? where id = ?", vb.getAmount(), vb.getUserId()) <= 0) {
+                                        return false;
+                                    }
+                                }
+                            }
+                            
+                            return true;
+                        }
+                    });
+                    
+                    if (!res) { //退款单更新失败
+                        log.error("微信退款通知错误：refund update failed!reqInfo = []" + reqInfo);
+                        return;
+                    }
+                    
+                    Map<String, String> xml = new HashMap<>();
+                    xml.put("return_code", SUCCESS);
+                    xml.put("return_msg", "OK");
+                    renderText(PaymentKit.toXml(xml));
+                } else {
+                    log.error("微信退款结果通知错误：resultStatus =" + resultStatus);
+                }
+            } else {
+                log.error("微信退款结果通知错误：解密错误");
+                renderText("who are you!!!");
+            }
+            renderText("");
+        } catch (Exception e) {
+            log.error("微信退款结果通知错误：", e);
+            renderText("who are you!!!");
+        }
+    }
+    
     private boolean calculateBonus(Transaction transaction, List<TemplateData> tempMsgList) {
         User currUser = UserQuery.DAO.findById(transaction.getUserId());//当前消费用户（不从缓存读取，因为缓存中的团队人数和团队金额不是最新值）
         BigDecimal spending = transaction.getCashFee().add(transaction.getAmountFee());//本次消费总金额 = 余额消费金额 + 现金消费金额，即不包括优惠券金额
@@ -311,6 +449,27 @@ public class WechatpayController extends BaseFrontController {
         if (pppUser != null) {
             if (!calculationBounsByUserLevel(spending, transaction, pppUser, "A", tempMsgList)) {
                 return false;
+            }
+            
+            //如果A层级是经销商则给与计算团队奖金
+            if (User.ROLE_DEALER.equals(ppUser.getRole())) { 
+                BigDecimal bounsTeamAmount = calculationTeamBouns(pppUser,spending);
+                if (bounsTeamAmount != null) {
+                    bounsTeamAmount = bounsTeamAmount.setScale(2, BigDecimal.ROUND_DOWN);
+                    Bonus bounsTeam = new Bonus();
+                    bounsTeam.setAmount(bounsTeamAmount);
+                    bounsTeam.setBonusCycle(1L);//奖金计算周期类型（1 按订单结算也就是实时结算;2 按月结算）
+                    bounsTeam.setBonusTime(new Date());
+                    bounsTeam.setBonusType(3L);//奖金分类（1 个人提成-直接推广;2 个人提成-间接推广;3 团队提成;4 团队管理费）
+                    bounsTeam.setTransactionId(transaction.getId());
+                    bounsTeam.setUserId(pppUser.getId());
+                    if (!bounsTeam.save()) {
+                        return false;
+                    }
+                    if (Db.update("update jp_user set amount = amount + ? where id = ?", bounsTeamAmount, pppUser.getId()) <= 0) {
+                        return false;
+                    }
+                }
             }
         } else {
             return true;
@@ -361,25 +520,6 @@ public class WechatpayController extends BaseFrontController {
                 .add("keyword5", bonusUseramount.toString() + " 元", "#999")
                 .add("remark", "奖金已存入商城账户余额，继续加油！^_^", "#999")
              );
-        }
-        
-        //计算获得的团队奖金
-        BigDecimal bounsTeamAmount = calculationTeamBouns(user,spending);
-        if (bounsTeamAmount != null) {
-            bounsTeamAmount = bounsTeamAmount.setScale(2, BigDecimal.ROUND_DOWN);
-            Bonus bounsTeam = new Bonus();
-            bounsTeam.setAmount(bounsTeamAmount);
-            bounsTeam.setBonusCycle(1L);//奖金计算周期类型（1 按订单结算也就是实时结算;2 按月结算）
-            bounsTeam.setBonusTime(new Date());
-            bounsTeam.setBonusType(3L);//奖金分类（1 个人提成-直接推广;2 个人提成-间接推广;3 团队提成;4 团队管理费）
-            bounsTeam.setTransactionId(transaction.getId());
-            bounsTeam.setUserId(user.getId());
-            if (!bounsTeam.save()) {
-                return false;
-            }
-            if (Db.update("update jp_user set amount = amount + ? where id = ?", bounsTeamAmount, user.getId()) <= 0) {
-                return false;
-            }
         }
         
         return true;
@@ -459,6 +599,11 @@ public class WechatpayController extends BaseFrontController {
                 ContentSpecItem contentSpecItem=ContentSpecItemQuery.me().findByContentIdAndSpecValueId(shoppingCart.getContentId(), shoppingCart.getSpecValueId());
                 if(contentSpecItem==null || shoppingCart.getQuantity()>contentSpecItem.getStock()){
                     renderAjaxResultForError(content.getTitle()+"货存不足");
+                    return;
+                }
+
+                if (!ContentSpecItemQuery.me().checkLimitPerUser(userId, shoppingCart.getContentId(), shoppingCart.getSpecValueId(), shoppingCart.getQuantity())) {
+                    renderAjaxResultForError("商品["+content.getTitle()+"]是限制购买的，不要太贪心噢^_^");
                     return;
                 }
                 shoppingCartIdSb.append(shoppingCartId).append(",");
@@ -672,7 +817,11 @@ public class WechatpayController extends BaseFrontController {
                 renderAjaxResultForError("货存不足");
                 return;
             }
-
+            if (contentSpecItem.getLimitPerUser() != null && contentSpecItem.getLimitPerUser()>0 
+                    && !ContentSpecItemQuery.me().checkLimitPerUser(userId, content.getId(), specValueId, quantity)) {
+                renderAjaxResultForError("该商品是限制购买的，不要太贪心噢^_^");
+                return;
+            }
             // 商户订单号，商户网站订单系统中唯一订单号，必填
             final String orderNo=RandomUtils.randomKey(null, userId.toString());
             // 商品总金额，必填

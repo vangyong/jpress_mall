@@ -30,6 +30,7 @@ public class User extends BaseUser<User> {
 	public static final String ROLE_ADMINISTRATOR = "administrator";//超级管理员
 	public static final String ROLE_OPERATOR = "operator";//运营人员
 	public static final String ROLE_VISITOR = "visitor";//游客
+    public static final String ROLE_DEALER = "dealer";//经销商
 
 	public static final String FLAG_ADMIN = "admin";//后台用户
 	public static final String FLAG_FRONT = "front";//前端用户

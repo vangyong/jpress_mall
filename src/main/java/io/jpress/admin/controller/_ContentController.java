@@ -361,6 +361,7 @@ public class _ContentController extends JBaseCRUDController<Content> {
 		for(BigInteger specValueId:specValueIds){
 			BigDecimal price=getParaToBigDecimal("price"+specValueId);
 			Integer stock=getParaToInt("stock"+specValueId);
+            Integer limitPerUser=getParaToInt("limitPerUser"+specValueId);
 			if(price==null){
 				renderAjaxResultForError("价格不能为空！");
 				return;
@@ -374,6 +375,7 @@ public class _ContentController extends JBaseCRUDController<Content> {
 			contentSpecItem.setSpecValueId(specValueId);
 			contentSpecItem.setPrice(price);
 			contentSpecItem.setStock(stock);
+			contentSpecItem.setLimitPerUser(limitPerUser);
 			contentSpecItemList.add(contentSpecItem);
 		}
 

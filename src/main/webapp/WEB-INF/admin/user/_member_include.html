@@ -21,7 +21,18 @@
 			</li>
 		</ul>
 	</div>
-
+	<div class="row content-row">
+		<div class="jp-left ">
+			<select style="width: 160px" class="form-control input-sm" id="roleSelect" >
+				<option value="">将角色更为</option>
+				<option value="visitor">普通用户</option>
+				<option value="dealer">经销商</option>
+			</select>
+		</div>
+		<div class="jp-left  ">
+			<button class="btn  btn-sm btn-default" type="button" onclick="batchAction()">应用</button>
+		</div>
+	</div>
 	<div class="box ">
 		<!-- /.box-header -->
 		<div class="box-body jp-common-pad">
@@ -40,7 +51,7 @@
 						<th>真实姓名</th>
 						<th>手机号码</th>
 						<th>电子邮件</th>
-						<th>会员级别</th>
+						<th>会员级别（角色）</th>
 						<th>上级用户</th>
 					</tr>
 				</thead>
@@ -57,7 +68,13 @@
 							<td>${bean.realname!}</td>
 							<td>${bean.mobile!}</td>
 							<td>${bean.email!}</td>
-							<td>${bean.agents_level!}</td>
+							<td>
+								<#if "dealer"==bean.role! >
+									经销商
+								<#elseif "visitor"==bean.role!>
+									普通用户
+								</#if>
+							</td>
 							<td>${bean.pname!}</td>
 						</tr>
 					</#list> 

@@ -24,10 +24,16 @@ import javax.servlet.http.HttpSessionContext;
 
 import com.jfinal.core.Controller;
 import com.jfinal.core.JFinal;
+import com.jfinal.log.Log;
 import com.jfinal.plugin.ehcache.CacheKit;
+
+import io.jpress.cache.JCacheKit;
 
 @SuppressWarnings("deprecation")
 public class JSession implements HttpSession {
+
+    private static final Log log = Log.getLog(JSession.class);
+    
 	final Controller controller;
 	private static final int TIME = 60 * 60 * 24 * 7;
 
@@ -36,15 +42,35 @@ public class JSession implements HttpSession {
 	}
 
 	private void doPut(String key, Object value) {
-		CacheKit.put("session", key + tryToGetJsessionId(), value);
+	    try {
+//            Redis.use("redis1").hset("session", key + tryToGetJsessionId(), value);
+            JCacheKit.put("session", key + tryToGetJsessionId(), value);
+        } catch (Exception e) {
+            log.error("redis connet timeout!!!");
+            CacheKit.put("session", key + tryToGetJsessionId(), value);
+        }
 	}
 
 	private void doRemove(String key) {
-		CacheKit.remove("session", key + tryToGetJsessionId());
+        try {
+//            Redis.use("redis1").hdel("session", key + tryToGetJsessionId());
+            JCacheKit.remove("session", key + tryToGetJsessionId());
+        } catch (Exception e) {
+            log.error("redis connet timeout!!!");
+            CacheKit.remove("session", key + tryToGetJsessionId());
+        }
 	}
 
 	private Object doGet(String key) {
-		return CacheKit.get("session", key + tryToGetJsessionId());
+	    Object obj = null;
+        try {
+//            obj = Redis.use("redis1").hget("session", key + tryToGetJsessionId());
+            obj = JCacheKit.get("session", key + tryToGetJsessionId());
+        } catch (Exception e) {
+            log.error("redis connet timeout!!!");
+            obj = CacheKit.get("session", key + tryToGetJsessionId());
+        }
+		return obj;
 	}
 
 	private String tryToGetJsessionId() {

@@ -4,6 +4,14 @@
 		 var localUserAddress = localStorage.getItem('m.yuweiguoye.com.userAddress');
          var userAddress = JSON.parse(localUserAddress);
          changeAddress(userAddress);
+         
+          //防止页面后退滚动条不消失
+          history.pushState(null, null, document.URL);
+          window.addEventListener('popstate', function () {
+          		if (/(iPhone|iPad|iPod)/i.test(navigator.userAgent)) {             
+		            window.location.href = window.document.referrer;
+		    	} else { window.history.go("-1"); }
+          });
      });
 	//微信支付--jiangjb
 	var wechatPayData = '';

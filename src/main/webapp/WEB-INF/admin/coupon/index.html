@@ -21,21 +21,30 @@ function restore(id){
 }
 
 
-var qrcode = new QRCode(document.getElementById("qrcode"), {
-	width : 200,
-	height : 200
-});
-
 function makeqrcode(code){
-	qrcode.makeCode("${WEBDOMAIN}/?cp_code=" + code);
-	layer.open({
-	  offset: 'auto',
-	  type: 1,
-	  title: false,
-	  closeBtn: 0,
-	  shadeClose: true,
-	  content: $('#qrcode')
+	$.ajax({
+		type: "POST",
+		traditional: true,
+		url: "${CPATH}/admin/coupon/couponQRCode",
+		data: {
+			cp_code:code
+		},
+		success: function(data){
+			if(data.errorCode == 0){
+				var imgUrl = data.data;
+                $('#qrcode_img').attr("src", imgUrl);
+                layer.open({
+				  offset: 'auto',
+				  type: 1,
+				  title: false,
+				  closeBtn: 0,
+				  shadeClose: true,
+				  content: $('#qrcode')
+				});
+			}
+		}
 	});
+			
 }
 
 function del(id){

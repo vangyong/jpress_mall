@@ -9,6 +9,21 @@
 			prevArrow:'',
 			nextArrow:'',
 		});
+		
+		//默认显示商品的第一个规则的数据
+		if ("${specValueList?size!0}" <= 1) {
+			$("#specDiv").hide();
+		}
+		showContentSpecItem("${specValueList[0].id!}","${specValueList[0].getContentSpecItem(content.id!).price!}","${specValueList[0].getContentSpecItem(content.id!).stock!}");
+		$("#demo-priority-specValue${specValueList[0].id!}").attr('checked','true');
+		
+		//防止页面后退滚动条不消失
+         history.pushState(null, null, document.URL);
+         window.addEventListener('popstate', function () {
+         		if (/(iPhone|iPad|iPod)/i.test(navigator.userAgent)) {             
+	            window.location.href = "${CPATH}/";
+	    		} else { window.history.go("-1"); }
+         });
 	});
 	
 	function showContentSpecItem(specValueId,price,stock){
@@ -102,23 +117,25 @@
 						<span class="image fit" style="margin-bottom: 10px"><img src="${content.thumbnailByName('t1')!}" alt="" /></span>
 					</#if>
 					<p>${(content.title)!}</p>
-					<p class="price">￥${(content.price)!0}</p>
+					<p class="price"></p>
 				</div>
 
 				<#if spec??>
-					<div class="box" style="display: flex;flex-direction: row;justify-content: space-between;align-items: center;border:0px;border-radius:0;border-top: 10px solid #f5f6f6;margin: 0em -2em;padding:1em 2em;margin-bottom: 0px">
-						<h5 style="display: none">选择${spec.title!}</h5>
-						<div class="row" style="display: none">
+					<div id="specDiv" class="box" style="display: flex;flex-direction: row;justify-content: space-between;align-items: center;border:0px;border-radius:0;border-top: 10px solid #f5f6f6;margin: 0em -2em;padding:1em 2em;margin-bottom: 0px">
+						<h5 style="width: 6em">${spec.title!}</h5>
+						<div class="row" style="margin-right: 0px">
 							<input type="hidden" readonly="readonly" id="specValueId" name="specValue.id" value="${specValueList[0].id!}"><!-- 默认取第一个规格的值 -->
 							<#if specValueList?size gt 0>
 								<#list specValueList as specValue>
 									<div>
 										<input type="radio" id="demo-priority-specValue${specValue.id!}" name="specValueRadio" onclick="showContentSpecItem(${specValue.id!},${specValue.getContentSpecItem(content.id!).price!},${specValue.getContentSpecItem(content.id!).stock!})">
-										<label for="demo-priority-specValue${specValue.id!}">${specValue.value!}</label>
+										<label style="padding-left:1.8em;padding-right: 0em" for="demo-priority-specValue${specValue.id!}">${specValue.value!}</label>
 									</div>
 								</#list>
 							</#if>
 						</div>
+					</div>
+					<div class="box" style="display: flex;flex-direction: row;justify-content: space-between;align-items: center;border:0px;border-radius:0;border-top: 10px solid #f5f6f6;margin: 0em -2em;padding:1em 2em;margin-bottom: 0px">
 						<h5 style="font-size: 15px;margin: 0em">选择数量</h5>
 						<div class="row" style="text-align: right;">
 							<div >

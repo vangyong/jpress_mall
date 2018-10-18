@@ -19,6 +19,17 @@ public class Coupon extends BaseCoupon<Coupon> {
         return get("couponUsedId");
     }
     
+    /**
+     * 是否失效，1是0否
+     */
+    public void setIsValid(java.lang.Integer isValid) {
+        set("isValid", isValid);
+    }
+
+    public java.lang.Integer getIsValid() {
+        return get("isValid");
+    }
+    
     @Override
     public boolean saveOrUpdate() {
         removeCache(getId());

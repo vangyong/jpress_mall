@@ -53,6 +53,9 @@
 					<#elseif '5'==transaction.status! >
 						完成
 					</#if>
+                    <#if "" != transaction.refundStatus!>
+					<span style="font-size: 11px;color: blue;border: 2">[${(transaction.refundStatus)!}]</span>
+					</#if>
 				</div>
 				<div class="form-group jp-input-item">
 					<label class="input-title">创建时间：</label>

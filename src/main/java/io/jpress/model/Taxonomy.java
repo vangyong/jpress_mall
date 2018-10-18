@@ -21,9 +21,9 @@ import java.util.List;
 import java.util.Set;
 
 import com.jfinal.core.JFinal;
-import com.jfinal.plugin.ehcache.CacheKit;
 import com.jfinal.plugin.ehcache.IDataLoader;
 
+import io.jpress.cache.JCacheKit;
 import io.jpress.model.ModelSorter.ISortModel;
 import io.jpress.model.base.BaseTaxonomy;
 import io.jpress.model.core.Table;
@@ -47,7 +47,7 @@ public class Taxonomy extends BaseTaxonomy<Taxonomy> implements ISortModel<Taxon
 	private String activeClass;
 
 	public <T> T getFromListCache(Object key, IDataLoader dataloader) {
-		Set<String> inCacheKeys = CacheKit.get(CACHE_NAME, "taxonomyCachekeys");
+		Set<String> inCacheKeys = JCacheKit.get(CACHE_NAME, "taxonomyCachekeys");
 
 		Set<String> cacheKeyList = new HashSet<String>();
 		if (inCacheKeys != null) {
@@ -55,23 +55,23 @@ public class Taxonomy extends BaseTaxonomy<Taxonomy> implements ISortModel<Taxon
 		}
 
 		cacheKeyList.add(key.toString());
-		CacheKit.put(CACHE_NAME, "taxonomyCachekeys", cacheKeyList);
+		JCacheKit.put(CACHE_NAME, "taxonomyCachekeys", cacheKeyList);
 
-		return CacheKit.get("taxonomy_list", key, dataloader);
+		return JCacheKit.get("taxonomy_list", key, dataloader);
 	}
 
 	public void clearList() {
-		Set<String> list = CacheKit.get(CACHE_NAME, "taxonomyCachekeys");
+		Set<String> list = JCacheKit.get(CACHE_NAME, "taxonomyCachekeys");
 		if (list != null && list.size() > 0) {
 			for (String key : list) {
 				if (!key.startsWith("module:")) {
-					CacheKit.remove("taxonomy_list", key);
+				    JCacheKit.remove("taxonomy_list", key);
 					continue;
 				}
 
 				// 不清除其他模型的内容
 				if (key.startsWith("module:" + getContentModule())) {
-					CacheKit.remove("taxonomy_list", key);
+				    JCacheKit.remove("taxonomy_list", key);
 				}
 			}
 		}

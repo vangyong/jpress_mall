@@ -4,11 +4,11 @@
   <artifactId>jpress_mall</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>war</packaging>
-  <name>jpress_mall Maven Webapp</name>
+  <name>jpress_mall</name>
   <url>http://maven.apache.org</url>
   
   <properties>
-        <jdk.version>1.7</jdk.version>
+        <jdk.version>1.8</jdk.version>
         <servlet.api.version>3.0.1</servlet.api.version>
         <junit.version>4.11</junit.version>
         <mysql.version>5.1.21</mysql.version>
@@ -182,6 +182,50 @@
 		  <artifactId>qcloudsms</artifactId>
 		  <version>1.0.2</version>
 		</dependency>
+		
+        <!-- 解密（微信退款结果通知数据解密） -->
+		<dependency>
+		    <groupId>org.bouncycastle</groupId>
+		    <artifactId>bcprov-ext-jdk16</artifactId>
+		    <version>1.45</version>
+		</dependency>
+		
+		<!-- 解密（微信退款结果通知数据解密） -->
+		<dependency>
+		    <groupId>cn.dreampie</groupId>
+		    <artifactId>jfinal-quartz</artifactId>
+		    <version>0.2</version>
+		</dependency>
+		
+		<!-- redis访问需要 -->
+		<dependency>
+		    <groupId>redis.clients</groupId>
+		    <artifactId>jedis</artifactId>
+		    <version>2.9.0</version>
+		</dependency>
+		<dependency>
+		    <groupId>org.apache.commons</groupId>
+		    <artifactId>commons-pool2</artifactId>
+		    <version>2.6.0</version>
+		</dependency>
+		<dependency>
+		    <groupId>de.ruedigermoeller</groupId>
+		    <artifactId>fst</artifactId>
+		    <version>2.57</version>
+		</dependency>
+		
+		<!-- google zxing 二维码 -->
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>core</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.zxing</groupId>
+			<artifactId>javase</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+				
 		
     </dependencies>
 

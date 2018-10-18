@@ -2,6 +2,8 @@ package io.jpress.core;
 
 import com.jfinal.handler.Handler;
 
+import io.jpress.utils.StringUtils;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -21,6 +23,7 @@ public class XssHandler extends Handler {
 
     @Override
     public void handle(String target, HttpServletRequest request, HttpServletResponse response, boolean[] isHandled) {
+        target = StringUtils.urlDecode(target);
         // 对于非静态文件，和非指定排除的url实现过滤
         if (target.indexOf(".") == -1 && !target.contains(exclude)){
             request = new HttpServletRequestWrapper(request);

@@ -26,7 +26,6 @@ import com.jfinal.aop.Before;
 import com.jfinal.core.Controller;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.IAtom;
-import com.jfinal.plugin.ehcache.CacheKit;
 import com.jfinal.weixin.sdk.api.ApiConfig;
 import com.jfinal.weixin.sdk.api.ApiResult;
 import com.jfinal.weixin.sdk.jfinal.MsgController;
@@ -65,6 +64,7 @@ import com.jfinal.weixin.sdk.msg.out.OutNewsMsg;
 import com.jfinal.weixin.sdk.msg.out.OutTextMsg;
 
 import io.jpress.Consts;
+import io.jpress.cache.JCacheKit;
 import io.jpress.core.JSession;
 import io.jpress.model.Content;
 import io.jpress.model.User;
@@ -129,6 +129,7 @@ public class WechatMessageController extends MsgController {
                                 pUser = UserQuery.me().findById(currUser.getPid());
                             } else {
                                 currUser = new User();
+                                currUser.setCreated(new Date());
                             }
                             
                             boolean setPid = false;
@@ -136,7 +137,9 @@ public class WechatMessageController extends MsgController {
                                 pUser = UserQuery.me().findById(pid);
                                 if (pUser == null ) {
                                     currUser.setPid(BigInteger.valueOf(0)); //系统找不到父亲的用户数据则记录为-1
-                                } else {
+                                } else if (currUser.getId() !=null && currUser.getId().compareTo(pUser.getId()) == 0) {
+                                    currUser.setPid(BigInteger.valueOf(0)); //当前用户试图把pid设置为自己，是不允许的
+                                }  else {
                                     currUser.setPid(pid); //设置当前用户的父id
                                     setPid = true;
                                 }
@@ -151,7 +154,7 @@ public class WechatMessageController extends MsgController {
                             currUser.setFlag(User.FLAG_FRONT);
                             currUser.setCreateSource(User.SOURCE_WECHAT);
                             currUser.setOpenid(openid);
-                            currUser.setCreated(new Date());
+                            currUser.setLogged(new Date());
                             if (!currUser.saveOrUpdate()) {
                                 return false;
                             }
@@ -498,7 +501,7 @@ public class WechatMessageController extends MsgController {
 	private boolean dkfProcess(InMsg message, String userInput) {
 		String dkf_quit_key = OptionQuery.me().findValue("wechat_dkf_quit_key");
 		if (StringUtils.isNotBlank(dkf_quit_key) && dkf_quit_key.equals(userInput)) {
-			CacheKit.remove("wechat_dkf", message.getFromUserName());
+		    JCacheKit.remove("wechat_dkf", message.getFromUserName());
 
 			String quit_message = OptionQuery.me().findValue("wechat_dkf_quit_message");
 			OutTextMsg otm = new OutTextMsg(message);
@@ -508,13 +511,13 @@ public class WechatMessageController extends MsgController {
 			return true;
 		}
 
-		Boolean isInDkf = CacheKit.get("wechat_dkf", message.getFromUserName());
+		Boolean isInDkf = JCacheKit.get("wechat_dkf", message.getFromUserName());
 		if (isInDkf != null && isInDkf == true) {
 
 			// 重新更新ehcache存储的开始时间，5分钟后失效。
 			{
-				CacheKit.remove("wechat_dkf", message.getFromUserName());
-				CacheKit.put("wechat_dkf", message.getFromUserName(), true);
+			    JCacheKit.remove("wechat_dkf", message.getFromUserName());
+			    JCacheKit.put("wechat_dkf", message.getFromUserName(), true);
 			}
 
 			OutCustomMsg outCustomMsg = new OutCustomMsg(message);
@@ -525,7 +528,7 @@ public class WechatMessageController extends MsgController {
 		String dkf_enter_key = OptionQuery.me().findValue("wechat_dkf_enter_key");
 		if (StringUtils.isNotBlank(dkf_enter_key) && dkf_enter_key.equals(userInput)) {
 			// ehcache的过期时间为5分钟，如果用户5分钟未咨询，自动失效。
-			CacheKit.put("wechat_dkf", message.getFromUserName(), true);
+		    JCacheKit.put("wechat_dkf", message.getFromUserName(), true);
 
 			// 进入多客服
 			String quit_message = OptionQuery.me().findValue("wechat_dkf_enter_message");

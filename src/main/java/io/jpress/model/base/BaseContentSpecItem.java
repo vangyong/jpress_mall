@@ -1,7 +1,7 @@
 package io.jpress.model.base;
 
 import com.jfinal.plugin.activerecord.IBean;
-import com.jfinal.plugin.ehcache.CacheKit;
+import io.jpress.cache.JCacheKit;
 import com.jfinal.plugin.ehcache.IDataLoader;
 import io.jpress.model.core.JModel;
 
@@ -23,19 +23,19 @@ public class BaseContentSpecItem<M extends BaseContentSpecItem<M>> extends JMode
 
     public void removeCache(Object key){
         if(key == null) return;
-        CacheKit.remove(CACHE_NAME, key);
+        JCacheKit.remove(CACHE_NAME, key);
     }
 
     public void putCache(Object key,Object value){
-        CacheKit.put(CACHE_NAME, key, value);
+        JCacheKit.put(CACHE_NAME, key, value);
     }
 
     public M getCache(Object key){
-        return CacheKit.get(CACHE_NAME, key);
+        return JCacheKit.get(CACHE_NAME, key);
     }
 
     public M getCache(Object key,IDataLoader dataloader){
-        return CacheKit.get(CACHE_NAME, key, dataloader);
+        return JCacheKit.get(CACHE_NAME, key, dataloader);
     }
 
     @Override
@@ -97,9 +97,17 @@ public class BaseContentSpecItem<M extends BaseContentSpecItem<M>> extends JMode
 		set("stock", stock);
 	}
 
-	public java.lang.Integer getStock() {
-		return get("stock");
-	}
+    public java.lang.Integer getStock() {
+        return get("stock");
+    }
+
+    public java.lang.Integer getLimitPerUser() {
+        return get("limit_per_user");
+    }
+    
+    public void setLimitPerUser(java.lang.Integer limitPerUser) {
+        set("limit_per_user", limitPerUser);
+    }
 
     public void setCreated(java.util.Date created) {
         set("created", created);

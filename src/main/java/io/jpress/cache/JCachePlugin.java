@@ -18,11 +18,14 @@ package io.jpress.cache;
 import com.jfinal.plugin.IPlugin;
 
 import io.jpress.cache.impl.JEhCache;
+import io.jpress.cache.impl.RedisCache;
 
 public class JCachePlugin implements IPlugin {
 
 	public JCachePlugin() {
-		CacheManager.me().init(JEhCache.class);
+	    //CacheManager.me().init(JEhCache.class);
+	    //修改为默认为redis缓存,jiangjb,20180910
+		CacheManager.me().init(RedisCache.class);
 	}
 
 	public JCachePlugin(Class<? extends ICache> clazz) {

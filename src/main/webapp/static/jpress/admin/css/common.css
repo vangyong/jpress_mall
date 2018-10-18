@@ -122,6 +122,9 @@ li.jpress_block {
 	padding: 0;
 }
 
+.vim-a {cursor:pointer;color:#333;text-decoration:none; }
+.vim-a:hover {color:#CC3300;text-decoration:underline;}
+
 .approve a {
 	color: #006505;
 }

@@ -18,6 +18,7 @@ package io.jpress.front.controller;
 import com.jfinal.aop.Before;
 import com.jfinal.aop.Clear;
 import com.jfinal.core.ActionKey;
+import com.jfinal.kit.PropKit;
 import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.IAtom;
@@ -38,8 +39,11 @@ import io.jpress.ui.freemarker.tag.ShoppingCartPageTag;
 import io.jpress.ui.freemarker.tag.TransactionPageTag;
 import io.jpress.ui.freemarker.tag.UserAddressPageTag;
 import io.jpress.ui.freemarker.tag.UserAmountPageTag;
+import io.jpress.ui.freemarker.tag.UserCouponPageTag;
 import io.jpress.utils.CookieUtils;
 import io.jpress.utils.EncryptUtils;
+import io.jpress.utils.FileUtils;
+import io.jpress.utils.QRCodeUtils;
 import io.jpress.utils.StringUtils;
 
 import java.math.BigDecimal;
@@ -277,6 +281,9 @@ public class UserController extends BaseFrontController {
 			setAttr("unpayed", TransactionQuery.me().findcount(getLoginedUser().getId(), Transaction.STATUS_1));
 			setAttr("unreceived", TransactionQuery.me().findcount(getLoginedUser().getId(), Transaction.STATUS_3));
 			setAttr("uncomment", TransactionQuery.me().findcount(getLoginedUser().getId(), Transaction.STATUS_4));
+			
+			//用户可用的优惠券数量
+            setAttr("userCouponAvailableNum", CouponQuery.me().findAvailableCountByUserId(getLoginedUser().getId()));
 		}
 		render("user_center.html");
 	}
@@ -480,7 +487,7 @@ public class UserController extends BaseFrontController {
 		setAttr(ShoppingCartPageTag.TAG_NAME, new ShoppingCartPageTag(getRequest(), pageNumber, ids, userId, null));
 		
 		//查询当前用户的优惠券信息
-        List<Coupon> couponList = CouponQuery.me().findListByUserId(1, 100, userId);
+        List<Coupon> couponList = CouponQuery.me().findAvailableByUserId(1, 100, userId);
         setAttr("couponList", couponList);
         if (couponList != null && !couponList.isEmpty()) {
             setAttr("couponDefault", couponList.get(0));
@@ -531,7 +538,7 @@ public class UserController extends BaseFrontController {
 		setAttr("quantity", quantity);
 		
 		//查询当前用户的优惠券信息
-		List<Coupon> couponList = CouponQuery.me().findListByUserId(1, 100, userId);
+		List<Coupon> couponList = CouponQuery.me().findAvailableByUserId(1, 100, userId);
 		setAttr("couponList", couponList);
 		if (couponList != null && !couponList.isEmpty()) {
 		    setAttr("couponDefault", couponList.get(0));
@@ -694,7 +701,7 @@ public class UserController extends BaseFrontController {
         Record record = UserQuery.me().getExtractAvailableAmount(user.getId());
         BigDecimal extractAvailableAmount = record.getBigDecimal("extractAvailableAmount");
         BigDecimal userAmount = record.getBigDecimal("userAmount");
-        //用户的不可提现金额 = 用户账户余额 - 可提现金额
+        //用户的不可提现金额 = 用户账户余额 - 可提现金额（不可提现金额通常为7天内的奖金，此笔奖金可能发生退款）
         BigDecimal extractUnavailableAmount = userAmount.subtract(extractAvailableAmount);
         
         if (extractUnavailableAmount.compareTo(BigDecimal.valueOf(0)) < 0 ||
@@ -735,14 +742,19 @@ public class UserController extends BaseFrontController {
 			renderAjaxResultForError("提现金额不能为空");
 			return;
 		}
+		if(extract.getExtractMoney().compareTo(extractAvailableAmount)<=0) {
+			extract.setExtractMoney(extract.getExtractMoney());
+		}else {
+			extract.setExtractMoney(extractAvailableAmount);
+		}
+		//extract.setExtractMoney(extractAvailableAmount);//可提现金额设置为当前实时查询的金额，避免极端情况出现的申请的可提现金额出现变化
+		
 		if(extractUnavailableAmount.compareTo(BigDecimal.valueOf(0)) < 0 ||
                 extractAvailableAmount.compareTo(BigDecimal.valueOf(0)) < 0 || 
                 extract.getExtractMoney().compareTo(BigDecimal.valueOf(0)) <= 0){
             renderAjaxResultForError("您目前没有可提现金额噢，赶紧推荐给小伙伴赚取奖金吧^_^");
             return;
         }
-		
-		extract.setExtractMoney(extractAvailableAmount);//可提现金额设置为当前实时查询的金额，避免极端情况出现的申请的可提现金额出现变化
 		
         Page<Extract> page=ExtractQuery.me().paginate(1, Integer.MAX_VALUE, userId, "");
         List<Extract> list = page.getList();
@@ -816,4 +828,103 @@ public class UserController extends BaseFrontController {
 		}
 	}
 
+    //用户所有优惠券列表
+    public void userCoupon(){
+        User currUser = getLoginedUser();
+        int pageNumber=getParaToInt("pageNumber", 1);
+        BigInteger userId=currUser.getId();
+        setAttr(UserCouponPageTag.TAG_NAME, new UserCouponPageTag(getRequest(), pageNumber, userId, null));
+        setAttr(Consts.ATTR_GLOBAL_WEB_TITLE, "我的优惠券");
+        render("user_coupon.html");
+    }
+    
+
+
+    /**
+     * <b>Description.用户分享成功后尝试领取优惠券:</b><br>
+     * <b>Author:jianb.jiang</b>
+     * <br><b>Date:</b> 2018年8月31日 下午8:57:25
+     */
+    public void getCouponWhenShare(){
+        final BigInteger userId=getLoginedUser().getId();
+        
+        //查找可用的优惠券
+        final Coupon coupon = CouponQuery.me().findFirstCanGetByUser(userId);
+        if (coupon == null) { //没有可领取的劵
+            renderAjaxResult("操作成功", 0, null);
+            return;
+        }
+        final StringBuilder sqlBuilder = new StringBuilder("UPDATE jp_coupon c SET c.free_num = c.free_num - 1 ");
+        sqlBuilder.append("WHERE c.id = ? AND c.invalid = 0 AND DATE(now()) <= c.last_date ");
+        sqlBuilder.append("AND NOT EXISTS ( SELECT 1 FROM jp_coupon_used cu WHERE c.id = cu.coupon_id AND cu.user_id = ?)");
+        boolean saved=Db.tx(new IAtom() {
+            @Override
+            public boolean run() throws SQLException {
+                if (Db.update(sqlBuilder.toString(), coupon.getId(), userId) > 0) { //抢券成功
+                    CouponUsed cu = new CouponUsed();
+                    cu.setCouponId(coupon.getId());
+                    cu.setUserId(userId);
+                    if (cu.save()) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
+
+        if(saved){
+            renderAjaxResult("操作成功", 0, coupon);
+            return;
+        }
+        renderAjaxResult("系统异常", Consts.ERROR_CODE_SYSTEM_ERROR, null);
+    }
+    
+    
+    //用户二维码
+  	public void userQRCode(){
+  	    String from = getPara("from");
+  		BigInteger userId=getLoginedUser().getId();
+  		User user = UserQuery.me().findById(userId);
+  		
+  		Attachment attachment = AttachmentQuery.me().findFirst(userId, userId, null, null, null, null, null, null);
+  		
+  		if(attachment==null) {
+  			//生成推销二维码
+  	  		String webDomain = OptionQuery.me().findValue("web_domain");
+  	  		String fileLocalPath = PropKit.get("fileLocalPath");
+  	  		StringBuffer text = new StringBuffer();
+  	  		text.append(webDomain);
+  	  		text.append("/?uid=");
+  	  		text.append(userId);
+  	  		StringBuffer fileName = new StringBuffer();
+  	  		fileName.append(fileLocalPath);
+  	  		fileName.append("qcode/");
+  	  		fileName.append(userId);
+  	  		fileName.append(".png");
+  	  		QRCodeUtils.createQRCode(text.toString(), fileName.toString(), 600, 600, 2);
+  	  		StringBuffer img2 = new StringBuffer();
+  	  		img2.append(fileLocalPath);
+  	  		img2.append("bottom.png");
+  	  		StringBuffer outImg = new StringBuffer();
+  	  		outImg.append(fileLocalPath);
+  	  		outImg.append("promotion/");
+  	  		outImg.append(userId);
+  	  		outImg.append(".png");
+  	  		QRCodeUtils.mergeImage(fileName.toString(), img2.toString(), outImg.toString());
+	  	  	attachment = new Attachment();
+			attachment.setModule("qcode");
+			attachment.setUserId(userId);
+			attachment.setContentId(userId);
+			attachment.setCreated(new Date());
+			attachment.setTitle(user.getUsername()+"_推广二维码");
+			attachment.setPath("/attachment/promotion/"+userId+".png");
+			attachment.setSuffix("png");
+			attachment.setMimeType("image/png");
+			attachment.save();
+  		}
+		setAttr("qcode",getRequest().getContextPath() + attachment.getPath() + "?v=" + System.currentTimeMillis());
+  		setAttr("user", user);
+  		setAttr("from",from);
+  		render("user_qrcode.html");
+  	}
 }

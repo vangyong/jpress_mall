@@ -36,6 +36,8 @@ public class IndexPageTag extends JTag {
 	String pagePara;
 	String orderBy;
 	HttpServletRequest request;
+	BigInteger typeId;
+	
 
 	public IndexPageTag(HttpServletRequest request, String pagePara, int pageNumber, String orderBy) {
 		this.pagePara = pagePara;
@@ -46,20 +48,38 @@ public class IndexPageTag extends JTag {
 		this.request = request;
 		this.orderBy = orderBy;
 	}
+	
+	public IndexPageTag(HttpServletRequest request, String pagePara, BigInteger typeId, int pageNumber, String orderBy) {
+		this.pagePara = pagePara;
+		if (pageNumber < 1) {
+			pageNumber = 1;
+		}
+		this.typeId = typeId;
+		this.pageNumber = pageNumber;
+		this.request = request;
+		this.orderBy = orderBy;
+		
+	}
+	
+	
 
 	@Override
 	public void onRender() {
 
 		orderBy = StringUtils.isBlank(orderBy) ? getParam("orderBy") : orderBy;
 		String keyword = getParam("keyword");
-
 		int pagesize = getParamToInt("pageSize", 10);
-
-		BigInteger[] typeIds = getParamToBigIntegerArray("typeId");
 		String[] modules = getParamToStringArray("module");
 		String status = getParam("status", Content.STATUS_NORMAL);
-
-		Page<Content> page = ContentQuery.me().paginate(pageNumber, pagesize, modules, keyword, status, typeIds, null,orderBy);
+		BigInteger[] typeIds = getParamToBigIntegerArray("typeId");
+		Page<Content> page =null;
+		if(this.typeId!=null) {
+			BigInteger[] typeId = {this.typeId};
+			page = ContentQuery.me().paginate(pageNumber, pagesize, modules, keyword, status, typeId, null,orderBy);
+		}else {
+			page = ContentQuery.me().paginate(pageNumber, pagesize, modules, keyword, status, typeIds, null,orderBy);
+		}
+		 
 		setVariable("page", page);
 		setVariable("contents", page.getList());
 		

@@ -1,0 +1,18 @@
+<#include "_inc/_layout.html"/>
+<#macro script>
+
+</#macro>
+<@layout>
+<style>
+
+</style>
+<section>
+	<input type="hidden" name="user.id" value="${(user.id)!}">
+	<div style="margin-top: 12%">
+   		<img src="${qcode}" style="width:100%;"/>
+   		<!-- <img src="/templates/jmall/images/hebing.png" style="height:300px;width:300px"/> -->
+	</div>
+	
+	<#include "_inc/_user_bottom_bar.html"/>
+</section>
+</@layout>

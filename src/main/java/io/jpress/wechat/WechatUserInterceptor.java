@@ -16,24 +16,25 @@
 package io.jpress.wechat;
 
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 
-import com.jfinal.aop.Before;
 import com.jfinal.aop.Interceptor;
 import com.jfinal.aop.Invocation;
 import com.jfinal.core.Controller;
-import com.jfinal.plugin.ehcache.CacheKit;
-import com.jfinal.weixin.sdk.api.AccessToken;
-import com.jfinal.weixin.sdk.api.AccessTokenApi;
+import com.jfinal.log.Log;
 import com.jfinal.weixin.sdk.api.ApiConfig;
 import com.jfinal.weixin.sdk.api.ApiConfigKit;
+import com.jfinal.weixin.sdk.api.ApiResult;
 import com.jfinal.weixin.sdk.api.JsTicket;
 import com.jfinal.weixin.sdk.api.JsTicketApi;
 import com.jfinal.weixin.sdk.api.JsTicketApi.JsApiType;
 
 import io.jpress.Consts;
-import io.jpress.model.Option;
+import io.jpress.model.User;
 import io.jpress.model.query.OptionQuery;
+import io.jpress.model.query.UserQuery;
+import io.jpress.utils.CookieUtils;
 import io.jpress.utils.StringUtils;
 import io.jpress.wechat.utils.AuthJsApiUtils;
 
@@ -41,8 +42,10 @@ public class WechatUserInterceptor implements Interceptor {
 
 	public static final String AUTHORIZE_URL = "https://open.weixin.qq.com/connect/oauth2/authorize" + "?appid={appid}"
 			+ "&redirect_uri={redirecturi}" + "&response_type=code" + "&scope=snsapi_userinfo"
-			+ "&state=235#wechat_redirect";
+			+ "&state=235&connect_redirect=1#wechat_redirect";
 
+	private static final Log log = Log.getLog(WechatUserInterceptor.class);
+    
 	@Override
 	public void intercept(Invocation inv) {
 
@@ -72,7 +75,8 @@ public class WechatUserInterceptor implements Interceptor {
         //当前url
         String currUrl = request.getScheme() + "://" + 
                 (request.getServerName().startsWith("1") ? request.getServerName()+":"+request.getServerPort() : request.getServerName()) + 
-                request.getContextPath() + toUrl;
+                request.getContextPath() + toUrl;//这个地址是浏览器的地址，用来签名的话，必须与浏览器保持一致，对中文是encode了的,jiangjb,20180914
+        toUrl = StringUtils.urlDecode(toUrl);//解码，因为ng中设置的302跳转是编码后的(为了解决安卓微信浏览器不能自动跳转带？的302url),jiangjb,20180912
         toUrl = StringUtils.urlEncode(toUrl);
 		
 		
@@ -184,6 +188,9 @@ public class WechatUserInterceptor implements Interceptor {
 		String userJson = inv.getController().getSessionAttr(Consts.SESSION_WECHAT_USER);
 		
 		if (StringUtils.isNotBlank(userJson)) {
+		    String openid = new ApiResult(userJson).getStr("openid");
+		    User currUser = UserQuery.me().findByOpenId(openid);
+	        request.setAttribute("userId", currUser.getId());//缓存当前用户id
 			inv.invoke();
 			return;
 		}
@@ -195,6 +202,7 @@ public class WechatUserInterceptor implements Interceptor {
 		redirectUrl = StringUtils.urlEncode(redirectUrl);
 
 		String url = AUTHORIZE_URL.replace("{redirecturi}", redirectUrl).replace("{appid}", appid.trim());
+		log.info("微信回调地址；" + url);
 		controller.redirect(url);
 
 	}

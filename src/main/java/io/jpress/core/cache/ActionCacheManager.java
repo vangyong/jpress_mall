@@ -18,8 +18,8 @@ package io.jpress.core.cache;
 import javax.servlet.http.HttpServletRequest;
 
 import com.jfinal.kit.PropKit;
-import com.jfinal.plugin.ehcache.CacheKit;
 
+import io.jpress.cache.JCacheKit;
 import io.jpress.utils.RequestUtils;
 
 public class ActionCacheManager {
@@ -35,9 +35,9 @@ public class ActionCacheManager {
 	public static void clearCache() {
 		if (isCloseActionCache())
 			return;
-		CacheKit.removeAll(CACHE_NAME);
-		CacheKit.removeAll(CACHE_NAME_WECHAT);
-		CacheKit.removeAll(CACHE_NAME_MOBILE);
+		JCacheKit.removeAll(CACHE_NAME);
+		JCacheKit.removeAll(CACHE_NAME_WECHAT);
+		JCacheKit.removeAll(CACHE_NAME_MOBILE);
 	}
 
 	private static Boolean isClose;
@@ -51,29 +51,29 @@ public class ActionCacheManager {
 
 	public static String getCache(HttpServletRequest request, String key) {
 		if (RequestUtils.isWechatBrowser(request)) {
-			return CacheKit.get(CACHE_NAME_WECHAT, key);
+			return JCacheKit.get(CACHE_NAME_WECHAT, key);
 		}
 
 		else if (RequestUtils.isMoblieBrowser(request)) {
-			return CacheKit.get(CACHE_NAME_MOBILE, key);
+			return JCacheKit.get(CACHE_NAME_MOBILE, key);
 		}
 
 		else {
-			return CacheKit.get(CACHE_NAME, key);
+			return JCacheKit.get(CACHE_NAME, key);
 		}
 	}
 
 	public static void putCache(HttpServletRequest request, Object value) {
 		if (RequestUtils.isWechatBrowser(request)) {
-			CacheKit.put(CACHE_NAME_WECHAT, getCacheKey(request), value);
+		    JCacheKit.put(CACHE_NAME_WECHAT, getCacheKey(request), value);
 		}
 
 		else if (RequestUtils.isMoblieBrowser(request)) {
-			CacheKit.put(CACHE_NAME_MOBILE, getCacheKey(request), value);
+		    JCacheKit.put(CACHE_NAME_MOBILE, getCacheKey(request), value);
 		}
 
 		else {
-			CacheKit.put(CACHE_NAME, getCacheKey(request), value);
+		    JCacheKit.put(CACHE_NAME, getCacheKey(request), value);
 		}
 	}
 

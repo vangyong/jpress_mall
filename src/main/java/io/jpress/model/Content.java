@@ -17,9 +17,9 @@ package io.jpress.model;
 
 import com.jfinal.core.JFinal;
 import com.jfinal.kit.PathKit;
-import com.jfinal.plugin.ehcache.CacheKit;
 import com.jfinal.plugin.ehcache.IDataLoader;
 import io.jpress.Consts;
+import io.jpress.cache.JCacheKit;
 import io.jpress.model.ModelSorter.ISortModel;
 import io.jpress.model.base.BaseContent;
 import io.jpress.model.core.Table;
@@ -60,7 +60,7 @@ public class Content extends BaseContent<Content> implements ISortModel<Content>
 	private Object object;
 
 	public <T> T getFromListCache(Object key, IDataLoader dataloader) {
-		Set<String> inCacheKeys = CacheKit.get(CACHE_NAME, "contentCachekeys");
+		Set<String> inCacheKeys = JCacheKit.get(CACHE_NAME, "contentCachekeys");
 
 		Set<String> cacheKeyList = new HashSet<String>();
 		if (inCacheKeys != null) {
@@ -68,23 +68,23 @@ public class Content extends BaseContent<Content> implements ISortModel<Content>
 		}
 
 		cacheKeyList.add(key.toString());
-		CacheKit.put(CACHE_NAME, "contentCachekeys", cacheKeyList);
+		JCacheKit.put(CACHE_NAME, "contentCachekeys", cacheKeyList);
 
-		return CacheKit.get("content_list", key, dataloader);
+		return JCacheKit.get("content_list", key, dataloader);
 	}
 
 	public void clearList() {
-		Set<String> list = CacheKit.get(CACHE_NAME, "contentCachekeys");
+		Set<String> list = JCacheKit.get(CACHE_NAME, "contentCachekeys");
 		if (list != null && list.size() > 0) {
 			for (String key : list) {
 				if (!key.startsWith("module:")) {
-					CacheKit.remove("content_list", key);
+				    JCacheKit.remove("content_list", key);
 					continue;
 				}
 
 				// 不清除其他模型的内容
 				if (key.startsWith("module:" + getModule())) {
-					CacheKit.remove("content_list", key);
+				    JCacheKit.remove("content_list", key);
 				}
 			}
 		}
