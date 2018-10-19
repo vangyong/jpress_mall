@@ -346,14 +346,15 @@ public class _TransactionController extends JBaseCRUDController<Transaction>{
         HSSFSheet sheet = wb.createSheet();  
         sheet.setDefaultRowHeightInPoints(25);
         sheet.setColumnWidth(0, 280 * 20);
-        sheet.setColumnWidth(1, 230 * 30);
+        sheet.setColumnWidth(1, 200 * 30);
         sheet.setColumnWidth(2, 100 * 50);
         sheet.setColumnWidth(3, 100 * 50);
         sheet.setColumnWidth(4, 156 * 30);
         sheet.setColumnWidth(5, 250 * 30);
         sheet.setColumnWidth(6, 256 * 30);
         sheet.setColumnWidth(7, 256 * 30);
-        sheet.setColumnWidth(8, 500 * 30);
+        sheet.setColumnWidth(8, 280 * 30);
+        sheet.setColumnWidth(9, 400 * 30);
 
         // 创建报表头部  
         HSSFRow row0 = sheet.createRow(0);
@@ -406,13 +407,17 @@ public class _TransactionController extends JBaseCRUDController<Transaction>{
         cell1 = row1.createCell(8);  
         cell1.setCellStyle(cellStyleTitle);  
         cell1.setCellValue(new HSSFRichTextString("收货地址"));   
+        //第一行第10列  
+        cell1 = row1.createCell(9);  
+        cell1.setCellStyle(cellStyleTitle);  
+        cell1.setCellValue(new HSSFRichTextString("商品信息"));   
 
         String keyword=getPara("k", "").trim();
         String pay_type=getPara("pay_type");
         String status=getPara("status");
         setAttr("pay_type", pay_type);
         setAttr("status", status);
-        Page<Transaction> page=TransactionQuery.me().paginate(1, Integer.MAX_VALUE, keyword, status, pay_type);
+        Page<Transaction> page=TransactionQuery.me().paginate4Export(1, Integer.MAX_VALUE, keyword, status, pay_type);
         List<Transaction> list = page.getList();
         
         for(int x=0;x<list.size();x++){
@@ -467,7 +472,11 @@ public class _TransactionController extends JBaseCRUDController<Transaction>{
             
             cell = row.createCell(8);  
             cell.setCellStyle(cellStyle);  
-            cell.setCellValue(new HSSFRichTextString(z.getUserAddress()));       
+            cell.setCellValue(new HSSFRichTextString(z.getUserAddress()));   
+            
+            cell = row.createCell(9);  
+            cell.setCellStyle(cellStyle);  
+            cell.setCellValue(new HSSFRichTextString(z.getContentTitles()));       
         }
         try {  
             bufferedOutPut.flush();  

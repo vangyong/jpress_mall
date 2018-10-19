@@ -63,6 +63,34 @@ public class TransactionQuery extends JBaseQuery{
         fromBuilder.append(" ORDER BY t.created DESC ");
         return DAO.paginate(pageNumber, pageSize, select, fromBuilder.toString());
     }
+    
+    /**
+     * <b>Description.:导出订单的时候查询订单数据，包括了商品信息</b><br>
+     * <b>Author:jianb.jiang</b>
+     * <br><b>Date:</b> 2018年10月19日 下午2:19:59
+     */
+    public Page<Transaction> paginate4Export(int pageNumber, int pageSize, String keyword, String status, String pay_type) {
+        String select = " SELECT t.*,SUM(ti.quantity*ti.price) AS price,SUM(ti.quantity) AS quantity,GROUP_CONCAT(c.thumbnail SEPARATOR ',') AS contentThumbnails,GROUP_CONCAT(CONCAT(c.title,' [数量x',ti.quantity,']') SEPARATOR ',') AS contentTitles,r.refund_no,r.status as refund_status ";
+        StringBuilder fromBuilder = new StringBuilder(" FROM transaction t LEFT JOIN refund r on t.order_no=r.order_no ");
+        fromBuilder.append(" LEFT JOIN transactionitem ti ON ti.transaction_id=t.id ");
+        fromBuilder.append(" LEFT JOIN content c ON ti.content_id=c.id ");
+        fromBuilder.append(" WHERE 1=1 ");
+        if(StringUtils.isNotBlank(keyword)){
+            fromBuilder.append(" AND ( ");
+            fromBuilder.append(" t.order_no = " +"'" + keyword + "'");
+            fromBuilder.append(" OR t.trade_no = " +"'" + keyword + "'");
+            fromBuilder.append(" ) ");
+        }
+        if(StringUtils.isNotBlank(status)){
+            fromBuilder.append(" AND t.status = "+"'"+status+"'");
+        }
+        if(StringUtils.isNotBlank(pay_type)){
+            fromBuilder.append(" AND t.pay_type = "+"'"+pay_type+"'");
+        }
+        fromBuilder.append(" GROUP BY t.id ");
+        fromBuilder.append(" ORDER BY t.created DESC ");
+        return DAO.paginate(pageNumber, pageSize, select, fromBuilder.toString());
+    }
 
     public Page<Transaction> paginate(int pageNumber, int pageSize, BigInteger user_id, String status, String orderBy) {
         String select = " SELECT t.*,SUM(ti.quantity*ti.price) AS price,SUM(ti.quantity) AS quantity,GROUP_CONCAT(c.thumbnail SEPARATOR ',') AS contentThumbnails,GROUP_CONCAT(c.title SEPARATOR ',') AS contentTitles,r.refund_no,r.status as refund_status ";

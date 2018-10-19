@@ -52,6 +52,7 @@
 						<th>手机号码</th>
 						<th>电子邮件</th>
 						<th>会员级别（角色）</th>
+						<th>账户余额</th>
 						<th>上级用户</th>
 					</tr>
 				</thead>
@@ -75,6 +76,7 @@
 									普通用户
 								</#if>
 							</td>
+							<td>${bean.amount!}</td>
 							<td>${bean.pname!}</td>
 						</tr>
 					</#list> 
