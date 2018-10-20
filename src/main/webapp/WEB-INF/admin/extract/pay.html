@@ -7,9 +7,9 @@ function doSubmit(){
 			dataType : "json", 
 			success : function(data) { 
 				if(data.errorCode == 0){
-					//location.reload();
 					var index = parent.layer.getFrameIndex(window.name);
 					parent.layer.close(index); 
+					parent.location.reload();
 				}else{
 					toastr.error(data.message,'操作失败');
 					

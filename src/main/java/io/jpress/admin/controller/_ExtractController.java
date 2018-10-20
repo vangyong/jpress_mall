@@ -12,6 +12,7 @@ import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.IAtom;
 import com.jfinal.plugin.activerecord.Page;
+import com.jfinal.plugin.activerecord.Record;
 
 import io.jpress.Consts;
 import io.jpress.core.JBaseCRUDController;
@@ -98,6 +99,14 @@ public class _ExtractController extends JBaseCRUDController<Extract> {
 				User user = UserQuery.me().findById(userId);
 				setAttr("user", user);
 				
+				Record record = UserQuery.me().getExtractAvailableAmount(userId);
+		        BigDecimal extractAvailableAmount = record.getBigDecimal("extractAvailableAmount");
+		        BigDecimal userAmount = record.getBigDecimal("userAmount");
+		        BigDecimal extractUnavailableAmount = userAmount.subtract(extractAvailableAmount);
+				
+		        setAttr("userAmount", userAmount);
+		        setAttr("extractAvailableAmount", extractAvailableAmount);
+		        setAttr("extractUnavailableAmount", extractUnavailableAmount);
 				//支付信息
 				ExtractPay extractPay = ExtractPayQuery.me().findByExtractId(id);
 				setAttr("extractPay", extractPay);
