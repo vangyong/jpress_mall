@@ -155,6 +155,7 @@ public class _ExtractController extends JBaseCRUDController<Extract> {
 			    extract.setPayedMoney(extractPay.getPayMoney());
 				extract.setPayedTime(new Date());
 				extract.setStatus(Extract.STATUS_PAYED);
+				extractPay.setPayedTime(new Date());
 				extractPay.saveOrUpdate();
 				extract.saveOrUpdate();
 				
