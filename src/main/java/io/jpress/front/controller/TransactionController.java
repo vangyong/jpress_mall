@@ -1,5 +1,15 @@
 package io.jpress.front.controller;
 
+import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.SQLException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import com.alipay.api.AlipayClient;
 import com.alipay.api.DefaultAlipayClient;
 import com.alipay.api.domain.AlipayTradeWapPayModel;
@@ -10,23 +20,32 @@ import com.jfinal.aop.Clear;
 import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.IAtom;
+
 import io.jpress.Consts;
 import io.jpress.core.BaseFrontController;
 import io.jpress.interceptor.UCodeInterceptor;
 import io.jpress.interceptor.UserInterceptor;
-import io.jpress.model.*;
-import io.jpress.model.query.*;
+import io.jpress.model.Bonus;
+import io.jpress.model.Content;
+import io.jpress.model.ContentSpecItem;
+import io.jpress.model.Refund;
+import io.jpress.model.ShoppingCart;
+import io.jpress.model.Transaction;
+import io.jpress.model.TransactionItem;
+import io.jpress.model.UserAddress;
+import io.jpress.model.query.BonusQuery;
+import io.jpress.model.query.ContentQuery;
+import io.jpress.model.query.ContentSpecItemQuery;
+import io.jpress.model.query.RefundQuery;
+import io.jpress.model.query.ShoppingCartQuery;
+import io.jpress.model.query.TransactionItemQuery;
+import io.jpress.model.query.TransactionQuery;
+import io.jpress.model.query.UserAddressQuery;
 import io.jpress.router.RouterMapping;
 import io.jpress.utils.DateUtils;
 import io.jpress.utils.RandomUtils;
 import io.jpress.utils.StringUtils;
 import io.jpress.wechat.WechatUserInterceptor;
-
-import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.sql.SQLException;
-import java.util.*;
 
 /**
  * @author heguoliang
@@ -506,6 +525,10 @@ public class TransactionController extends BaseFrontController {
                 }
                 //删除余额支付记录
                 BonusQuery.me().deleteByTransactionId(id);
+                
+                //修改此订单关联的couponUsed的used、transaction_id 为未使用
+                Db.update("update jp_coupon_used set used = 0,transaction_id = 0 where user_id = ? and used = 1 and transaction_id = ?", 
+                        transaction.getId(), userId);
                 return true;
             }
         });
