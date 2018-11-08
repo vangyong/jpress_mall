@@ -528,7 +528,7 @@ public class TransactionController extends BaseFrontController {
                 
                 //修改此订单关联的couponUsed的used、transaction_id 为未使用
                 Db.update("update jp_coupon_used set used = 0,transaction_id = 0 where user_id = ? and used = 1 and transaction_id = ?", 
-                        transaction.getId(), userId);
+                        userId, transaction.getId());
                 return true;
             }
         });
