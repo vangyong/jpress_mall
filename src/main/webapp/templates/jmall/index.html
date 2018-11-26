@@ -123,7 +123,7 @@ body, input, select, textarea{font-size:8pt}
  	</div>
     <div class="posts" name="content_a">
     	<a name="content_a" id="content_a"></a>
-        <@jp.indexPage module="mall" pageSize="8">
+        <@jp.indexPage module="mall" orderBy="order_number desc" pageSize="8">
             <#if page.getList()?size gt 0>
                 <#list page.getList() as content>
                     <article>
